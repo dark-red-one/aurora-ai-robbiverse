@@ -1,0 +1,89 @@
+{
+  "cursor.liveShare.workspace": {
+    "name": "Robbie V3 Live Development",
+    "autoOpenFiles": [
+      "src/featurePackages.js",
+      "src/devTeamManager.js",
+      "src/budgetManagement.js",
+      "src/naturalSQLSystem.js",
+      "src/vipAssociation.js",
+      "src/screenshotSystem.js",
+      "src/behavioralAnalysis.js",
+      "src/teamMemberProfiles.js",
+      "src/brainTab.js",
+      "src/index.js"
+    ],
+    "defaultView": "spectator",
+    "showLiveActivity": true,
+    "enableFollowMode": true
+  },
+  
+  "files.watcherExclude": {
+    "**/node_modules/**": false,
+    "**/.git/**": false,
+    "**/logs/**": true,
+    "**/screenshots/**": true,
+    "**/temp/**": true
+  },
+  
+  "cursor.liveShare.notifications": {
+    "onUserJoin": true,
+    "onUserLeave": true,
+    "onFileChange": true,
+    "onLargeEdit": true,
+    "soundEnabled": true
+  },
+  
+  "cursor.liveShare.robbie": {
+    "teamMembers": {
+      "allan": {
+        "role": "CEO/Product Owner",
+        "color": "#FF6B6B",
+        "priority": 1,
+        "followWeight": 3.0
+      },
+      "marcus": {
+        "role": "Dev Team Manager", 
+        "color": "#9B59B6",
+        "priority": 2,
+        "followWeight": 2.5
+      },
+      "sarah": {
+        "role": "Frontend Lead",
+        "color": "#E67E22",
+        "priority": 3,
+        "followWeight": 2.0
+      },
+      "alex": {
+        "role": "Backend Lead",
+        "color": "#2ECC71",
+        "priority": 3,
+        "followWeight": 2.0
+      },
+      "tom": {
+        "role": "Head of Revenue",
+        "color": "#4ECDC4",
+        "priority": 4,
+        "followWeight": 1.5
+      },
+      "kristina": {
+        "role": "Account Manager",
+        "color": "#45B7D1",
+        "priority": 4,
+        "followWeight": 1.5
+      }
+    },
+    "focusAreas": [
+      "src/featurePackages.js",
+      "src/devTeamManager.js",
+      "src/budgetManagement.js",
+      "src/naturalSQLSystem.js"
+    ],
+    "autoSwitchRules": {
+      "followAllanAlways": true,
+      "prioritizeNewFiles": true,
+      "focusOnErrors": true,
+      "followLargeChanges": true
+    }
+  }
+}

@@ -1,0 +1,25 @@
+. {
+  log
+  errors
+  cache 30
+  reload 10s
+  forward . 1.1.1.1 9.9.9.9
+}
+
+aurora.lan {
+  log
+  errors
+  file /etc/coredns/zones/aurora.lan.db {
+    transfer to 192.168.1.0/24
+    reload 30s
+  }
+}
+
+town.lan {
+  log
+  errors
+  file /etc/coredns/zones/town.lan.db {
+    transfer to 192.168.1.0/24
+    reload 30s
+  }
+}

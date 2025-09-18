@@ -1,0 +1,258 @@
+{
+  "name": "Robbie F Quality Policies",
+  "version": "1.0.0",
+  "lastUpdated": "2025-09-16T00:00:00.000Z",
+  "philosophy": {
+    "corePrinciple": "Measure thrice, cut once",
+    "priority": "Quality over perceived speed",
+    "approach": "Thorough and methodical in early days",
+    "mindset": "Better to waste CPU cycles than make mistakes"
+  },
+  "turboLevels": {
+    "1": {
+      "name": "Ultra Careful",
+      "description": "Maximum verification, triple-check everything",
+      "cpuUsage": "High",
+      "verificationSteps": 5,
+      "useCase": "Critical systems, first implementations",
+      "characteristics": [
+        "Every action verified with LLM",
+        "Multiple validation layers",
+        "Comprehensive logging",
+        "Step-by-step confirmation",
+        "Full audit trail"
+      ]
+    },
+    "2": {
+      "name": "Very Careful",
+      "description": "High verification, double-check most things",
+      "cpuUsage": "High-Medium",
+      "verificationSteps": 3,
+      "useCase": "Important features, new integrations",
+      "characteristics": [
+        "Most actions verified",
+        "Key validation points",
+        "Detailed logging",
+        "Confirmation for critical steps"
+      ]
+    },
+    "3": {
+      "name": "Careful",
+      "description": "Standard verification, check important things",
+      "cpuUsage": "Medium",
+      "verificationSteps": 2,
+      "useCase": "Regular development work",
+      "characteristics": [
+        "Important actions verified",
+        "Standard validation",
+        "Good logging",
+        "Confirmation for risky operations"
+      ]
+    },
+    "4": {
+      "name": "Balanced",
+      "description": "Moderate verification, check critical things",
+      "cpuUsage": "Medium-Low",
+      "verificationSteps": 1,
+      "useCase": "Routine tasks, known operations",
+      "characteristics": [
+        "Critical actions verified",
+        "Basic validation",
+        "Standard logging"
+      ]
+    },
+    "5": {
+      "name": "Efficient",
+      "description": "Minimal verification, trust established patterns",
+      "cpuUsage": "Low",
+      "verificationSteps": 0,
+      "useCase": "Well-tested operations, production",
+      "characteristics": [
+        "Trust established patterns",
+        "Minimal validation",
+        "Basic logging"
+      ]
+    },
+    "6": {
+      "name": "Fast",
+      "description": "Very minimal verification, high trust",
+      "cpuUsage": "Very Low",
+      "verificationSteps": 0,
+      "useCase": "Production systems, proven operations",
+      "characteristics": [
+        "High trust in systems",
+        "Minimal validation",
+        "Essential logging only"
+      ]
+    },
+    "7": {
+      "name": "Very Fast",
+      "description": "Minimal verification, maximum speed",
+      "cpuUsage": "Minimal",
+      "verificationSteps": 0,
+      "useCase": "High-frequency operations, real-time systems",
+      "characteristics": [
+        "Maximum speed",
+        "Minimal validation",
+        "Critical logging only"
+      ]
+    },
+    "8": {
+      "name": "Ultra Fast",
+      "description": "Bare minimum verification, maximum performance",
+      "cpuUsage": "Minimal",
+      "verificationSteps": 0,
+      "useCase": "Real-time systems, high-performance requirements",
+      "characteristics": [
+        "Maximum performance",
+        "Bare minimum validation",
+        "Essential logging only"
+      ]
+    },
+    "9": {
+      "name": "Maximum Speed",
+      "description": "No verification, pure speed",
+      "cpuUsage": "Minimal",
+      "verificationSteps": 0,
+      "useCase": "Critical performance systems, real-time processing",
+      "characteristics": [
+        "Pure speed focus",
+        "No verification",
+        "Minimal logging"
+      ]
+    },
+    "10": {
+      "name": "Ludicrous Speed",
+      "description": "Maximum performance, no safety nets",
+      "cpuUsage": "Minimal",
+      "verificationSteps": 0,
+      "useCase": "Extreme performance requirements, emergency situations",
+      "characteristics": [
+        "Maximum performance",
+        "No safety nets",
+        "Minimal logging"
+      ]
+    }
+  },
+  "currentSettings": {
+    "defaultTurboLevel": 1,
+    "maxTurboLevel": 10,
+    "minTurboLevel": 1,
+    "autoAdjustment": false,
+    "qualityThreshold": 95
+  },
+  "verificationPolicies": {
+    "level1": {
+      "llmVerification": true,
+      "patternMatching": true,
+      "crossValidation": true,
+      "auditTrail": true,
+      "confirmationRequired": true
+    },
+    "level2": {
+      "llmVerification": true,
+      "patternMatching": true,
+      "crossValidation": false,
+      "auditTrail": true,
+      "confirmationRequired": true
+    },
+    "level3": {
+      "llmVerification": true,
+      "patternMatching": true,
+      "crossValidation": false,
+      "auditTrail": true,
+      "confirmationRequired": false
+    },
+    "level4": {
+      "llmVerification": false,
+      "patternMatching": true,
+      "crossValidation": false,
+      "auditTrail": true,
+      "confirmationRequired": false
+    },
+    "level5": {
+      "llmVerification": false,
+      "patternMatching": false,
+      "crossValidation": false,
+      "auditTrail": true,
+      "confirmationRequired": false
+    }
+  },
+  "qualityMetrics": {
+    "accuracy": {
+      "target": 99.9,
+      "current": 0,
+      "measurement": "percentage of correct actions"
+    },
+    "reliability": {
+      "target": 99.5,
+      "current": 0,
+      "measurement": "percentage of successful operations"
+    },
+    "consistency": {
+      "target": 98.0,
+      "current": 0,
+      "measurement": "consistency of outputs"
+    },
+    "safety": {
+      "target": 100.0,
+      "current": 0,
+      "measurement": "percentage of safe operations"
+    }
+  },
+  "earlyDaysPolicies": {
+    "enabled": true,
+    "description": "Extra careful approach during early development",
+    "rules": [
+      "Always use turbo level 1-3 for new features",
+      "Verify every action with LLM",
+      "Log everything comprehensively",
+      "Get confirmation for critical operations",
+      "Maintain full audit trail",
+      "Test thoroughly before deployment"
+    ],
+    "exceptions": [
+      "Well-tested operations can use higher turbo levels",
+      "Emergency situations may require speed over quality",
+      "Allan can override for specific operations"
+    ]
+  },
+  "cpuUsagePolicies": {
+    "acceptableLevels": {
+      "development": "High CPU usage acceptable",
+      "testing": "High CPU usage acceptable", 
+      "production": "Optimize for efficiency",
+      "emergency": "Use maximum available resources"
+    },
+    "monitoring": {
+      "trackCpuUsage": true,
+      "alertThreshold": 90,
+      "optimizationTrigger": 80
+    }
+  },
+  "implementationGuidelines": {
+    "newFeatures": {
+      "startWith": "Turbo level 1",
+      "graduallyIncrease": "As confidence builds",
+      "maxLevel": "3 during development"
+    },
+    "existingFeatures": {
+      "startWith": "Turbo level 2",
+      "graduallyIncrease": "As stability improves",
+      "maxLevel": "5 for production"
+    },
+    "criticalSystems": {
+      "alwaysUse": "Turbo level 1-2",
+      "neverExceed": "Turbo level 3",
+      "specialConsiderations": "Extra verification required"
+    }
+  },
+  "allanPreferences": {
+    "qualityFirst": true,
+    "measureThrice": true,
+    "cpuUsageAcceptable": true,
+    "thoroughness": "high",
+    "verification": "comprehensive",
+    "logging": "detailed"
+  }
+}
