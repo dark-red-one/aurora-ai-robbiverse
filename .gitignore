@@ -1,8 +1,67 @@
-node_modules/
-.env*
-*.log
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite
+postgres_data/
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
 logs/
-dist/
-build/
+
+# API Keys and secrets
+config/secrets.json
+api_keys.txt
+
+# Logs
+*.log
+logs/
+
+# API Keys and secrets
+config/secrets.json
+api_keys.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+
+# API Keys and secrets
+config/secrets.json
+api_keys.txt
+
+# OS files
+.DS_Store
+Thumbs.db
