@@ -1,0 +1,24 @@
+RunPod Storage Expansion Request
+=================================
+
+Pod ID: 2tbwzatlrjdy7i
+Pod Name: Aurora (allied_ivory_gerbil)
+Current Size: 20GB
+Requested Size: 100GB
+Reason: AI model storage and training data
+
+Additional Network Volume Request:
+Size: 1TB
+Purpose: Shared model library across pods
+Mount Point: /workspace/shared-models
+
+Total Monthly Cost Increase:
+- Volume expansion: +$0.80/month
+- Network volume: +$10/month
+- Total: +$10.80/month
+
+Business Justification:
+- Store multiple large language models locally
+- Faster inference with local storage
+- Reduced network transfer costs
+- Improved training performance

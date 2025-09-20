@@ -1,0 +1,30 @@
+{
+  "expansion_date": "2025-09-19T15:57:13.674947",
+  "original_size_gb": 20,
+  "expanded_size_gb": 100,
+  "expansion_factor": 5.0,
+  "monthly_cost_increase": 0.8,
+  "capabilities_unlocked": [
+    "Large AI model storage (10-20GB each)",
+    "Training dataset storage (20-50GB)",
+    "Multi-node deployment packages",
+    "Comprehensive backup systems",
+    "Model versioning and rollback",
+    "Distributed computing cache",
+    "Real-time data processing",
+    "Enterprise-grade logging"
+  ],
+  "ai_models_capacity": {
+    "llama2_70b": "40GB",
+    "gpt4_turbo": "20GB",
+    "claude_opus": "15GB",
+    "custom_models": "25GB"
+  },
+  "training_datasets": {
+    "general_knowledge": "30GB",
+    "code_repositories": "20GB",
+    "conversation_data": "10GB",
+    "business_documents": "15GB",
+    "technical_manuals": "5GB"
+  }
+}

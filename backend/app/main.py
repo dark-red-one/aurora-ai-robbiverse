@@ -130,3 +130,10 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
+
+# Add to main.py imports
+from backend.app.api.memory_chat import router as memory_chat_router
+
+# Add to main.py app setup  
+app.include_router(memory_chat_router, prefix='/api')
+

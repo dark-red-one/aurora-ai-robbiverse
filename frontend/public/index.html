@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora GPU Cloud Monitor - 4x NVIDIA Performance Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0F1419;
+            --bg-secondary: #1A1F2E;
+            --bg-card: #151A23;
+            --border: #2A2F3A;
+            --text-primary: #E1E8ED;
+            --text-secondary: #8B98A5;
+            --accent-green: #00D084;
+            --accent-blue: #1DA1F2;
+            --accent-purple: #7C3AED;
+            --accent-orange: #FF6B6B;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .header-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .header-stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .header-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Main Grid */
+        .dashboard {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+        }
+
+        .metric-card.gpu-1::before { background: var(--gradient-1); }
+        .metric-card.gpu-2::before { background: var(--gradient-2); }
+        .metric-card.gpu-3::before { background: var(--gradient-3); }
+        .metric-card.gpu-4::before { background: var(--gradient-4); }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-icon {
+            font-size: 1.25rem;
+            opacity: 0.5;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .metric-change.positive {
+            color: var(--accent-green);
+        }
+
+        .metric-change.negative {
+            color: var(--accent-orange);
+        }
+
+        /* GPU Cards */
+        .gpu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .gpu-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gpu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .gpu-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .gpu-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .gpu-status.online {
+            background: rgba(0, 208, 132, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 208, 132, 0.3);
+        }
+
+        .gpu-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .gpu-metric {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+
+        .gpu-metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .gpu-metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill.low { background: var(--gradient-4); }
+        .progress-fill.medium { background: var(--gradient-3); }
+        .progress-fill.high { background: var(--gradient-2); }
+        .progress-fill.critical { background: var(--gradient-1); }
+
+        /* Performance Chart */
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-btn:hover {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .chart-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .chart-area {
+            height: 300px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--gradient-3);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .chart-bar:hover .chart-tooltip {
+            opacity: 1;
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .activity-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .activity-item:hover {
+            background: var(--bg-primary);
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .activity-icon.success {
+            background: rgba(0, 208, 132, 0.1);
+            color: var(--accent-green);
+        }
+
+        .activity-icon.info {
+            background: rgba(29, 161, 242, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .activity-icon.warning {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--accent-orange);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Live indicator */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 208, 132, 0.1);
+            border: 1px solid rgba(0, 208, 132, 0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gpu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gpu-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🔥</div>
+            <div class="logo-text">Aurora GPU Cloud Monitor</div>
+        </div>
+        <div class="header-stats">
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                LIVE
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="totalGPUs">4</div>
+                <div class="header-stat-label">Total GPUs</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="avgUtilization">28%</div>
+                <div class="header-stat-label">Avg Utilization</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="totalVRAM">96GB</div>
+                <div class="header-stat-label">Total VRAM</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <!-- Top Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Total Compute Power</div>
+                    <div class="metric-icon">⚡</div>
+                </div>
+                <div class="metric-value" id="computePower">142.3</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>12% from last hour</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Active Models</div>
+                    <div class="metric-icon">🤖</div>
+                </div>
+                <div class="metric-value" id="activeModels">23</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>3 new today</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Tokens/Second</div>
+                    <div class="metric-icon">📊</div>
+                </div>
+                <div class="metric-value" id="tokensPerSec">8,432</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>23% faster</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Cost/Hour</div>
+                    <div class="metric-icon">💰</div>
+                </div>
+                <div class="metric-value" id="costPerHour">$4.20</div>
+                <div class="metric-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>8% optimized</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GPU Cards -->
+        <div class="gpu-grid">
+            <!-- GPU 1: Aurora Primary -->
+            <div class="gpu-card">
+                <div class="gpu-header">
+                    <div class="gpu-name">
+                        <span>🎮</span>
+                        <span>RTX 4090 #1 - Aurora</span>
+                    </div>
+                    <div class="gpu-status online">ONLINE</div>
+                </div>
+                <div class="gpu-metrics">
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Utilization</div>
+                        <div class="gpu-metric-value" id="gpu1-util">32%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 32%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Memory</div>
+                        <div class="gpu-metric-value" id="gpu1-mem">18.2/24 GB</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill high" style="width: 76%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Temperature</div>
+                        <div class="gpu-metric-value" id="gpu1-temp">72°C</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 72%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Power Draw</div>
+                        <div class="gpu-metric-value" id="gpu1-power">320W</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 71%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPU 2: Aurora Secondary -->
+            <div class="gpu-card">
+                <div class="gpu-header">
+                    <div class="gpu-name">
+                        <span>🎮</span>
+                        <span>RTX 4090 #2 - Aurora</span>
+                    </div>
+                    <div class="gpu-status online">ONLINE</div>
+                </div>
+                <div class="gpu-metrics">
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Utilization</div>
+                        <div class="gpu-metric-value" id="gpu2-util">28%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 28%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Memory</div>
+                        <div class="gpu-metric-value" id="gpu2-mem">12.4/24 GB</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 52%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Temperature</div>
+                        <div class="gpu-metric-value" id="gpu2-temp">68°C</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 68%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Power Draw</div>
+                        <div class="gpu-metric-value" id="gpu2-power">285W</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 63%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPU 3: Collaboration -->
+            <div class="gpu-card">
+                <div class="gpu-header">
+                    <div class="gpu-name">
+                        <span>🎮</span>
+                        <span>RTX 4090 - Collaboration</span>
+                    </div>
+                    <div class="gpu-status online">ONLINE</div>
+                </div>
+                <div class="gpu-metrics">
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Utilization</div>
+                        <div class="gpu-metric-value" id="gpu3-util">45%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Memory</div>
+                        <div class="gpu-metric-value" id="gpu3-mem">20.1/24 GB</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill high" style="width: 84%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Temperature</div>
+                        <div class="gpu-metric-value" id="gpu3-temp">75°C</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill high" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Power Draw</div>
+                        <div class="gpu-metric-value" id="gpu3-power">380W</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill high" style="width: 84%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPU 4: Fluenti -->
+            <div class="gpu-card">
+                <div class="gpu-header">
+                    <div class="gpu-name">
+                        <span>🎮</span>
+                        <span>RTX 4090 - Fluenti</span>
+                    </div>
+                    <div class="gpu-status online">ONLINE</div>
+                </div>
+                <div class="gpu-metrics">
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Utilization</div>
+                        <div class="gpu-metric-value" id="gpu4-util">8%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 8%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Memory</div>
+                        <div class="gpu-metric-value" id="gpu4-mem">4.2/24 GB</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 18%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Temperature</div>
+                        <div class="gpu-metric-value" id="gpu4-temp">58°C</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 58%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Power Draw</div>
+                        <div class="gpu-metric-value" id="gpu4-power">120W</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 27%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="chart-title">GPU Utilization Timeline</div>
+                <div class="chart-controls">
+                    <button class="chart-btn active">1H</button>
+                    <button class="chart-btn">6H</button>
+                    <button class="chart-btn">24H</button>
+                    <button class="chart-btn">7D</button>
+                </div>
+            </div>
+            <div class="chart-area" id="chartArea">
+                <!-- Chart bars will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="activity-feed">
+            <div class="activity-header">
+                <i class="fas fa-stream"></i>
+                <span>Recent Activity</span>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Model training completed on GPU #1</div>
+                    <div class="activity-time">2 minutes ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon info">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Load balanced from GPU #3 to GPU #4</div>
+                    <div class="activity-time">5 minutes ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">High temperature warning on GPU #3 (75°C)</div>
+                    <div class="activity-time">12 minutes ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon success">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">New AI model deployed: GPT-4-Turbo-Custom</div>
+                    <div class="activity-time">18 minutes ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon info">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">Vector database optimization completed</div>
+                    <div class="activity-time">25 minutes ago</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time data updates
+        function updateMetrics() {
+            // Update GPU utilization
+            const gpuUtils = [
+                Math.floor(Math.random() * 20) + 25, // GPU 1: 25-45%
+                Math.floor(Math.random() * 20) + 20, // GPU 2: 20-40%
+                Math.floor(Math.random() * 30) + 35, // GPU 3: 35-65%
+                Math.floor(Math.random() * 15) + 5   // GPU 4: 5-20%
+            ];
+
+            // Update GPU metrics
+            for (let i = 1; i <= 4; i++) {
+                const util = gpuUtils[i-1];
+                const utilElement = document.getElementById(`gpu${i}-util`);
+                if (utilElement) {
+                    utilElement.textContent = util + '%';
+                    const progressBar = utilElement.parentElement.querySelector('.progress-fill');
+                    if (progressBar) {
+                        progressBar.style.width = util + '%';
+                        progressBar.className = 'progress-fill ' + 
+                            (util < 30 ? 'low' : util < 60 ? 'medium' : util < 80 ? 'high' : 'critical');
+                    }
+                }
+
+                // Update memory
+                const memUsed = (Math.random() * 20 + 4).toFixed(1);
+                const memElement = document.getElementById(`gpu${i}-mem`);
+                if (memElement) {
+                    memElement.textContent = `${memUsed}/24 GB`;
+                    const memProgress = memElement.parentElement.querySelector('.progress-fill');
+                    if (memProgress) {
+                        const memPercent = (memUsed / 24) * 100;
+                        memProgress.style.width = memPercent + '%';
+                        memProgress.className = 'progress-fill ' + 
+                            (memPercent < 30 ? 'low' : memPercent < 60 ? 'medium' : memPercent < 80 ? 'high' : 'critical');
+                    }
+                }
+
+                // Update temperature
+                const temp = Math.floor(Math.random() * 20) + 60;
+                const tempElement = document.getElementById(`gpu${i}-temp`);
+                if (tempElement) {
+                    tempElement.textContent = temp + '°C';
+                    const tempProgress = tempElement.parentElement.querySelector('.progress-fill');
+                    if (tempProgress) {
+                        tempProgress.style.width = temp + '%';
+                        tempProgress.className = 'progress-fill ' + 
+                            (temp < 65 ? 'low' : temp < 75 ? 'medium' : temp < 85 ? 'high' : 'critical');
+                    }
+                }
+
+                // Update power
+                const power = Math.floor(Math.random() * 200) + 200;
+                const powerElement = document.getElementById(`gpu${i}-power`);
+                if (powerElement) {
+                    powerElement.textContent = power + 'W';
+                    const powerProgress = powerElement.parentElement.querySelector('.progress-fill');
+                    if (powerProgress) {
+                        const powerPercent = (power / 450) * 100;
+                        powerProgress.style.width = powerPercent + '%';
+                        powerProgress.className = 'progress-fill ' + 
+                            (powerPercent < 50 ? 'low' : powerPercent < 70 ? 'medium' : powerPercent < 85 ? 'high' : 'critical');
+                    }
+                }
+            }
+
+            // Update average utilization
+            const avgUtil = Math.floor(gpuUtils.reduce((a, b) => a + b) / gpuUtils.length);
+            document.getElementById('avgUtilization').textContent = avgUtil + '%';
+
+            // Update other metrics
+            document.getElementById('computePower').textContent = 
+                (Math.random() * 50 + 120).toFixed(1);
+            document.getElementById('tokensPerSec').textContent = 
+                Math.floor(Math.random() * 2000 + 7000).toLocaleString();
+            document.getElementById('costPerHour').textContent = 
+                '$' + (Math.random() * 2 + 3).toFixed(2);
+        }
+
+        // Generate chart bars
+        function generateChart() {
+            const chartArea = document.getElementById('chartArea');
+            chartArea.innerHTML = '';
+            
+            for (let i = 0; i < 30; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                const height = Math.random() * 80 + 20;
+                bar.style.height = height + '%';
+                
+                const tooltip = document.createElement('div');
+                tooltip.className = 'chart-tooltip';
+                tooltip.textContent = `${height.toFixed(0)}% at ${i}:00`;
+                bar.appendChild(tooltip);
+                
+                chartArea.appendChild(bar);
+            }
+        }
+
+        // Initialize
+        generateChart();
+        updateMetrics();
+
+        // Update every 2 seconds
+        setInterval(updateMetrics, 2000);
+
+        // Regenerate chart every 10 seconds
+        setInterval(generateChart, 10000);
+
+        // Add new activity items periodically
+        function addActivityItem() {
+            const activities = [
+                { icon: 'success', iconClass: 'fa-check', title: 'Training batch completed successfully' },
+                { icon: 'info', iconClass: 'fa-sync', title: 'GPU mesh rebalancing initiated' },
+                { icon: 'success', iconClass: 'fa-rocket', title: 'New model deployed to production' },
+                { icon: 'warning', iconClass: 'fa-exclamation-triangle', title: 'Memory usage approaching limit' },
+                { icon: 'info', iconClass: 'fa-database', title: 'Cache cleared and optimized' }
+            ];
+            
+            const activity = activities[Math.floor(Math.random() * activities.length)];
+            const feed = document.querySelector('.activity-feed');
+            const items = feed.querySelectorAll('.activity-item');
+            
+            if (items.length > 5) {
+                items[items.length - 1].remove();
+            }
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'activity-item';
+            newItem.style.opacity = '0';
+            newItem.innerHTML = `
+                <div class="activity-icon ${activity.icon}">
+                    <i class="fas ${activity.iconClass}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-time">Just now</div>
+                </div>
+            `;
+            
+            feed.insertBefore(newItem, items[0]);
+            setTimeout(() => newItem.style.opacity = '1', 100);
+        }
+
+        // Add new activity every 30 seconds
+        setInterval(addActivityItem, 30000);
+    </script>
+</body>
+</html>

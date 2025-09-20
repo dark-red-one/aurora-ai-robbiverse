@@ -1,0 +1,82 @@
+# Copy and paste these commands into the RunPod web terminal
+
+# 1. Create directories
+mkdir -p /workspace/health /workspace/logs /workspace/scripts
+
+# 2. Create health endpoint
+echo 'OK' > /workspace/health/index.html
+
+# 3. Create health check script
+cat > /workspace/scripts/health-check.py << 'EOF'
+#!/usr/bin/env python3
+import json, torch, psycopg2
+from datetime import datetime
+
+def health_check():
+    status = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "status": "healthy",
+        "services": {}
+    }
+    
+    # GPU Check
+    try:
+        status["services"]["gpu"] = {
+            "available": torch.cuda.is_available(),
+            "count": torch.cuda.device_count(),
+            "name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
+        }
+    except Exception as e:
+        status["services"]["gpu"] = {"error": str(e)}
+        status["status"] = "degraded"
+    
+    # Database Check
+    try:
+        conn = psycopg2.connect(
+            host="aurora-postgres-u44170.vm.elestio.app",
+            port=25432,
+            dbname="aurora_unified", 
+            user="aurora_app",
+            password="TestPilot2025_Aurora!",
+            sslmode="require",
+            connect_timeout=5
+        )
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+        conn.close()
+        status["services"]["database"] = {"status": "connected"}
+    except Exception as e:
+        status["services"]["database"] = {"error": str(e)}
+        status["status"] = "unhealthy"
+    
+    return status
+
+if __name__ == "__main__":
+    health = health_check()
+    print(json.dumps(health, indent=2))
+    
+    # Write to health endpoint
+    with open("/workspace/health/status.json", "w") as f:
+        json.dump(health, f, indent=2)
+EOF
+
+chmod +x /workspace/scripts/health-check.py
+
+# 4. Start health server
+python3 -m http.server 8000 --directory /workspace/health > /workspace/logs/health-server.log 2>&1 &
+echo $! > /workspace/health-server.pid
+
+# 5. Run health check
+python3 /workspace/scripts/health-check.py
+
+# 6. Test endpoints
+curl http://localhost:8000
+curl http://localhost:8000/status.json
+
+# 7. Show running processes
+ps aux | grep python
+
+echo "✅ Aurora GPU Worker setup complete!"
+echo "📊 Health endpoint: http://localhost:8000"
+echo "📊 Status API: http://localhost:8000/status.json"

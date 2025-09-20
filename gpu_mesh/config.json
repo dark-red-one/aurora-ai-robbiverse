@@ -1,0 +1,50 @@
+{
+  "cluster_name": "aurora-ai-empire",
+  "nodes": [
+    {
+      "name": "aurora",
+      "role": "primary",
+      "ip": "82.221.170.242",
+      "internal_ip": "172.20.0.2",
+      "gpus": 2,
+      "gpu_model": "RTX 4090",
+      "memory_per_gpu": 24564,
+      "status": "active"
+    },
+    {
+      "name": "collaboration",
+      "role": "worker",
+      "ip": "213.181.111.2",
+      "ssh_port": 43540,
+      "pod_id": "7k1blgn8pa3k43",
+      "gpus": 1,
+      "gpu_model": "RTX 4090",
+      "memory_per_gpu": 24564,
+      "status": "requires_ssh_key"
+    },
+    {
+      "name": "fluenti",
+      "role": "worker",
+      "ip": "103.196.86.56",
+      "ssh_port": 19777,
+      "pod_id": "n4zcnj47dy7q05",
+      "gpus": 1,
+      "gpu_model": "RTX 4090",
+      "memory_per_gpu": 24564,
+      "status": "requires_ssh_key"
+    }
+  ],
+  "total_gpus": 4,
+  "total_memory_gb": 96,
+  "total_tflops": 330.4,
+  "networking": {
+    "mesh_port": 8890,
+    "ray_port": 6379,
+    "dashboard_port": 8265
+  },
+  "workload_distribution": {
+    "strategy": "round_robin",
+    "load_balancing": true,
+    "failover": true
+  }
+}

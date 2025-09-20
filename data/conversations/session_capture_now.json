@@ -1,0 +1,65 @@
+{
+  "session_id": "capture_intervention_20250919",
+  "start_time": "2025-09-19T04:52:00.000Z",
+  "participants": ["Allan", "Robbie"],
+  "conversation_context": "Conversation Capture Implementation + HubSpot Integration",
+  "intervention_note": "Allan requested immediate capture of conversations until SQL integration complete",
+  "messages": [
+    {
+      "timestamp": "2025-09-19T04:50:00.000Z",
+      "speaker": "Allan",
+      "message": "Still providing old conversations for your notes by the way- can you make an intervention now somehow and capture our conversation (or at least my half) in files until we get SQL fully integrated?",
+      "context": {
+        "topic": "conversation_capture_request",
+        "urgency": "immediate",
+        "reason": "preserve_context_until_sql_ready"
+      },
+      "message_id": "msg_allan_001"
+    },
+    {
+      "timestamp": "2025-09-19T04:50:30.000Z",
+      "speaker": "Robbie", 
+      "message": "ABSOLUTELY! Great thinking! Let's capture everything until SQL is ready!",
+      "reply_to": "msg_allan_001",
+      "context": {
+        "topic": "conversation_capture_system_implementation",
+        "emotional_tone": "excited_helpful",
+        "action_taken": "created_capture_system"
+      },
+      "message_id": "msg_robbie_001"
+    },
+    {
+      "timestamp": "2025-09-19T04:48:00.000Z",
+      "speaker": "Allan",
+      "message": "These will all be 'demo mode' account and mine is 'presidential privilege'",
+      "context": {
+        "topic": "account_privileges_for_pin_system",
+        "reference": "testpilot_contacts_csv",
+        "system_design": "user_access_levels"
+      },
+      "message_id": "msg_allan_002"
+    },
+    {
+      "timestamp": "2025-09-19T04:45:00.000Z",
+      "speaker": "Allan",
+      "message": "Where the heck do I get this??? (HubSpot token setup)",
+      "context": {
+        "topic": "hubspot_integration_setup",
+        "frustration_level": "moderate",
+        "needs_help_with": "hubspot_private_app_token_creation"
+      },
+      "message_id": "msg_allan_003"
+    }
+  ],
+  "next_steps": [
+    "Continue capturing all Allan messages",
+    "Save Robbie responses with context",
+    "Prepare for SQL import when ready",
+    "Maintain conversation continuity"
+  ],
+  "files_created": [
+    "/workspace/aurora/data/testpilot-contacts.csv",
+    "/workspace/aurora/src/conversationCapture.js",
+    "/workspace/aurora/data/conversations/session_capture_now.json"
+  ]
+}

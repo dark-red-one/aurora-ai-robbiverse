@@ -1,0 +1,149 @@
+# Aurora AI Empire - Staging Environment
+# Production-like environment for testing before production deployment
+version: '3.8'
+
+services:
+  # PostgreSQL Database with pgvector (Staging)
+  aurora-database:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-db-staging
+    environment:
+      POSTGRES_DB: aurora_staging
+      POSTGRES_USER: robbie
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - aurora_db_staging_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./database/staging_data.sql:/docker-entrypoint-initdb.d/staging_data.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # Redis for caching (Staging)
+  aurora-redis:
+    image: redis:7-alpine
+    container_name: aurora-redis-staging
+    ports:
+      - "6379:6379"
+    volumes:
+      - aurora_redis_staging_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # Aurora Backend (FastAPI) - Staging
+  aurora-backend:
+    build: .
+    container_name: aurora-backend-staging
+    environment:
+      - DATABASE_URL=postgresql://robbie:${DB_PASSWORD}@aurora-database:5432/aurora_staging
+      - REDIS_URL=redis://aurora-redis:6379
+      - NODE_ENV=staging
+      - RUNPOD_NODE=${RUNPOD_NODE:-staging}
+      - AURORA_ROLE=${AURORA_ROLE:-staging}
+      - LOG_LEVEL=info
+    volumes:
+      - aurora_app_staging_data:/app/data
+      - aurora_logs_staging:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+    depends_on:
+      aurora-database:
+        condition: service_healthy
+      aurora-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Robbie Frontend (Node.js) - Staging
+  robbie-frontend:
+    build: .
+    container_name: robbie-frontend-staging
+    environment:
+      - API_BASE_URL=http://aurora-backend:8000
+      - REDIS_URL=redis://aurora-redis:6379
+      - NODE_ENV=staging
+      - RUNPOD_NODE=${RUNPOD_NODE:-staging}
+    volumes:
+      - aurora_frontend_staging_data:/app/frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - aurora-backend
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # Nginx Reverse Proxy (Staging)
+  aurora-nginx:
+    image: nginx:alpine
+    container_name: aurora-nginx-staging
+    volumes:
+      - ./nginx.staging.conf:/etc/nginx/nginx.conf
+      - aurora_logs_staging:/var/log/nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - aurora-backend
+      - robbie-frontend
+    restart: unless-stopped
+
+  # Health Monitor (Staging)
+  health-monitor:
+    build: .
+    container_name: aurora-health-monitor-staging
+    environment:
+      - MONITOR_INTERVAL=60
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+    volumes:
+      - aurora_logs_staging:/app/logs
+    command: ["python3", "/app/scripts/health_monitor.py"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  aurora_db_staging_data:
+    driver: local
+  aurora_redis_staging_data:
+    driver: local
+  aurora_app_staging_data:
+    driver: local
+  aurora_frontend_staging_data:
+    driver: local
+  aurora_logs_staging:
+    driver: local
+
+networks:
+  default:
+    name: aurora-staging-network
+
+
+
