@@ -214,7 +214,6 @@ class GmailConnector:
 
 if __name__ == "__main__":
     # Configuration
-    FIREFLIES_API_KEY = os.getenv("FIREFLIES_API_KEY")
     GMAIL_CREDENTIALS = os.getenv("GMAIL_CREDENTIALS_PATH", "credentials.json")
     GMAIL_TOKEN = os.getenv("GMAIL_TOKEN_PATH", "token.json")
     
@@ -227,18 +226,18 @@ if __name__ == "__main__":
         "sslmode": "require"
     }
     
-    if not FIREFLIES_API_KEY:
-        print("❌ FIREFLIES_API_KEY environment variable required")
+    if not os.path.exists(GMAIL_CREDENTIALS):
+        print("❌ Gmail credentials file not found. Please set up OAuth credentials.")
         exit(1)
     
-    connector = FirefliesConnector(FIREFLIES_API_KEY, db_config)
+    connector = GmailConnector(GMAIL_CREDENTIALS, GMAIL_TOKEN, db_config)
     
-    print("🚀 Starting Fireflies data import...")
+    print("🚀 Starting Gmail data import...")
     
-    # Import meeting transcripts
-    print("📝 Fetching meeting transcripts...")
-    transcripts = connector.fetch_transcripts(days_back=30)
-    imported_transcripts = connector.import_transcripts(transcripts)
-    print(f"✅ Imported {imported_transcripts} meeting transcripts")
+    # Import recent emails
+    print("📧 Fetching emails...")
+    emails = connector.fetch_emails(query="newer_than:30d", max_results=500)
+    imported_emails = connector.import_emails_as_activities(emails)
+    print(f"✅ Imported {imported_emails} email activities")
     
-    print("🎉 Fireflies import complete!")
+    print("🎉 Gmail import complete!")

@@ -41,6 +41,10 @@ class MasterImporter:
             "apollo": os.getenv("APOLLO_API_KEY"),
             "openai": os.getenv("OPENAI_API_KEY")
         }
+        
+        # Gmail OAuth paths
+        self.gmail_credentials = os.getenv("GMAIL_CREDENTIALS_PATH", "credentials.json")
+        self.gmail_token = os.getenv("GMAIL_TOKEN_PATH", "token.json")
     
     def check_prerequisites(self) -> bool:
         """Check if all required API keys and dependencies are available"""
@@ -122,6 +126,28 @@ class MasterImporter:
             logger.error(f"❌ Fireflies import failed: {e}")
             return {"meetings": 0}
     
+    def import_google_workspace_data(self) -> Dict:
+        """Import data from Google Workspace (Gmail, Calendar, Drive)"""
+        google_credentials = os.getenv("GOOGLE_CREDENTIALS_PATH", "google-credentials.json")
+        google_token = os.getenv("GOOGLE_TOKEN_PATH", "google-token.json")
+        
+        if not os.path.exists(google_credentials):
+            logger.warning("⚠️ Skipping Google Workspace import - OAuth credentials not configured")
+            return {"emails": 0, "events": 0, "files": 0}
+        
+        try:
+            from google_workspace_connector import GoogleWorkspaceConnector
+            connector = GoogleWorkspaceConnector(google_credentials, google_token, self.db_config)
+            
+            logger.info("🏢 Importing Google Workspace data...")
+            results = connector.import_all_data()
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"❌ Google Workspace import failed: {e}")
+            return {"emails": 0, "events": 0, "files": 0}
+    
     def create_sample_data(self) -> Dict:
         """Create sample data for testing"""
         logger.info("📊 Creating sample TestPilot data...")
@@ -195,6 +221,10 @@ class MasterImporter:
         # Import from Fireflies
         fireflies_results = self.import_fireflies_data()
         results["fireflies"] = fireflies_results
+        
+        # Import from Google Workspace
+        google_results = self.import_google_workspace_data()
+        results["google"] = google_results
         
         # Create sample data if no API data
         if sum(hubspot_results.values()) == 0:
