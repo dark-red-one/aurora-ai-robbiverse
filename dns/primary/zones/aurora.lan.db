@@ -1,0 +1,15 @@
+ aurora.lan.
+ 300
+@   IN SOA ns1.aurora.lan. admin.aurora.lan. (
+        2025091501 ; serial
+        3600       ; refresh
+        900        ; retry
+        1209600    ; expire
+        300 )      ; minimum
+    IN NS ns1.aurora.lan.
+ns1 IN A 192.168.1.10
+vengeance IN A 192.168.1.10
+nas IN A 192.168.1.20
+ollama IN A 192.168.1.10
+litellm IN A 192.168.1.10
+postgres IN A 192.168.1.11
