@@ -247,8 +247,8 @@ body {
 }
 
 .message-avatar {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
     display: flex;
