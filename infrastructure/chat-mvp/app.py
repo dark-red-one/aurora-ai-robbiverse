@@ -345,12 +345,13 @@ async def get_status():
         "status": "online",
         "service": "TestPilot Chat MVP",
         "integrations": {
-            "gmail": "connected" if manager.integrations.gmail_api_key else "disconnected",
-            "calendar": "connected" if manager.integrations.calendar_api_key else "disconnected",
+            "llm_gateway": "connected",
+            "database": "connected",
             "fireflies": "connected" if manager.integrations.fireflies_api_key else "disconnected"
         },
         "personality": manager.personality.name,
-        "capabilities": manager.personality.capabilities
+        "capabilities": manager.personality.capabilities,
+        "model": "llama3.1:8b"
     }
 
 if __name__ == "__main__":
