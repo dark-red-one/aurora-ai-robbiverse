@@ -217,85 +217,57 @@ class BusinessPersonality:
         }
     
     async def generate_response(self, message: str, integrations: BusinessIntegrations) -> str:
-        """Generate business-contextualized response"""
+        """Generate business-contextualized response using Aurora Town LLM Gateway"""
         
         # Get business context
         gmail_summary = await integrations.get_gmail_summary()
         calendar_events = await integrations.get_calendar_events()
         fireflies_summary = await integrations.get_fireflies_summary()
         
-        # Business context analysis
-        context = f"""
-Business Context:
+        # Build context for LLM
+        system_prompt = f"""You are Robbie, Allan's thoughtful and direct executive assistant at TestPilot CPG.
+
+Personality traits:
+- Thoughtful: Consider implications, think ahead
+- Direct: No fluff, get to the point
+- Curious: Ask clarifying questions
+- Honest: Acknowledge limitations
+- Pragmatic: Focus on what's actionable
+
+Current Business Context:
 {gmail_summary}
 {calendar_events}
 {fireflies_summary}
 
-Active Deals: {len(self.context['current_deals'])} worth ${sum(int(d['value'].replace('$', '').replace('K', '000')) for d in self.context['current_deals'])}K total
-Priority Tasks: {len(self.context['priority_tasks'])} pending
-"""
+Active Deals: {', '.join(d['name'] for d in self.context['current_deals'])}
+Priority Tasks: {', '.join(self.context['priority_tasks'])}
+
+Respond directly and actionably. Use emojis strategically: ✅ 🔴 💰 🚀 ⚠️ 💡 📊 🎯
+Keep it brief but strategic. Focus on revenue and action."""
+
+        full_prompt = f"{system_prompt}\n\nAllan: {message}\n\nRobbie:"
         
-        # Generate response based on message content
-        if "deal" in message.lower() or "pipeline" in message.lower():
-            return f"""🤖 **Robbie - Business AI Assistant**
-
-{context}
-
-**Deal Pipeline Status:**
-{chr(10).join(f"• {deal['name']}: {deal['value']} ({deal['probability']} close probability)" for deal in self.context['current_deals'])}
-
-**Next Actions:**
-{chr(10).join(f"• {task}" for task in self.context['priority_tasks'])}
-
-How can I help you move these deals forward?"""
-
-        elif "meeting" in message.lower() or "calendar" in message.lower():
-            return f"""🤖 **Robbie - Business AI Assistant**
-
-{context}
-
-**Today's Focus:**
-{calendar_events}
-
-**Meeting Prep:**
-• Review PepsiCo proposal one more time
-• Prepare Wondercide timeline updates
-• Research prospect background
-
-Ready to dominate these meetings! What do you need?"""
-
-        elif "email" in message.lower() or "gmail" in message.lower():
-            return f"""🤖 **Robbie - Business AI Assistant**
-
-{context}
-
-**Email Status:**
-{gmail_summary}
-
-**Suggested Actions:**
-• Prioritize PepsiCo follow-up (high value, high probability)
-• Draft Wondercide contract terms
-• Schedule prospect discovery call
-
-Want me to help draft any responses?"""
-
-        else:
-            return f"""🤖 **Robbie - Business AI Assistant**
-
-{context}
-
-**Quick Status:**
-• {len(self.context['current_deals'])} active deals in pipeline
-• {len(self.context['priority_tasks'])} priority tasks pending
-• Today's focus: PepsiCo decision meeting
-
-**How I can help:**
-• Deal pipeline analysis and next steps
-• Meeting preparation and follow-up
-• Email prioritization and drafting
-• Task management and scheduling
-
-What's on your mind?"""
+        try:
+            # Call Aurora Town LLM Gateway
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    'http://aurora-town-u44170.vm.elestio.app:8080/chat',
+                    json={
+                        'model': 'llama3.1:8b',
+                        'prompt': full_prompt,
+                        'temperature': 0.7,
+                        'max_tokens': 500
+                    },
+                    timeout=aiohttp.ClientTimeout(total=120)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return data.get('response', 'Sorry, I got an empty response.')
+                    else:
+                        return "⚠️ LLM service temporarily unavailable. I'm working on it!"
+        except Exception as e:
+            logger.error(f"LLM Gateway error: {e}")
+            return f"⚠️ Connection issue with my brain (LLM gateway). Let me try to reconnect... Error: {str(e)}"
 
 # WebSocket connection manager
 class ConnectionManager:

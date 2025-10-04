@@ -125,9 +125,25 @@ class TestPilotChat {
         
         const timestamp = new Date().toLocaleTimeString();
         
+        // Robbie avatar selection based on message content/mood
+        let robbieAvatar = '/static/images/robbie-happy-1.png'; // default
+        if (content.toLowerCase().includes('deal') || content.toLowerCase().includes('revenue')) {
+            robbieAvatar = '/static/images/robbie-content-1.png'; // satisfied
+        } else if (content.toLowerCase().includes('error') || content.toLowerCase().includes('problem')) {
+            robbieAvatar = '/static/images/robbie-surprised-1.png'; // surprised
+        } else if (content.toLowerCase().includes('think') || content.toLowerCase().includes('consider')) {
+            robbieAvatar = '/static/images/robbie-thoughtful-1.png'; // thinking
+        }
+        
+        const avatarContent = sender === 'Robbie' 
+            ? `<img src="${robbieAvatar}" alt="Robbie" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` 
+            : sender === 'You' 
+                ? 'A' 
+                : 'S';
+        
         messageDiv.innerHTML = `
             <div class="message-avatar">
-                ${sender === 'Robbie' ? 'R' : sender === 'You' ? 'A' : 'S'}
+                ${avatarContent}
             </div>
             <div class="message-content">
                 <div class="message-header">
@@ -158,7 +174,9 @@ class TestPilotChat {
         typingDiv.id = 'typing-indicator';
         
         typingDiv.innerHTML = `
-            <div class="message-avatar">R</div>
+            <div class="message-avatar">
+                <img src="/static/images/robbie-thoughtful-1.png" alt="Robbie" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+            </div>
             <div class="message-content">
                 <div class="message-header">
                     <span class="message-sender">Robbie</span>
