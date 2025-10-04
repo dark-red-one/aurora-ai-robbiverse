@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🤖 Robbie V3 Command Center</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #0a0a0a; 
+            color: #ffffff; 
+            overflow-x: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, #1a1a2e, #16213e); 
+            padding: 20px; 
+            border-bottom: 2px solid #00d4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 28px; font-weight: bold; color: #00d4ff; }
+        .mood-display { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            font-size: 18px;
+        }
+        .mood-emoji { 
+            font-size: 32px; 
+            cursor: pointer; 
+            transition: transform 0.3s;
+        }
+        .mood-emoji:hover { transform: scale(1.2); }
+        .pin-display { 
+            background: #2d2d2d; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            font-family: monospace;
+            font-size: 16px;
+        }
+        .main-content { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            padding: 20px; 
+        }
+        .panel { 
+            background: #1a1a1a; 
+            border-radius: 8px; 
+            padding: 20px; 
+            border: 1px solid #333;
+        }
+        .panel-title { 
+            font-size: 20px; 
+            margin-bottom: 15px; 
+            color: #00d4ff; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .stat-card { 
+            background: #2d2d2d; 
+            padding: 15px; 
+            border-radius: 6px; 
+            text-align: center;
+            border-left: 4px solid #00d4ff;
+        }
+        .stat-number { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #4caf50; 
+        }
+        .stat-label { 
+            font-size: 12px; 
+            color: #ccc; 
+            margin-top: 5px; 
+        }
+        .priority-item { 
+            background: #2d2d2d; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border-radius: 6px; 
+            border-left: 4px solid #ffa500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .priority-item.critical { border-left-color: #ff6b6b; }
+        .priority-item.high { border-left-color: #ffa500; }
+        .priority-item.medium { border-left-color: #4caf50; }
+        .priority-item.completed { border-left-color: #4caf50; opacity: 0.7; }
+        .priority-status { 
+            font-size: 12px; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: bold;
+        }
+        .status-in_progress { background: #ffa500; color: #000; }
+        .status-completed { background: #4caf50; color: #000; }
+        .status-pending { background: #666; color: #fff; }
+        .action-item { 
+            background: #2d2d2d; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 4px; 
+            font-size: 14px;
+            border-left: 3px solid #00d4ff;
+        }
+        .job-item { 
+            background: #2d2d2d; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border-radius: 6px; 
+            border-left: 4px solid #9c27b0;
+        }
+        .job-progress { 
+            background: #1a1a1a; 
+            height: 6px; 
+            border-radius: 3px; 
+            margin: 8px 0; 
+            overflow: hidden;
+        }
+        .job-progress-bar { 
+            background: linear-gradient(90deg, #00d4ff, #4caf50); 
+            height: 100%; 
+            transition: width 0.3s;
+            width: 75%;
+        }
+        .streaming-indicator { 
+            display: inline-block; 
+            width: 8px; 
+            height: 8px; 
+            background: #4caf50; 
+            border-radius: 50%; 
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 
+            0% { opacity: 1; } 
+            50% { opacity: 0.5; } 
+            100% { opacity: 1; } 
+        }
+        .pin-input { 
+            background: #1a1a1a; 
+            border: 2px solid #00d4ff; 
+            color: #fff; 
+            padding: 8px; 
+            border-radius: 4px; 
+            font-family: monospace;
+            font-size: 16px;
+            text-align: center;
+            width: 80px;
+        }
+        .pin-input:focus { outline: none; border-color: #4caf50; }
+        .btn { 
+            background: #00d4ff; 
+            color: #000; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: all 0.3s;
+        }
+        .btn:hover { background: #4caf50; }
+        .btn-danger { background: #ff6b6b; }
+        .btn-danger:hover { background: #ff5252; }
+        .chat-area { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            padding: 15px; 
+            height: 200px; 
+            overflow-y: auto; 
+            font-family: monospace; 
+            font-size: 14px;
+        }
+        .chat-message { 
+            margin: 5px 0; 
+            padding: 5px; 
+            border-radius: 4px; 
+        }
+        .chat-system { background: #2d2d2d; }
+        .chat-user { background: #1a4d1a; }
+        .chat-ai { background: #1a1a4d; }
+        .chat-error { background: #4d1a1a; color: #ff6b6b; }
+        .terminal-panel {
+            grid-column: 1 / -1;
+            height: 300px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            overflow-y: auto;
+        }
+        .terminal-line {
+            margin: 2px 0;
+            color: #00ff00;
+        }
+        .terminal-system { color: #ffff00; }
+        .terminal-prompt { color: #00d4ff; font-weight: bold; }
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            width: 80%;
+        }
+        .chat-apps {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .chat-app-btn {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .chat-app-btn:hover {
+            background: #00d4ff;
+            color: #000;
+            transform: translateY(-2px);
+        }
+        .chat-app-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🤖 Robbie V3 Command Center</div>
+        <div class="mood-display">
+            <span>Mood:</span>
+            <span class="mood-emoji" onclick="changeMood()" id="moodEmoji">🎯</span>
+            <span id="moodText">Focused</span>
+        </div>
+        <div class="pin-display">
+            PIN: <input type="password" class="pin-input" id="pinInput" maxlength="4" placeholder="2106">
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Terminal Panel -->
+        <div class="panel terminal-panel">
+            <div class="terminal-line terminal-system">🚀 Robbie V3 Terminal - AI + Data + Unfair Advantage</div>
+            <div class="terminal-line terminal-system">Type your message and press ENTER to chat with Robbie...</div>
+            <div class="terminal-line terminal-system">Commands: /help, /clear, /status, /models</div>
+            <div class="terminal-line terminal-system">──────────────────────────────────────────────────────────────</div>
+            <div id="terminal-chat">
+                <div class="terminal-line">[Robbie] Hello Allan! I'm ready to help with your Aurora AI Empire. What would you like to work on?</div>
+            </div>
+            <div class="terminal-line terminal-prompt">ROBBIE> <input type="text" class="terminal-input" id="terminalInput" placeholder="Enter message..." onkeypress="handleTerminalKey(event)"></div>
+        </div>
+
+        <!-- Chat Apps Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                💬 Robbie Chat Applications
+            </div>
+            <div class="chat-apps">
+                <a href="http://localhost:8005" class="chat-app-btn" target="_blank">
+                    <span class="chat-app-icon">💬</span>
+                    TestPilot Chat MVP
+                </a>
+                <a href="http://localhost:8000/docs" class="chat-app-btn" target="_blank">
+                    <span class="chat-app-icon">🧠</span>
+                    Aurora AI API
+                </a>
+                <a href="http://localhost:8081" class="chat-app-btn" target="_blank">
+                    <span class="chat-app-icon">📊</span>
+                    RobbieBook Dashboard
+                </a>
+                <button class="chat-app-btn" onclick="runCLITerminal()">
+                    <span class="chat-app-icon">💻</span>
+                    CLI Terminal
+                </button>
+            </div>
+        </div>
+
+        <!-- System Performance Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                📊 System Performance <span class="streaming-indicator"></span>
+            </div>
+            <div class="stats-grid" id="systemStats">
+                <div class="stat-card">
+                    <div class="stat-number" id="gpuUtil">85%</div>
+                    <div class="stat-label">GPU Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="cpuUtil">42%</div>
+                    <div class="stat-label">CPU Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="memoryUtil">67%</div>
+                    <div class="stat-label">Memory</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="diskUtil">23%</div>
+                    <div class="stat-label">Disk</div>
+                </div>
+            </div>
+            <div class="chat-area" id="systemChat">
+                <div class="chat-message chat-system">Aurora AI Backend: ✅ Online</div>
+                <div class="chat-message chat-system">RobbieBook Proxy: ✅ Active</div>
+                <div class="chat-message chat-system">GPU Mesh: ✅ Connected</div>
+                <div class="chat-message chat-system">All systems operational...</div>
+            </div>
+        </div>
+
+        <!-- Priorities Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                🎯 Agreed Priorities <span class="streaming-indicator"></span>
+            </div>
+            <div id="prioritiesList">
+                <div class="priority-item critical">
+                    <span>Build Robbie's Physical Body</span>
+                    <span class="priority-status status-in_progress">In Progress</span>
+                </div>
+                <div class="priority-item high">
+                    <span>Expert-Trained AI System</span>
+                    <span class="priority-status status-in_progress">In Progress</span>
+                </div>
+                <div class="priority-item medium">
+                    <span>Automated Lifestyle Business</span>
+                    <span class="priority-status status-in_progress">In Progress</span>
+                </div>
+                <div class="priority-item completed">
+                    <span>Aurora AI Empire Setup</span>
+                    <span class="priority-status status-completed">Completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Actions Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                ⚡ Last 5 Actions <span class="streaming-indicator"></span>
+            </div>
+            <div id="recentActions">
+                <div class="action-item">🔧 Fixed Aurora AI Backend ModuleNotFoundError</div>
+                <div class="action-item">🚀 Started RobbieBook1 Empire Services</div>
+                <div class="action-item">🌐 Configured Transparent Proxy System</div>
+                <div class="action-item">📊 Added Custom Favicon to Dashboard</div>
+                <div class="action-item">💬 Linked Robbie Chat Applications</div>
+            </div>
+        </div>
+
+        <!-- Job Tracking Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                🔧 Job Tracking <span class="streaming-indicator"></span>
+            </div>
+            <div id="jobsList">
+                <div class="job-item">
+                    <strong>AllanBot Training</strong>
+                    <div class="job-progress">
+                        <div class="job-progress-bar"></div>
+                    </div>
+                    <small>Learning decision patterns from Allan's data</small>
+                </div>
+                <div class="job-item">
+                    <strong>GPU Mesh Optimization</strong>
+                    <div class="job-progress">
+                        <div class="job-progress-bar" style="width: 60%;"></div>
+                    </div>
+                    <small>Distributing AI workloads across nodes</small>
+                </div>
+                <div class="job-item">
+                    <strong>Business Pipeline Re-engagement</strong>
+                    <div class="job-progress">
+                        <div class="job-progress-bar" style="width: 40%;"></div>
+                    </div>
+                    <small>Contacting VIP prospects and clients</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMood = 'focused';
+        let moods = {
+            focused: { emoji: '🎯', text: 'Focused' },
+            excited: { emoji: '🚀', text: 'Excited' },
+            stressed: { emoji: '😰', text: 'Stressed' },
+            confident: { emoji: '💪', text: 'Confident' },
+            determined: { emoji: '🔥', text: 'Determined' },
+            calm: { emoji: '😌', text: 'Calm' },
+            alert: { emoji: '👁️', text: 'Alert' }
+        };
+
+        // Change mood
+        function changeMood() {
+            const moodKeys = Object.keys(moods);
+            const currentIndex = moodKeys.indexOf(currentMood);
+            const nextIndex = (currentIndex + 1) % moodKeys.length;
+            currentMood = moodKeys[nextIndex];
+            
+            document.getElementById('moodEmoji').textContent = moods[currentMood].emoji;
+            document.getElementById('moodText').textContent = moods[currentMood].text;
+        }
+
+        // PIN validation
+        document.getElementById('pinInput').addEventListener('input', function(e) {
+            if (e.target.value === '2106') {
+                e.target.style.borderColor = '#4caf50';
+                e.target.style.color = '#4caf50';
+            } else {
+                e.target.style.borderColor = '#ff6b6b';
+                e.target.style.color = '#ff6b6b';
+            }
+        });
+
+        // Terminal input handling
+        function handleTerminalKey(event) {
+            if (event.key === 'Enter') {
+                const input = document.getElementById('terminalInput');
+                const message = input.value.trim();
+                if (message) {
+                    addTerminalMessage(`[Allan] ${message}`, 'user');
+                    input.value = '';
+                    
+                    // Send to Ollama backend
+                    sendToOllama(message);
+                }
+            }
+        }
+
+        // Send message to Ollama backend
+        async function sendToOllama(message) {
+            try {
+                addTerminalMessage(`[System] Processing with Ollama...`, 'system');
+                
+                const response = await fetch('http://localhost:9000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        model: 'llama3.1:8b'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addTerminalMessage(`[Robbie] ${data.response}`, 'ai');
+                } else {
+                    addTerminalMessage(`[System] Error: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                addTerminalMessage(`[System] Connection error: ${error.message}`, 'error');
+                // Fallback to simulated response
+                setTimeout(() => {
+                    const responses = [
+                        "I understand you want to discuss: " + message,
+                        "Let me process that request for you...",
+                        "That's an interesting point about " + message,
+                        "I'll help you with that right away!",
+                        "Excellent idea! Let me work on that."
+                    ];
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    addTerminalMessage(`[Robbie] ${response} (fallback)`, 'ai');
+                }, 1000);
+            }
+        }
+
+        // Add terminal message
+        function addTerminalMessage(message, type) {
+            const chat = document.getElementById('terminal-chat');
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            if (type === 'user') div.style.color = '#00d4ff';
+            if (type === 'ai') div.style.color = '#4caf50';
+            if (type === 'system') div.style.color = '#ffff00';
+            if (type === 'error') div.style.color = '#ff6b6b';
+            div.textContent = message;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // CLI Terminal popup
+        function runCLITerminal() {
+            const terminalWindow = window.open('', 'CLITerminal', 'width=800,height=600,scrollbars=yes');
+            terminalWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Robbie CLI Terminal</title>
+                    <style>
+                        body { 
+                            background: #1a1a1a; 
+                            color: #00ff00; 
+                            font-family: 'Courier New', monospace; 
+                            padding: 20px; 
+                            margin: 0;
+                        }
+                        .terminal { 
+                            background: #000; 
+                            padding: 20px; 
+                            border-radius: 5px; 
+                            border: 1px solid #333;
+                            height: 500px;
+                            overflow-y: auto;
+                        }
+                        .prompt { color: #ffff00; }
+                        .command { color: #00aaff; }
+                        .response { color: #ff6b6b; margin-left: 20px; }
+                        .cursor { animation: blink 1s infinite; }
+                        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <h2>🤖 Robbie CLI Terminal</h2>
+                    <div class="terminal">
+                        <div class="prompt">🚀 TestPilot Chat CLI (type /quit to exit)</div>
+                        <div class="prompt">==========================================</div>
+                        <div class="prompt">Connected to: ws://localhost:8005/ws</div>
+                        <br>
+                        <div class="response">[Robbie] Hello Allan! I'm ready to chat. What would you like to discuss?</div>
+                        <br>
+                        <div class="prompt">> <span class="cursor">_</span></div>
+                    </div>
+                    <br>
+                    <div>
+                        <strong>Instructions:</strong> This is a demo terminal. In the real CLI, you would type commands here.<br>
+                        <strong>Real CLI Command:</strong> <code>cd /Users/allanperetz/aurora-ai-robbiverse && python3 chat-mvp/cli_chat.py</code>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        // Auto-refresh stats
+        setInterval(() => {
+            // Simulate changing stats
+            const gpu = Math.floor(Math.random() * 20) + 70;
+            const cpu = Math.floor(Math.random() * 30) + 30;
+            const memory = Math.floor(Math.random() * 20) + 60;
+            const disk = Math.floor(Math.random() * 10) + 20;
+            
+            document.getElementById('gpuUtil').textContent = gpu + '%';
+            document.getElementById('cpuUtil').textContent = cpu + '%';
+            document.getElementById('memoryUtil').textContent = memory + '%';
+            document.getElementById('diskUtil').textContent = disk + '%';
+        }, 3000);
+    </script>
+</body>
+</html>

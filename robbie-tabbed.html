@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Robbie Command Center - Tabs</title>
+  <style>
+    body { margin: 0; background: #0a0a0a; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 14px 18px; border-bottom: 2px solid #00d4ff; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-weight: bold; color: #00d4ff; }
+    .tabs { display: flex; gap: 8px; background: #111; border-bottom: 1px solid #222; padding: 8px 12px; }
+    .tab { padding: 8px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px 6px 0 0; cursor: pointer; color: #ccc; }
+    .tab.active { background: #0f0f0f; color: #00d4ff; border-bottom-color: #0f0f0f; }
+    .content { padding: 12px; }
+    .hidden { display: none; }
+    iframe { width: 100%; height: 78vh; border: 1px solid #222; border-radius: 8px; background: #000; }
+    .quick-links { display: flex; gap: 10px; }
+    .btn { background: #00d4ff; color: #000; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #4caf50; }
+    .status { color: #888; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🤖 Robbie Command Center</div>
+    <div class="quick-links">
+      <button class="btn" onclick="window.open('http://localhost:9000/robbie-avatar-chat.html','_blank')">Open Avatar Chat</button>
+      <button class="btn" onclick="window.open('http://localhost:8005','_blank')">Open Chat MVP</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="terminal">Terminal</div>
+    <div class="tab" data-tab="avatar">Avatar Chat</div>
+    <div class="tab" data-tab="mvp">Chat MVP</div>
+  </div>
+
+  <div class="content">
+    <div id="terminal" class="panel">
+      <iframe src="robbie-classic-terminal.html"></iframe>
+      <div class="status">Model defaults to llama3.1:8b • Uses local Ollama backend</div>
+    </div>
+    <div id="avatar" class="panel hidden">
+      <iframe src="http://localhost:9000/robbie-avatar-chat.html"></iframe>
+      <div class="status">Avatar mood changes on click • Connected to Ollama backend</div>
+    </div>
+    <div id="mvp" class="panel hidden">
+      <iframe src="http://localhost:8005/"></iframe>
+      <div class="status">FastAPI WebSocket chat • Enhanced business context</div>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+
+    function activate(name) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      panels.forEach(p => p.classList.toggle('hidden', p.id !== name));
+    }
+
+    tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.tab)));
+  </script>
+</body>
+</html>

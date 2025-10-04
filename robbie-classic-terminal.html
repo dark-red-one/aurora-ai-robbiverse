@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ROBBIE Classic Terminal</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { background: #0a0a0a; color: #00ff88; font-family: "Courier New", monospace; }
+    .container { max-width: 920px; margin: 20px auto; padding: 0 12px; }
+    .title { color: #00d4ff; margin: 8px 0 16px; }
+    .terminal { background: #000; border: 1px solid #222; border-radius: 6px; height: 70vh; overflow-y: auto; padding: 14px; }
+    .line { white-space: pre-wrap; word-break: break-word; margin: 2px 0; }
+    .sys { color: #ffff66; }
+    .user { color: #00d4ff; }
+    .ai { color: #4caf50; }
+    .error { color: #ff6b6b; }
+    .prompt { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
+    .caret { color: #00d4ff; font-weight: bold; }
+    .input { flex: 1; background: transparent; border: none; border-bottom: 1px solid #222; color: #00ff88; font-family: inherit; font-size: 14px; outline: none; padding: 6px 4px; }
+    .status { color: #888; font-size: 12px; margin-top: 6px; }
+    .controls { margin: 10px 0 6px; color: #ccc; font-size: 12px; }
+    .controls code { color: #00d4ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="title">Vengeance Terminal v1.0 - AI + Data + Unfair Advantage</h2>
+    <div class="controls">Commands: <code>/help</code>, <code>/clear</code>, <code>/status</code>, <code>/model &lt;name&gt;</code></div>
+    <div id="terminal" class="terminal"></div>
+    <div class="prompt">
+      <div class="caret">ROBBIE&gt;</div>
+      <input id="input" class="input" placeholder="Enter message..." autocomplete="off" />
+    </div>
+    <div id="status" class="status">Model: llama3.1:8b • Backend: http://127.0.0.1:9000/api/chat</div>
+  </div>
+
+  <script>
+    const term = document.getElementById('terminal');
+    const input = document.getElementById('input');
+    const statusEl = document.getElementById('status');
+
+    let currentModel = 'llama3.1:8b';
+    const backendUrl = 'http://127.0.0.1:9000/api/chat';
+
+    function addLine(text, cls = '') {
+      const div = document.createElement('div');
+      div.className = `line ${cls}`.trim();
+      div.textContent = text;
+      term.appendChild(div);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function banner() {
+      addLine('──────────────────────────────────────────────────────────────', 'sys');
+      addLine('Type your message and press ENTER to chat with Robbie...', 'sys');
+      addLine('Use /model <name> to switch (e.g., llama3.1:8b, qwen2.5:14b)', 'sys');
+      addLine('──────────────────────────────────────────────────────────────', 'sys');
+    }
+
+    async function callBackend(message) {
+      try {
+        const body = { message: message, model: currentModel };
+        const res = await fetch(backendUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          addLine(`Error: HTTP ${res.status} ${res.statusText}`, 'error');
+          return;
+        }
+        const data = await res.json();
+        addLine(`ROBBIE: ${data.response}`, 'ai');
+      } catch (e) {
+        addLine(`Error calling backend: ${e.message}`, 'error');
+      }
+    }
+
+    function handleCommand(cmd) {
+      const parts = cmd.trim().split(/\s+/);
+      const base = parts[0].toLowerCase();
+      if (base === '/help') {
+        addLine('Available: /help, /clear, /status, /model <name>', 'sys');
+      } else if (base === '/clear') {
+        term.innerHTML = '';
+        banner();
+      } else if (base === '/status') {
+        addLine(`Model: ${currentModel} • Backend: ${backendUrl}`, 'sys');
+      } else if (base === '/model') {
+        if (parts[1]) {
+          currentModel = parts.slice(1).join(' ');
+          statusEl.textContent = `Model: ${currentModel} • Backend: ${backendUrl}`;
+          addLine(`Switched model to ${currentModel}`, 'sys');
+        } else {
+          addLine('Usage: /model <name>', 'sys');
+        }
+      } else {
+        addLine('Unknown command. Try /help', 'sys');
+      }
+    }
+
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+      addLine(`ROBBIE> ${message}`, 'user');
+      input.value = '';
+
+      if (message.startsWith('/')) {
+        handleCommand(message);
+        return;
+      }
+
+      addLine('Thinking...', 'sys');
+      await callBackend(message);
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Init
+    banner();
+    input.focus();
+  </script>
+</body>
+</html>
