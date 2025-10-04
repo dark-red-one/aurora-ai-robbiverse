@@ -326,8 +326,7 @@ async def get_chat_interface(request: Request):
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     
-    # Stream welcome message
-    await stream_llm_response("", manager, websocket)
+    # Just connect - wait for user to send first message
     
     try:
         while True:
