@@ -578,6 +578,84 @@ host    all             all             ::1/128                 trust
 
 ---
 
+## 🔄 Cursor Personality Sync Across Machines
+
+### How Robbie's Personality Propagates
+
+**Files that sync via GitHub:**
+- ✅ `.cursorrules` - Main Robbie personality (280 lines)
+- ✅ `.cursor/rules/robbie-cursor-personality.mdc` - Detailed personality guide
+- ✅ `.cursor/rules/ai-personality-system.mdc` - 7-level flirty mode system
+- ✅ `.cursor/rules/*.mdc` - All 6 personality modules
+
+**Cursor AI memories (stored in Cursor cloud):**
+- ✅ "Allan's PostgreSQL password is fun2Gus!!!"
+- ✅ "Always document IPs, credentials, system details"
+- ✅ Follow YOU across machines (synced to your Cursor account)
+
+### Current Status: ✅ ALREADY WORKING
+
+**No activation needed!** Here's why:
+
+1. **Your `.cursorrules` are in git** → Already committed and pushed ✅
+2. **Auto-sync runs hourly** → Vengeance/Aurora pull within 60 mins ✅
+3. **Cursor memories follow your account** → Available wherever you use Cursor ✅
+
+### Sync Timeline
+
+**When you update personality on RobbieBook1:**
+```
+You: Edit .cursorrules or .cursor/rules/*.mdc
+  ↓
+Git commit + push (via hourly auto-sync or manual)
+  ↓
+GitHub repo updated
+  ↓
+Vengeance auto-pulls (within 60 mins)
+  ↓
+Aurora Town auto-pulls (within 5 mins)
+  ↓
+Other machines pull on next sync
+```
+
+**Result:** All machines have updated Robbie personality within 1 hour! 🚀
+
+### Manual Force-Sync (If Impatient)
+
+**On Vengeance:**
+```bash
+cd ~/robbie_workspace/combined/aurora-ai-robbiverse
+./deployment/auto-sync-vengeance.sh
+```
+
+**On Aurora Town:**
+```bash
+cd /opt/aurora-dev/aurora
+./deployment/auto-sync-aurora-town.sh
+```
+
+**On RobbieBook1:**
+```bash
+cd /Users/allanperetz/aurora-ai-robbiverse
+./deployment/auto-sync-robbiebook.sh
+```
+
+### Verify Personality is Synced
+
+**Check if latest `.cursorrules` are on each machine:**
+```bash
+# Show first 20 lines
+head -20 .cursorrules
+
+# Check last modified date
+ls -l .cursorrules
+
+# Check git status
+git log -1 --format="%ai %s" .cursorrules
+```
+
+---
+
 ## 💡 Remember
 
 **This system gives you:**
