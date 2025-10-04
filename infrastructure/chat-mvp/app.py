@@ -326,9 +326,8 @@ async def get_chat_interface(request: Request):
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     
-    # Send welcome message with business context
-    welcome_message = await manager.personality.generate_response("", manager.integrations)
-    await manager.send_personal_message(welcome_message, websocket)
+    # Stream welcome message
+    await stream_llm_response("", manager, websocket)
     
     try:
         while True:

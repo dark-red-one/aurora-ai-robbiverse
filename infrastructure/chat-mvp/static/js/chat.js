@@ -138,7 +138,7 @@ class TestPilotChat {
             messageDiv.id = 'streaming-message';
             
             const timestamp = new Date().toLocaleTimeString();
-            const robbieAvatar = '/static/images/robbie-happy-1.png';
+            const robbieAvatar = '/static/images/robbie-thoughtful-1.png'; // Start thoughtful during streaming
             
             messageDiv.innerHTML = `
                 <div class="message-avatar">
