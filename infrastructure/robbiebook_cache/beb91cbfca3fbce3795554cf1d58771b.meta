@@ -1,0 +1,26 @@
+{
+  "url": "http://clients2.google.com/time/1/current?cup2key=9:amvsZcft3q-qh1MBxcgNL9wsRRHMs2d46bMF4FXiLik&cup2hreq=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timestamp": 1759601305.631883,
+  "status_code": 200,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8",
+    "Vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+    "X-Content-Type-Options": "nosniff",
+    "x-cup-server-proof": "3045022100fe76c3ed4295224c3a9ebbf6cede3e71f9ca4380bc2cb047710b57a891c9dcac02204afde787bcb69bfbdf668c19cfca79a8a151782c2e112769d18868fe32cb6bcb:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "Etag": "W/\"3045022100fe76c3ed4295224c3a9ebbf6cede3e71f9ca4380bc2cb047710b57a891c9dcac02204afde787bcb69bfbdf668c19cfca79a8a151782c2e112769d18868fe32cb6bcb:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"",
+    "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "Mon, 01 Jan 1990 00:00:00 GMT",
+    "Date": "Sat, 04 Oct 2025 18:08:25 GMT",
+    "Content-Disposition": "attachment; filename=\"json.txt\"; filename*=UTF-8''json.txt",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "same-site",
+    "Content-Encoding": "gzip",
+    "Transfer-Encoding": "chunked",
+    "Server": "ESF",
+    "X-XSS-Protection": "0",
+    "X-Frame-Options": "SAMEORIGIN"
+  },
+  "size": 80,
+  "compressed": false
+}
