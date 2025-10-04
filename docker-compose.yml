@@ -1,0 +1,130 @@
+# Aurora AI Empire - Multi-Node Deployment
+# Orchestrates Robbie consciousness across 3 RunPod network
+version: '3.8'
+
+services:
+  # PostgreSQL Database with pgvector
+  aurora-database:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-db
+    environment:
+      POSTGRES_DB: aurora
+      POSTGRES_USER: robbie
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_aurora_password}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - aurora_db_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U robbie -d aurora"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Aurora Backend (FastAPI)
+  aurora-backend:
+    build: .
+    container_name: aurora-backend
+    environment:
+      - DATABASE_URL=postgresql://robbie:${DB_PASSWORD:-secure_aurora_password}@aurora-database:5432/aurora
+      - REDIS_URL=redis://aurora-redis:6379
+      - NODE_ENV=production
+      - RUNPOD_NODE=${RUNPOD_NODE:-aurora}
+      - AURORA_NETWORK_ROLE=${AURORA_ROLE:-primary}
+    volumes:
+      - aurora_app_data:/app/data
+      - aurora_logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+    depends_on:
+      aurora-database:
+        condition: service_healthy
+      aurora-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and sessions
+  aurora-redis:
+    image: redis:7-alpine
+    container_name: aurora-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - aurora_redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Robbie Frontend (Node.js)
+  robbie-frontend:
+    build: .
+    container_name: robbie-frontend
+    environment:
+      - API_BASE_URL=http://aurora-backend:8000
+      - REDIS_URL=redis://aurora-redis:6379
+      - RUNPOD_NODE=${RUNPOD_NODE:-aurora}
+    volumes:
+      - aurora_frontend_data:/app/frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - aurora-backend
+    restart: unless-stopped
+    command: ["npm", "start"]
+
+  # Nginx Reverse Proxy
+  aurora-nginx:
+    image: nginx:alpine
+    container_name: aurora-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - aurora_logs:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - aurora-backend
+      - robbie-frontend
+    restart: unless-stopped
+
+  # Storage Monitor (prevents drive crashes)
+  storage-monitor:
+    build: .
+    container_name: storage-monitor
+    environment:
+      - STORAGE_ALERT_THRESHOLD=80
+      - CLEANUP_THRESHOLD=90
+    volumes:
+      - aurora_db_data:/monitor/db_data:ro
+      - aurora_app_data:/monitor/app_data:ro
+      - aurora_logs:/monitor/logs:ro
+    restart: unless-stopped
+    command: ["python3", "/app/scripts/storage_monitor.py"]
+
+volumes:
+  aurora_db_data:
+    driver: local
+  aurora_app_data:
+    driver: local
+  aurora_redis_data:
+    driver: local
+  aurora_frontend_data:
+    driver: local
+  aurora_logs:
+    driver: local
+
+networks:
+  default:
+    name: aurora-network

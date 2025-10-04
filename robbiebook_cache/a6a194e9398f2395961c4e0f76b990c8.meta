@@ -1,0 +1,13 @@
+{
+  "url": "http://localhost:8000/health",
+  "timestamp": 1758609838.8789198,
+  "status_code": 200,
+  "headers": {
+    "Date": "Tue, 23 Sep 2025 06:43:58 GMT",
+    "Server": "uvicorn",
+    "Content-Length": "71",
+    "Content-Type": "application/json"
+  },
+  "size": 71,
+  "compressed": false
+}

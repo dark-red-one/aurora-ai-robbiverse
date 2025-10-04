@@ -1,0 +1,53 @@
+# Aurora-Town Control Plane Dependencies
+
+# Database
+psycopg2-binary==2.9.10
+redis==5.0.1
+sqlalchemy==2.0.23
+
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+jinja2==3.1.2
+python-multipart==0.0.6
+
+# HTTP Client
+httpx==0.25.2
+requests==2.31.0
+
+# Configuration
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# Monitoring
+prometheus-client==0.19.0
+psutil==5.9.6
+
+# Logging
+structlog==23.2.0
+
+# Task Queue
+celery==5.3.4
+kombu==5.3.4
+
+# Security
+cryptography==41.0.8
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# AWS/S3
+boto3==1.34.0
+botocore==1.34.0
+
+# Utilities
+click==8.1.7
+rich==13.7.0
+typer==0.9.0
+schedule==1.2.0
+
+# Development
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
+flake8==6.1.0

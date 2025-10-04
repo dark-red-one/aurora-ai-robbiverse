@@ -1,0 +1,35 @@
+{
+    "storage_nodes": {
+        "aurora": {
+            "host": "localhost",
+            "port": 8000,
+            "capacity_gb": 20,
+            "role": "primary",
+            "replication_factor": 3
+        },
+        "collaboration": {
+            "host": "collaboration.runpod.io",
+            "port": 8000,
+            "capacity_gb": 20,
+            "role": "replica",
+            "replication_factor": 3
+        },
+        "fluenti": {
+            "host": "fluenti.runpod.io",
+            "port": 8000,
+            "capacity_gb": 20,
+            "role": "model_storage",
+            "replication_factor": 2
+        },
+        "vengeance": {
+            "host": "vengeance.runpod.io",
+            "port": 8000,
+            "capacity_gb": 20,
+            "role": "backup",
+            "replication_factor": 1
+        }
+    },
+    "total_capacity_gb": 80,
+    "redundancy_level": "high",
+    "fault_tolerance": "enabled"
+}

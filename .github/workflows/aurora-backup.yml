@@ -1,0 +1,67 @@
+name: 💾 Aurora Data Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Daily at 3 AM
+  workflow_dispatch:
+
+jobs:
+  backup-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🏗️ Checkout Aurora Code
+      uses: actions/checkout@v4
+
+    - name: 💾 Backup Aurora Database
+      run: |
+        echo "💾 Backing up Aurora database..."
+        
+        # Create backup directory
+        mkdir -p backups/$(date +%Y%m%d)
+        
+        # Backup from each RunPod
+        for runpod in aurora collaboration fluenti; do
+          echo "📦 Backing up $runpod database..."
+          
+          # Get connection details
+          case $runpod in
+            aurora)
+              HOST="82.221.170.242"
+              PORT="24505"
+              ;;
+            collaboration)
+              HOST="213.181.111.2"
+              PORT="43540"
+              ;;
+            fluenti)
+              HOST="103.196.86.56"
+              PORT="19777"
+              ;;
+          esac
+          
+          # Create database backup
+          ssh -p $PORT -o StrictHostKeyChecking=no root@$HOST << EOF
+            docker exec aurora-database pg_dump -U robbie -d aurora > /tmp/aurora_backup_$(date +%Y%m%d_%H%M%S).sql
+          EOF
+          
+          # Download backup
+          scp -P $PORT -o StrictHostKeyChecking=no \
+            root@$HOST:/tmp/aurora_backup_$(date +%Y%m%d_%H%M%S).sql \
+            backups/$(date +%Y%m%d)/${runpod}_backup.sql
+        done
+
+    - name: 📤 Upload to GitHub Releases
+      uses: actions/upload-artifact@v3
+      with:
+        name: aurora-backup-$(date +%Y%m%d)
+        path: backups/
+        retention-days: 30
+
+    - name: 🗑️ Cleanup Old Backups
+      run: |
+        echo "🗑️ Cleaning up backups older than 30 days..."
+        find backups/ -type d -mtime +30 -exec rm -rf {} + || true
+
+
+

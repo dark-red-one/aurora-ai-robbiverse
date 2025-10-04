@@ -1,0 +1,283 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "Your personal AI business assistant",
+          "examplePhrases": [
+            "Alexa, ask Robbie about my deal pipeline",
+            "Alexa, ask Robbie for today's calendar",
+            "Alexa, ask Robbie who's at the door"
+          ],
+          "keywords": [
+            "business",
+            "assistant", 
+            "AI",
+            "calendar",
+            "deals",
+            "CRM",
+            "productivity"
+          ],
+          "name": "Robbie Business Assistant",
+          "description": "Robbie is your AI-powered business assistant that connects to your CRM, calendar, email, and smart home devices. Get real-time business intelligence, manage your schedule, and control your environment with natural voice commands.",
+          "largeIconUri": "https://aurora-town.robbieverse.com/assets/robbie-icon-512.png",
+          "smallIconUri": "https://aurora-town.robbieverse.com/assets/robbie-icon-108.png"
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "Say 'Alexa, ask Robbie about my deals' to test business intelligence integration.",
+      "category": "BUSINESS_AND_FINANCE",
+      "distributionCountries": ["US"]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "arn:aws:lambda:us-east-1:YOUR_ACCOUNT:function:RobbieSkillHandler"
+        },
+        "interfaces": [
+          {
+            "type": "ALEXA_PRESENTATION_APL"
+          }
+        ],
+        "regions": {
+          "NA": {
+            "endpoint": {
+              "uri": "arn:aws:lambda:us-east-1:YOUR_ACCOUNT:function:RobbieSkillHandler"
+            }
+          }
+        }
+      }
+    },
+    "manifestVersion": "1.0",
+    "permissions": [
+      {
+        "name": "alexa::devices:all:address:full:read"
+      },
+      {
+        "name": "alexa::profile:email:read"
+      },
+      {
+        "name": "alexa::profile:name:read"
+      }
+    ]
+  },
+  "interactionModels": {
+    "en-US": {
+      "languageModel": {
+        "invocationName": "robbie",
+        "intents": [
+          {
+            "name": "RobbieCommandIntent",
+            "slots": [
+              {
+                "name": "command",
+                "type": "AMAZON.SearchQuery"
+              }
+            ],
+            "samples": [
+              "ask {command}",
+              "tell me {command}",
+              "what's {command}",
+              "show me {command}",
+              "{command}"
+            ]
+          },
+          {
+            "name": "DealPipelineIntent",
+            "samples": [
+              "what's my deal pipeline",
+              "show my deals", 
+              "deal status",
+              "pipeline update",
+              "how are my deals",
+              "show revenue"
+            ]
+          },
+          {
+            "name": "CalendarIntent",
+            "samples": [
+              "what's my schedule",
+              "show my calendar",
+              "what meetings do I have",
+              "what's next on my calendar",
+              "today's schedule",
+              "calendar for today"
+            ]
+          },
+          {
+            "name": "EmailIntent", 
+            "samples": [
+              "check my email",
+              "any urgent emails",
+              "priority messages",
+              "email summary",
+              "what emails came in",
+              "inbox status"
+            ]
+          },
+          {
+            "name": "MeetingPrepIntent",
+            "samples": [
+              "prepare for my next meeting",
+              "meeting prep",
+              "brief me on my next meeting",
+              "what's my next meeting about",
+              "meeting preparation"
+            ]
+          },
+          {
+            "name": "ContactLookupIntent",
+            "slots": [
+              {
+                "name": "name",
+                "type": "AMAZON.Person"
+              }
+            ],
+            "samples": [
+              "lookup {name}",
+              "who is {name}",
+              "tell me about {name}",
+              "find contact {name}",
+              "search for {name}"
+            ]
+          },
+          {
+            "name": "SecurityIntent",
+            "slots": [
+              {
+                "name": "command",
+                "type": "SecurityCommand"
+              }
+            ],
+            "samples": [
+              "who's at the door",
+              "show front camera",
+              "check security",
+              "show all cameras",
+              "security status",
+              "lock the door",
+              "unlock the door"
+            ]
+          },
+          {
+            "name": "SmartHomeIntent",
+            "slots": [
+              {
+                "name": "action",
+                "type": "SmartHomeAction"
+              },
+              {
+                "name": "device", 
+                "type": "SmartHomeDevice"
+              }
+            ],
+            "samples": [
+              "{action} {device}",
+              "{action} the {device}",
+              "turn {action} {device}",
+              "set {device} to {action}"
+            ]
+          },
+          {
+            "name": "AMAZON.CancelIntent",
+            "samples": []
+          },
+          {
+            "name": "AMAZON.HelpIntent", 
+            "samples": []
+          },
+          {
+            "name": "AMAZON.StopIntent",
+            "samples": []
+          },
+          {
+            "name": "AMAZON.NavigateHomeIntent",
+            "samples": []
+          }
+        ],
+        "types": [
+          {
+            "name": "SecurityCommand",
+            "values": [
+              {
+                "name": {
+                  "value": "show cameras"
+                }
+              },
+              {
+                "name": {
+                  "value": "check door"
+                }
+              },
+              {
+                "name": {
+                  "value": "security status"
+                }
+              },
+              {
+                "name": {
+                  "value": "lock door"
+                }
+              },
+              {
+                "name": {
+                  "value": "unlock door"
+                }
+              }
+            ]
+          },
+          {
+            "name": "SmartHomeAction",
+            "values": [
+              {
+                "name": {
+                  "value": "on"
+                }
+              },
+              {
+                "name": {
+                  "value": "off"
+                }
+              },
+              {
+                "name": {
+                  "value": "dim"
+                }
+              },
+              {
+                "name": {
+                  "value": "brighten"
+                }
+              }
+            ]
+          },
+          {
+            "name": "SmartHomeDevice", 
+            "values": [
+              {
+                "name": {
+                  "value": "lights"
+                }
+              },
+              {
+                "name": {
+                  "value": "office lights"
+                }
+              },
+              {
+                "name": {
+                  "value": "thermostat"
+                }
+              },
+              {
+                "name": {
+                  "value": "fan"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

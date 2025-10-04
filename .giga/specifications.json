@@ -1,0 +1,22 @@
+[
+  {
+    "fileName": "main-overview.mdc",
+    "description": "Complete system overview covering the dual-AI architecture (Robbie/Gatekeeper), GPU mesh distribution system, and core business components including memory management and personality systems"
+  },
+  {
+    "fileName": "ai-personality-system.mdc",
+    "description": "Detailed documentation of the personality isolation system, contextual modes (business/flirty), and dynamic personality switching algorithms including the Gandhi-Genghis intensity control system"
+  },
+  {
+    "fileName": "risk-assessment-model.mdc",
+    "description": "Documentation of the comprehensive risk assessment system including weighted scoring across reputational, financial, temporal, and personal dimensions with real-time monitoring cycles"
+  },
+  {
+    "fileName": "gpu-mesh-architecture.mdc",
+    "description": "Technical details of the distributed GPU processing system including workload distribution algorithms, node health monitoring, and automatic failover mechanisms"
+  },
+  {
+    "fileName": "memory-persistence-model.mdc",
+    "description": "Documentation of the vector-based memory system, context retrieval algorithms, and cross-device synchronization including the comprehensive dossier system"
+  }
+]

@@ -1,0 +1,184 @@
+name: Deploy Aurora-Town
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'app/**'
+      - 'docker/aurora-town/**'
+      - '.github/workflows/deploy-aurora-town.yml'
+  
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: testpilot/aurora-town
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        pip install -r docker/aurora-town/requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=app --cov-report=xml
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+
+  build-image:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/aurora-town/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    needs: build-image
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Elestio Aurora-Town (Staging)
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.ELESTIO_AURORA_HOST }}
+        username: ${{ secrets.ELESTIO_USERNAME }}
+        key: ${{ secrets.ELESTIO_SSH_KEY }}
+        port: ${{ secrets.ELESTIO_SSH_PORT }}
+        script: |
+          cd /opt/aurora-town
+          
+          # Pull latest code
+          git pull origin develop
+          
+          # Update environment
+          echo "DOCKER_IMAGE=${{ needs.build-image.outputs.image-tag }}" > .env.deploy
+          
+          # Deploy with Docker Compose
+          docker-compose -f docker/aurora-town/docker-compose.yml pull
+          docker-compose -f docker/aurora-town/docker-compose.yml up -d
+          
+          # Health check
+          sleep 30
+          curl -f http://localhost:3000/health || exit 1
+          
+          # Cleanup old images
+          docker image prune -f
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    needs: build-image
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Elestio Aurora-Town (Production)
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.ELESTIO_AURORA_PROD_HOST }}
+        username: ${{ secrets.ELESTIO_USERNAME }}
+        key: ${{ secrets.ELESTIO_SSH_KEY }}
+        port: ${{ secrets.ELESTIO_SSH_PORT }}
+        script: |
+          cd /opt/aurora-town
+          
+          # Pull latest code
+          git pull origin main
+          
+          # Update environment
+          echo "DOCKER_IMAGE=${{ needs.build-image.outputs.image-tag }}" > .env.deploy
+          
+          # Deploy with Docker Compose
+          docker-compose -f docker/aurora-town/docker-compose.yml pull
+          docker-compose -f docker/aurora-town/docker-compose.yml up -d
+          
+          # Health check
+          sleep 30
+          curl -f http://localhost:3000/health || exit 1
+          
+          # Cleanup old images
+          docker image prune -f
+
+  notify:
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Notify Slack
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#aurora-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow

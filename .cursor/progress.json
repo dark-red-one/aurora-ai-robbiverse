@@ -1,0 +1,52 @@
+{
+  "status": "initialized",
+  "timestamp": "2025-09-20T03:30:00Z",
+  "widgets": {
+    "completed": [],
+    "in_progress": null,
+    "queue": [
+      "vista-hero",
+      "chat-widget", 
+      "specsheet",
+      "smart-cart",
+      "sentinel-gate",
+      "doc-prism",
+      "spotlight",
+      "reviews",
+      "subscribe",
+      "lightwell",
+      "beacon-tiles",
+      "funnel-flow",
+      "talentverse-grid",
+      "facet-forge",
+      "roi-calculator",
+      "pricing-table",
+      "stripe-portal",
+      "comparison-table",
+      "workflow-runner",
+      "prompt-console"
+    ]
+  },
+  "sites": {
+    "askrobbie": { "status": "pending", "widgets_needed": ["vista-hero", "chat-widget", "specsheet", "pricing-table"] },
+    "robbieblocks": { "status": "pending", "widgets_needed": ["vista-hero", "talentverse-grid", "facet-forge"] },
+    "leadershipquotes": { "status": "pending", "widgets_needed": ["spotlight", "subscribe", "reviews"] },
+    "testpilot": { "status": "pending", "widgets_needed": ["vista-hero", "specsheet", "roi-calculator"] },
+    "heyshopper": { "status": "pending", "widgets_needed": ["spotlight", "smart-cart", "comparison-table"] }
+  },
+  "engines": {
+    "llm": { "status": "pending", "endpoint": "ws://localhost:8001/llm" },
+    "pricing": { "status": "pending", "endpoint": "/api/v1/pricing" },
+    "workflow": { "status": "pending", "endpoint": "/api/v1/workflows" },
+    "stripe": { "status": "pending", "endpoint": "stripe-api" },
+    "analytics": { "status": "pending", "endpoint": "/api/v1/analytics" }
+  },
+  "metrics": {
+    "widgets_completed": 0,
+    "widgets_total": 20,
+    "sites_assembled": 0,
+    "sites_total": 5,
+    "build_success_rate": 0,
+    "last_activity": "2025-09-20T03:30:00Z"
+  }
+}

@@ -1,0 +1,320 @@
+# Aurora Complete Infrastructure - All Services
+# Multi-node deployment with monitoring, AI, and business intelligence
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector for AI
+  aurora-database:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-database
+    environment:
+      POSTGRES_DB: aurora
+      POSTGRES_USER: robbie
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - aurora_db_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/vector_setup.sql:/docker-entrypoint-initdb.d/02_vectors.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Qdrant Vector Database (Superior to pgvector for scale)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: aurora-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - aurora_qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+
+  # Redis Cluster for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: aurora-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - aurora_redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+
+  # Aurora Backend API
+  aurora-backend:
+    build: .
+    container_name: aurora-backend
+    environment:
+      - DATABASE_URL=postgresql://robbie:${DB_PASSWORD}@aurora-database:5432/aurora
+      - REDIS_URL=redis://redis:6379
+      - QDRANT_URL=http://qdrant:6333
+      - HUBSPOT_ACCESS_TOKEN=${HUBSPOT_ACCESS_TOKEN}
+      - GMAIL_CREDENTIALS=${GMAIL_CREDENTIALS}
+      - GCAL_CREDENTIALS=${GCAL_CREDENTIALS}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RUNPOD_NODE=${RUNPOD_NODE:-aurora}
+    volumes:
+      - aurora_app_data:/app/data
+      - aurora_logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+    depends_on:
+      - aurora-database
+      - redis
+      - qdrant
+    restart: unless-stopped
+
+  # Robbie Frontend
+  robbie-frontend:
+    build: .
+    container_name: robbie-frontend
+    environment:
+      - API_BASE_URL=http://aurora-backend:8000
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      - aurora-backend
+    restart: unless-stopped
+    command: ["npm", "start"]
+
+  # Ollama for Local LLMs
+  ollama:
+    image: ollama/ollama:latest
+    container_name: aurora-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - aurora_ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_GPU_LAYERS=999
+      - OLLAMA_FLASH_ATTENTION=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aurora-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - aurora_prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  # Grafana for beautiful dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aurora-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-aurora_admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - aurora_grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # Loki for log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: aurora-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - aurora_loki_data:/loki
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  # Apache Kafka for real-time data streaming
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: aurora-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - aurora_kafka_data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+
+  # Zookeeper for Kafka coordination
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: aurora-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - aurora_zookeeper_data:/var/lib/zookeeper/data
+    restart: unless-stopped
+
+  # MinIO for S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: aurora-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-aurora_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-aurora_secret_key}
+    volumes:
+      - aurora_minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  # Jupyter Lab for data science
+  jupyter:
+    image: jupyter/tensorflow-notebook:latest
+    container_name: aurora-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-aurora_jupyter}
+    volumes:
+      - aurora_jupyter_data:/home/jovyan/work
+      - aurora_app_data:/home/jovyan/aurora:ro
+    restart: unless-stopped
+
+  # Apache Airflow for data pipelines
+  airflow-webserver:
+    image: apache/airflow:2.7.1
+    container_name: aurora-airflow
+    ports:
+      - "8080:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://robbie:${DB_PASSWORD}@aurora-database:5432/aurora
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY}
+    volumes:
+      - aurora_airflow_data:/opt/airflow
+      - ./airflow/dags:/opt/airflow/dags
+    depends_on:
+      - aurora-database
+    restart: unless-stopped
+
+  # Nextcloud for file sharing
+  nextcloud:
+    image: nextcloud:latest
+    container_name: aurora-nextcloud
+    ports:
+      - "8081:80"
+    environment:
+      - POSTGRES_HOST=aurora-database
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=robbie
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - NEXTCLOUD_ADMIN_USER=allan
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_PASSWORD:-aurora_admin}
+    volumes:
+      - aurora_nextcloud_data:/var/www/html
+      - aurora_app_data:/var/www/html/data/shared:rw
+    depends_on:
+      - aurora-database
+    restart: unless-stopped
+
+  # WireGuard VPN for inter-node connectivity
+  wireguard:
+    image: linuxserver/wireguard:latest
+    container_name: aurora-wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - SERVERURL=${RUNPOD_PUBLIC_IP}
+      - SERVERPORT=51820
+      - PEERS=aurora,collaboration,fluenti
+      - PEERDNS=auto
+    volumes:
+      - aurora_wireguard_data:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - "51820:51820/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: aurora-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+
+volumes:
+  aurora_db_data:
+  aurora_redis_data:
+  aurora_qdrant_data:
+  aurora_app_data:
+  aurora_logs:
+  aurora_grafana_data:
+  aurora_prometheus_data:
+  aurora_loki_data:
+  aurora_kafka_data:
+  aurora_zookeeper_data:
+  aurora_minio_data:
+  aurora_jupyter_data:
+  aurora_airflow_data:
+  aurora_nextcloud_data:
+  aurora_wireguard_data:
+  aurora_ollama_data:
+
+networks:
+  aurora-network:
+    driver: bridge

@@ -1,0 +1,131 @@
+# Aurora AI Empire - Development Environment
+# Optimized for local development with hot reloading
+version: '3.8'
+
+services:
+  # PostgreSQL Database with pgvector (Development)
+  aurora-database:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-db-dev
+    environment:
+      POSTGRES_DB: aurora_dev
+      POSTGRES_USER: robbie
+      POSTGRES_PASSWORD: dev_password_123
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - aurora_db_dev_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./database/dev_data.sql:/docker-entrypoint-initdb.d/dev_data.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    command: postgres -c log_statement=all -c log_destination=stderr
+
+  # Redis for caching (Development)
+  aurora-redis:
+    image: redis:7-alpine
+    container_name: aurora-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - aurora_redis_dev_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes --loglevel debug
+
+  # Aurora Backend (FastAPI) - Development with hot reload
+  aurora-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: aurora-backend-dev
+    environment:
+      - DATABASE_URL=postgresql://robbie:dev_password_123@aurora-database:5432/aurora_dev
+      - REDIS_URL=redis://aurora-redis:6379
+      - NODE_ENV=development
+      - RUNPOD_NODE=local-dev
+      - AURORA_ROLE=development
+      - DEBUG=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./backend:/app/backend
+      - ./src:/app/src
+      - ./data:/app/data
+      - aurora_logs_dev:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Debug port
+    depends_on:
+      aurora-database:
+        condition: service_healthy
+      aurora-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]
+
+  # Robbie Frontend (Node.js) - Development with hot reload
+  robbie-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: robbie-frontend-dev
+    environment:
+      - API_BASE_URL=http://localhost:8000
+      - REDIS_URL=redis://aurora-redis:6379
+      - NODE_ENV=development
+      - RUNPOD_NODE=local-dev
+      - DEBUG=true
+    volumes:
+      - ./src:/app/src
+      - ./frontend:/app/frontend
+      - aurora_frontend_dev_data:/app/frontend
+    ports:
+      - "3000:3000"
+      - "3001:3001"  # Debug port
+    depends_on:
+      - aurora-backend
+    restart: unless-stopped
+    command: ["npm", "run", "dev"]
+
+  # Development Tools
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: aurora-dev-tools
+    volumes:
+      - ./:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspace
+    command: ["tail", "-f", "/dev/null"]
+    profiles: ["tools"]
+
+  # Database Admin (pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: aurora-pgadmin-dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: robbie@aurora.ai
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - aurora-database
+    profiles: ["tools"]
+
+volumes:
+  aurora_db_dev_data:
+    driver: local
+  aurora_redis_dev_data:
+    driver: local
+  aurora_frontend_dev_data:
+    driver: local
+  aurora_logs_dev:
+    driver: local
+
+networks:
+  default:
+    name: aurora-dev-network
+
+
+

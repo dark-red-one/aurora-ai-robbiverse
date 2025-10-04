@@ -1,0 +1,26 @@
+{
+    "aws_s3": {
+        "bucket": "aurora-ai-models",
+        "region": "us-west-2",
+        "access_key": "YOUR_ACCESS_KEY",
+        "secret_key": "YOUR_SECRET_KEY",
+        "use_for": ["ai_models", "large_datasets"]
+    },
+    "google_cloud": {
+        "bucket": "aurora-ai-data",
+        "project_id": "aurora-ai-empire",
+        "credentials_file": "/workspace/aurora/gcp-credentials.json",
+        "use_for": ["training_data", "processed_datasets"]
+    },
+    "azure_blob": {
+        "container": "aurora-backups",
+        "account_name": "auroraaiempire",
+        "account_key": "YOUR_ACCOUNT_KEY",
+        "use_for": ["backups", "archives"]
+    },
+    "local_cache": {
+        "cache_size_gb": 10,
+        "cache_directory": "/workspace/aurora/cache",
+        "eviction_policy": "lru"
+    }
+}

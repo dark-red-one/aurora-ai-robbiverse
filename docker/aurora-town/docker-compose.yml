@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  aurora-town:
+    build: 
+      context: ../..
+      dockerfile: docker/aurora-town/Dockerfile
+    container_name: aurora-town
+    hostname: aurora-town
+    restart: unless-stopped
+    
+    environment:
+      - NODE_ENV=production
+      - CITY=aurora
+      - REGION=austin
+      - AURORA_DB_HOST=aurora-postgres-u44170.vm.elestio.app
+      - AURORA_DB_PORT=25432
+      - AURORA_DB_NAME=aurora_unified
+      - AURORA_DB_USER=aurora_app
+      - AURORA_DB_PASSWORD=TestPilot2025_Aurora!
+      - AURORA_DB_SSLMODE=require
+      - RUNPOD_GPU_HOST=209.170.80.132
+      - RUNPOD_GPU_PORT=8000
+      - S3_ENDPOINT=https://s3api-eur-is-1.runpod.io
+      - S3_BUCKET=bguoh9kd1g
+    
+    ports:
+      - "80:80"
+      - "443:443"
+      - "3000:3000"   # Main app
+      - "8080:8080"   # Admin panel
+      - "9090:9090"   # Prometheus
+      - "3001:3001"   # Grafana
+    
+    volumes:
+      - aurora_data:/app/data
+      - aurora_logs:/app/logs
+      - aurora_config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./ssl:/app/ssl:ro
+    
+    networks:
+      - aurora-network
+    
+    depends_on:
+      - redis
+      - prometheus
+      - grafana
+    
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aurora-town.rule=Host(`aurora-town.testpilot.ai`)"
+      - "traefik.http.routers.aurora-town.tls=true"
+      - "traefik.http.services.aurora-town.loadbalancer.server.port=3000"
+
+  redis:
+    image: redis:7-alpine
+    container_name: aurora-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass "TestPilot2025_Redis!"
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - aurora-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aurora-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - aurora-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aurora-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=TestPilot2025_Grafana!
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3001:3000"
+    networks:
+      - aurora-network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: aurora-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - aurora-network
+
+  traefik:
+    image: traefik:v3.0
+    container_name: aurora-traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=allan@testpilot.ai"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - aurora-network
+
+volumes:
+  aurora_data:
+  aurora_logs:
+  aurora_config:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  letsencrypt:
+
+networks:
+  aurora-network:
+    driver: bridge

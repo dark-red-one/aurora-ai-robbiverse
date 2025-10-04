@@ -1,0 +1,16 @@
+{
+  "url": "http://httpbin.org/status/200",
+  "timestamp": 1758610105.8087811,
+  "status_code": 200,
+  "headers": {
+    "Date": "Tue, 23 Sep 2025 06:48:25 GMT",
+    "Content-Type": "text/html; charset=utf-8",
+    "Content-Length": "0",
+    "Connection": "keep-alive",
+    "Server": "gunicorn/19.9.0",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Credentials": "true"
+  },
+  "size": 0,
+  "compressed": false
+}

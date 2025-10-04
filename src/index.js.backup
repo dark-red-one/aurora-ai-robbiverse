@@ -1,0 +1,1042 @@
+import Fastify from "fastify";
+import os from "os";
+import { fetch } from "undici";
+import { db, initializeSchema } from "./db.js";
+import { registerBanishmentRoutes } from "./banishmentRoutes.js";
+import { startScheduler } from "./scheduler.js";
+import { registerLLMRoutes } from "./llmRoutes.js";
+import { registerGovernanceRoutes } from "./routesGovernance.js";
+import { registerQuotesRoutes } from "./routesQuotes.js";
+import { registerCharacterRoutes } from "./routesCharacters.js";
+import { registerAnalyticsRoutes } from "./analyticsDashboard.js";
+import { bbsInterface } from "./bbsInterface.js";
+import { directGPU } from "./directGPU.js";
+import { workTracker } from "./workTracker.js";
+import { characterFilter } from "./characterFilter.js";
+import { credentialsManager } from "./credentials.js";
+
+const app = Fastify({ logger: true });
+
+// Minimal access logger to verify Cursor hits Vengeance
+app.addHook('onResponse', async (request, reply) => {
+  try {
+    const ua = request.headers['user-agent'] || '';
+    db.prepare('INSERT INTO proxy_access (method, path, user_agent, status) VALUES (?,?,?,?)')
+      .run(request.method, request.url, ua, reply.statusCode || 0);
+  } catch {}
+});
+
+app.get("/health", async () => ({ status: "ok", host: os.hostname(), time: new Date().toISOString() }));
+
+// BBS Interface Route
+app.get('/', async (request, reply) => {
+  const html = bbsInterface.generateInterface();
+  reply.headers({ 'content-type': 'text/html; charset=utf-8' }).send(html);
+});
+
+// Legacy terminal interface
+app.get('/terminal', async (request, reply) => {
+  const html = `<!doctype html>
+<html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vengeance Terminal</title>
+<style>
+/* Cursor + Databox Hybrid Aesthetic */
+:root {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-tertiary: #2d2d30;
+  --border: #3c3c3c;
+  --border-light: #464647;
+  --text-primary: #cccccc;
+  --text-secondary: #969696;
+  --text-accent: #4fc1ff;
+  --accent: #007acc;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { 
+  font-family: var(--font-ui); 
+  background: var(--bg-primary); 
+  color: var(--text-primary); 
+  margin: 0; 
+  padding: 0; 
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* Cursor-style layout */
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--bg-tertiary);
+  color: var(--text-accent);
+  border-right: 2px solid var(--accent);
+}
+
+.nav-item-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+
+.toolbar {
+  height: 40px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Terminal Panel */
+.terminal {
+  flex: 1;
+  background: var(--bg-primary);
+  padding: 16px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.terminal-line {
+  margin: 2px 0;
+  white-space: pre-wrap;
+}
+
+.terminal-prompt { color: var(--text-accent); }
+.terminal-user { color: var(--accent); }
+.terminal-ai { color: var(--text-primary); }
+.terminal-system { color: var(--warning); }
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  margin-left: 8px;
+}
+
+/* Databox-style Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.card:hover {
+  border-color: var(--border-light);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-accent);
+  font-family: var(--font-mono);
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Approval Queue */
+.approval-queue {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.approval-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.approval-item:hover {
+  border-color: var(--border-light);
+}
+
+.approval-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.approval-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.approval-type {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.approval-content {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 8px 0;
+}
+
+.approval-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: var(--bg-primary);
+  border-color: var(--border-light);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-success {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--error);
+  border-color: var(--error);
+  color: white;
+}
+
+/* Notes */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.note {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.note:hover {
+  border-color: var(--border-light);
+}
+
+.note-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.note-content {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+/* Status indicators */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-online { background: var(--success); }
+.status-offline { background: var(--error); }
+.status-pending { background: var(--warning); }
+</style>
+</head><body>
+<div class="layout">
+  <!-- Cursor-style Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span class="status-indicator status-online"></span>
+      VENGEANCE
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="switchTab('terminal')">
+        <div class="nav-item-icon">💬</div>
+        Terminal
+      </div>
+      <div class="nav-item" onclick="switchTab('dashboard')">
+        <div class="nav-item-icon">📊</div>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="switchTab('approval')">
+        <div class="nav-item-icon">✅</div>
+        Approval Queue
+      </div>
+      <div class="nav-item" onclick="switchTab('notes')">
+        <div class="nav-item-icon">📝</div>
+        Notes
+      </div>
+      <div class="nav-item" onclick="switchTab('preferences')">
+        <div class="nav-item-icon">⚙️</div>
+        Preferences
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <div class="toolbar">
+      <span id="toolbar-status">Ready</span>
+      <div style="margin-left: auto;">
+        <span class="status-indicator status-online"></span>
+        <span>GPU: Active</span>
+      </div>
+    </div>
+    
+    <div class="content-area">
+      <!-- Terminal Panel -->
+      <div class="panel active" id="terminal-panel">
+        <div class="terminal" id="terminal">
+          <div class="terminal-line terminal-system">Vengeance Terminal v1.0 - AI + Data + Unfair Advantage</div>
+          <div class="terminal-line terminal-system">Type your message and press ENTER to chat with Robbie...</div>
+          <div class="terminal-line terminal-system">Commands: /help, /clear, /status, /models</div>
+          <div class="terminal-line terminal-system">──────────────────────────────────────────────────────────────</div>
+          <div id="chat"></div>
+          <div class="terminal-line terminal-prompt">ROBBIE> <input type="text" class="terminal-input" id="input" placeholder="Enter message..."></div>
+        </div>
+      </div>
+
+      <!-- Dashboard Panel -->
+      <div class="panel" id="dashboard-panel">
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">LLM Usage</div>
+            </div>
+            <div class="card-value" id="llm-tokens">0</div>
+            <div class="card-subtitle">Tokens processed today</div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Approval Queue</div>
+            </div>
+            <div class="card-value" id="approval-count">0</div>
+            <div class="card-subtitle">Items pending review</div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Notes</div>
+            </div>
+            <div class="card-value" id="notes-count">0</div>
+            <div class="card-subtitle">Active notes</div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Git Sync</div>
+            </div>
+            <div class="card-value" id="git-commits">0</div>
+            <div class="card-subtitle">Commits synced today</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval Panel -->
+      <div class="panel" id="approval-panel">
+        <div class="approval-queue">
+          <div id="approval-queue"></div>
+        </div>
+      </div>
+
+      <!-- Notes Panel -->
+      <div class="panel" id="notes-panel">
+        <div class="notes-grid">
+          <div id="notes-list"></div>
+        </div>
+      </div>
+
+      <!-- Preferences Panel -->
+      <div class="panel" id="preferences-panel">
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Allan's Likes</div>
+            </div>
+            <div id="likes-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Allan's Dislikes</div>
+            </div>
+            <div id="dislikes-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const terminal = document.getElementById('terminal');
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+
+function addMessage(content, type = 'system') {
+  const div = document.createElement('div');
+  div.className = type;
+  div.textContent = content;
+  chat.appendChild(div);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function sendMessage() {
+  const message = input.value.trim();
+  if (!message) return;
+  
+  addMessage('ROBBIE> ' + message, 'user');
+  input.value = '';
+  
+  if (message.startsWith('/')) {
+    handleCommand(message);
+    return;
+  }
+  
+  addMessage('Thinking...', 'system');
+  
+  fetch('/llm/chat/stream', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: message }] })
+  }).then(res => {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let response = '';
+    
+    function read() {
+      reader.read().then(({ value, done }) => {
+        if (done) return;
+        const chunk = decoder.decode(value, { stream: true });
+        response += chunk;
+        addMessage('ROBBIE: ' + response, 'ai');
+        read();
+      });
+    }
+    read();
+  }).catch(err => {
+    addMessage('ERROR: ' + err.message, 'system');
+  });
+}
+
+function handleCommand(cmd) {
+  switch(cmd) {
+    case '/help':
+      addMessage('Commands: /help, /clear, /status, /models', 'system');
+      break;
+    case '/clear':
+      chat.innerHTML = '';
+      break;
+    case '/status':
+      fetch('/health').then(r => r.json()).then(d => addMessage('Status: ' + JSON.stringify(d), 'system'));
+      break;
+    case '/models':
+      fetch('/llm/models').then(r => r.json()).then(d => addMessage('Models: ' + JSON.stringify(d.data?.map(m => m.id) || []), 'system'));
+      break;
+    default:
+      addMessage('Unknown command: ' + cmd, 'system');
+  }
+}
+
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+  
+  if (item.type === 'copy') {
+    addMessage('CONTENT:', 'system');
+    addMessage(item.content, 'ai');
+    addMessage('─'.repeat(60), 'system');
+    addMessage('Commands: /approve, /reject, /edit "new text", /next, /prev', 'system');
+  } else if (item.type === 'image') {
+    addMessage('IMAGE: ' + item.filename, 'system');
+    addMessage('Note: Images cannot be viewed in terminal. SSH to review.', 'system');
+    addMessage('Commands: /approve, /reject, /next, /prev', 'system');
+  }
+}
+
+function addApprovalItem(type, title, content, filename = null) {
+  const item = {
+    id: Date.now(),
+    type,
+    title,
+    content,
+    filename,
+    status: 'pending',
+    created: new Date().toISOString()
+  };
+  approvalQueue.push(item);
+  addMessage(`Added to approval queue: ${type.toUpperCase()} - ${title}`, 'system');
+}
+
+function handleApprovalCommand(cmd) {
+  if (approvalQueue.length === 0) {
+    addMessage('No items in approval queue.', 'system');
+    return;
+  }
+  
+  const item = approvalQueue[currentItem];
+  
+  if (cmd === '/approve') {
+    item.status = 'approved';
+    addMessage(`✅ APPROVED: ${item.title}`, 'system');
+    nextItem();
+  } else if (cmd === '/reject') {
+    item.status = 'rejected';
+    addMessage(`❌ REJECTED: ${item.title}`, 'system');
+    nextItem();
+  } else if (cmd.startsWith('/edit ')) {
+    if (item.type === 'copy') {
+      const newText = cmd.substring(6);
+      item.content = newText;
+      addMessage(`📝 EDITED: ${item.title}`, 'system');
+      addMessage('New content: ' + newText, 'ai');
+    } else {
+      addMessage('Cannot edit images in terminal.', 'system');
+    }
+  } else if (cmd === '/next') {
+    nextItem();
+  } else if (cmd === '/prev') {
+    prevItem();
+  }
+}
+
+function nextItem() {
+  currentItem = (currentItem + 1) % approvalQueue.length;
+  showApprovalQueue();
+}
+
+function prevItem() {
+  currentItem = currentItem === 0 ? approvalQueue.length - 1 : currentItem - 1;
+  showApprovalQueue();
+}
+
+// Add approval commands to help
+const originalHandleCommand = handleCommand;
+handleCommand = function(cmd) {
+  if (cmd.startsWith('/additem ')) {
+    const parts = cmd.split(' ', 4);
+    if (parts.length >= 4) {
+      addApprovalItem(parts[1], parts[2], parts[3]);
+    } else {
+      addMessage('Usage: /additem copy "Title" "Content"', 'system');
+    }
+  } else if (['/approve', '/reject', '/next', '/prev'].includes(cmd) || cmd.startsWith('/edit ')) {
+    handleApprovalCommand(cmd);
+  } else {
+    originalHandleCommand(cmd);
+  }
+};
+
+// Tab switching
+function switchTab(tabName) {
+  // Hide all panels
+  document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  
+  // Show selected panel
+  document.getElementById(tabName + '-panel').classList.add('active');
+  document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+  
+  // Load content for specific tabs
+  if (tabName === 'approval') {
+    loadApprovalQueue();
+  } else if (tabName === 'notes') {
+    loadNotes();
+  } else if (tabName === 'dashboard') {
+    loadDashboard();
+  } else if (tabName === 'preferences') {
+    loadPreferences();
+  }
+}
+
+// Notes system
+let notes = [];
+
+function loadNotes() {
+  const notesList = document.getElementById('notes-list');
+  if (notes.length === 0) {
+    notesList.innerHTML = '<div class="card"><div class="card-title">No notes yet</div><div class="card-subtitle">Add a note to get started</div></div>';
+    return;
+  }
+  
+  notesList.innerHTML = notes.map(note => `
+    <div class="note">
+      <div class="note-title">${note.title}</div>
+      <div class="note-content">${note.content}</div>
+      <div class="approval-actions">
+        <button class="btn" onclick="editNote(${note.id})">Edit</button>
+        <button class="btn btn-danger" onclick="deleteNote(${note.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addNote() {
+  const title = document.getElementById('note-title').value.trim();
+  if (!title) return;
+  
+  const note = {
+    id: Date.now(),
+    title: title,
+    content: 'Click EDIT to add content...',
+    created: new Date().toISOString()
+  };
+  notes.push(note);
+  document.getElementById('note-title').value = '';
+  loadNotes();
+}
+
+function editNote(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  
+  const newContent = prompt('Edit note content:', note.content);
+  if (newContent !== null) {
+    note.content = newContent;
+    loadNotes();
+  }
+}
+
+function deleteNote(id) {
+  if (confirm('Delete this note?')) {
+    notes = notes.filter(n => n.id !== id);
+    loadNotes();
+  }
+}
+
+// Approval queue display
+function loadApprovalQueue() {
+  const queue = document.getElementById('approval-queue');
+  if (approvalQueue.length === 0) {
+    queue.innerHTML = '<div class="system">No items in approval queue. Use /additem to add content for review.</div>';
+    return;
+  }
+  
+  queue.innerHTML = approvalQueue.map((item, index) => `
+    <div class="approval-item">
+      <div class="approval-header">[${index + 1}/${approvalQueue.length}] ${item.type.toUpperCase()} - ${item.title}</div>
+      <div class="approval-content">${item.type === 'copy' ? item.content : `Image: ${item.filename || 'No filename'}`}</div>
+      <div class="approval-actions">
+        <button onclick="approveItem(${item.id})">APPROVE</button>
+        <button onclick="rejectItem(${item.id})">REJECT</button>
+        ${item.type === 'copy' ? `<button onclick="editItem(${item.id})">EDIT</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function approveItem(id) {
+  const item = approvalQueue.find(i => i.id === id);
+  if (item) {
+    item.status = 'approved';
+    addMessage(`✅ APPROVED: ${item.title}`, 'system');
+    loadApprovalQueue();
+  }
+}
+
+function rejectItem(id) {
+  const item = approvalQueue.find(i => i.id === id);
+  if (item) {
+    item.status = 'rejected';
+    addMessage(`❌ REJECTED: ${item.title}`, 'system');
+    loadApprovalQueue();
+  }
+}
+
+function editItem(id) {
+  const item = approvalQueue.find(i => i.id === id);
+  if (item && item.type === 'copy') {
+    const newContent = prompt('Edit content:', item.content);
+    if (newContent !== null) {
+      item.content = newContent;
+      addMessage(`📝 EDITED: ${item.title}`, 'system');
+      loadApprovalQueue();
+    }
+  }
+}
+
+// Add some sample items for demo
+addApprovalItem('copy', 'LinkedIn Post - AI Insights', 'Another fun example of how AI transforms business...');
+addApprovalItem('copy', 'Email Campaign - TestPilot Launch', 'Subject: Your 72-hour test results are ready...');
+addApprovalItem('image', 'Blog Header - Data Visualization', '', 'data-viz-header.png');
+
+// Dashboard functions
+function loadDashboard() {
+  // Update dashboard metrics
+  document.getElementById('llm-tokens').textContent = '1,247';
+  document.getElementById('approval-count').textContent = approvalQueue.length;
+  document.getElementById('notes-count').textContent = notes.length;
+  document.getElementById('git-commits').textContent = '12';
+}
+
+// Preferences functions
+function loadPreferences() {
+  const likesList = document.getElementById('likes-list');
+  const dislikesList = document.getElementById('dislikes-list');
+  
+  const likes = [
+    'TEXT FIRST interface',
+    'Terminal aesthetic with AI superpowers',
+    'Visible progress and dopamine hits',
+    'One-click operations',
+    'Clean, organized code',
+    'Local GPU-first approach'
+  ];
+  
+  const dislikes = [
+    'Cluttered repositories',
+    'Silent work without feedback',
+    'Complex interfaces',
+    'Blocking prompts during live flow'
+  ];
+  
+  likesList.innerHTML = likes.map(like => `
+    <div style="padding: 8px; background: var(--bg-tertiary); margin: 4px 0; border-radius: 4px; font-size: 13px;">
+      ✅ ${like}
+    </div>
+  `).join('');
+  
+  dislikesList.innerHTML = dislikes.map(dislike => `
+    <div style="padding: 8px; background: var(--bg-tertiary); margin: 4px 0; border-radius: 4px; font-size: 13px;">
+      ❌ ${dislike}
+    </div>
+  `).join('');
+}
+
+// Add sample notes
+notes.push({
+  id: 1,
+  title: 'TestPilot Strategy',
+  content: 'Focus on 72-hour turnaround as key differentiator. Emphasize behavioral vs stated preferences.',
+  created: new Date().toISOString()
+});
+notes.push({
+  id: 2,
+  title: 'Robbie Development',
+  content: 'TEXT FIRST interface. Terminal aesthetic with AI superpowers. Keep it simple but powerful.',
+  created: new Date().toISOString()
+});
+</script>
+</body></html>`;
+  reply.headers({ 'content-type': 'text/html; charset=utf-8' }).send(html);
+});
+
+app.get("/models", async () => {
+  try {
+    const res = await fetch("http://localhost:4000/v1/models");
+    const data = await res.json();
+    return { source: "litellm", ...data };
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
+await registerBanishmentRoutes(app);
+await registerLLMRoutes(app);
+await registerGovernanceRoutes(app);
+await registerQuotesRoutes(app);
+await registerCharacterRoutes(app);
+await registerAnalyticsRoutes(app);
+
+// Initialize credentials and defaults
+await credentialsManager.initializeDefaults();
+
+// BBS Interface Routes
+app.post('/bbs/message', async (request, reply) => {
+  const { channel, username, message, messageType = 'text', metadata = {} } = request.body;
+  
+  try {
+    const result = bbsInterface.addMessage(channel, username, message, messageType, metadata);
+    
+    // Process hashtags
+    const hashtags = bbsInterface.processHashtags(message);
+    
+    return { success: true, messageId: result.id, hashtags };
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/bbs/messages/:channel', async (request, reply) => {
+  const { channel } = request.params;
+  const { limit = 50 } = request.query;
+  
+  try {
+    const messages = bbsInterface.getChannelMessages(channel, parseInt(limit));
+    return { messages };
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/bbs/hashtags/trending', async (request, reply) => {
+  const { limit = 10 } = request.query;
+  
+  try {
+    const hashtags = bbsInterface.getTrendingHashtags(parseInt(limit));
+    return { hashtags };
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+// Direct GPU Routes
+app.post('/gpu/generate', async (request, reply) => {
+  const { prompt, model = 'llama-maverick', temperature = 0.7, max_tokens = 1024 } = request.body;
+  
+  try {
+    const result = await directGPU.generateText(prompt, { model, temperature, max_tokens });
+    return result;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.post('/gpu/stream', async (request, reply) => {
+  const { prompt, model = 'llama-maverick', temperature = 0.7, max_tokens = 1024 } = request.body;
+  
+  try {
+    reply.headers({ 'Content-Type': 'text/plain' });
+    
+    await directGPU.generateTextStream(prompt, { model, temperature, max_tokens }, (chunk) => {
+      reply.raw.write(chunk);
+    });
+    
+    reply.raw.end();
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/gpu/models', async (request, reply) => {
+  try {
+    const models = await directGPU.getAvailableModels();
+    return { models };
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/gpu/stats', async (request, reply) => {
+  try {
+    const stats = await directGPU.getGPUStats();
+    return stats;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+// Work Tracker Routes
+app.post('/work/create', async (request, reply) => {
+  const { title, description, type, priority = 5, clientId = 'allan' } = request.body;
+  
+  try {
+    const result = await workTracker.createWorkItem({
+      title, description, type, priority, clientId
+    });
+    return result;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.post('/work/select-option', async (request, reply) => {
+  const { workItemId, optionId, feedback = '' } = request.body;
+  
+  try {
+    const result = await workTracker.selectOption(workItemId, optionId, feedback);
+    return result;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/work/queue', async (request, reply) => {
+  try {
+    const queue = workTracker.getWorkQueue();
+    return queue;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+// Character Filter Routes
+app.post('/character/assess', async (request, reply) => {
+  const { response, context = {} } = request.body;
+  
+  try {
+    const assessment = await characterFilter.assessCharacter(response, context);
+    return assessment;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+// Credentials Routes
+app.post('/credentials/store', async (request, reply) => {
+  const { service, credentialType, data, description, expiresAt } = request.body;
+  
+  try {
+    const result = await credentialsManager.storeCredentials(service, credentialType, data, description, expiresAt);
+    return result;
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/credentials/:service', async (request, reply) => {
+  const { service } = request.params;
+  const { credentialType } = request.query;
+  
+  try {
+    const credentials = await credentialsManager.getCredentials(service, credentialType);
+    return { credentials };
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+
+app.get('/api/endpoints', async (request, reply) => {
+  try {
+    const services = credentialsManager.listServices();
+    return { services };
+  } catch (error) {
+    return reply.status(500).send({ error: error.message });
+  }
+});
+initializeSchema();
+startScheduler(app.log);
+
+const port = process.env.PORT || 5055;
+app.listen({ port, host: "0.0.0.0" });
