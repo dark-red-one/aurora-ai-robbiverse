@@ -1,0 +1,20 @@
+{
+  "url": "http://clientservices.googleapis.com/chrome-variations/seed?osname=mac&channel=stable&milestone=140",
+  "timestamp": 1759551213.617333,
+  "status_code": 200,
+  "headers": {
+    "Content-Security-Policy": "sandbox allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-scripts allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation allow-top-navigation-to-custom-protocols",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Im": "gzip",
+    "X-Content-Type-Options": "nosniff",
+    "X-Country": "us",
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-Seed-Signature": "MEQCIEHaZ+Jj0atx2dDE+UAhXMSRFu3pmYr6hEyk4Mq1hoopAiAIpJdvTwUe2qTeg2xZqX5896P4ym9OmIMS9gMa9Ag2wA==",
+    "X-Xss-Protection": "0",
+    "Date": "Sat, 04 Oct 2025 04:13:33 GMT",
+    "Content-Type": "application/x-gzip",
+    "Transfer-Encoding": "chunked"
+  },
+  "size": 50914,
+  "compressed": true
+}

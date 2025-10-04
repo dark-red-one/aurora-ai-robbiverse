@@ -1,16 +1,16 @@
 {
-  "url": "http://httpbin.org/status/200",
-  "timestamp": 1759551449.942131,
+  "url": "http://httpbin.org/ip",
+  "timestamp": 1759551074.449902,
   "status_code": 200,
   "headers": {
-    "Date": "Sat, 04 Oct 2025 04:17:29 GMT",
-    "Content-Type": "text/html; charset=utf-8",
-    "Content-Length": "0",
+    "Date": "Sat, 04 Oct 2025 04:11:14 GMT",
+    "Content-Type": "application/json",
+    "Content-Length": "33",
     "Connection": "keep-alive",
     "Server": "gunicorn/19.9.0",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Credentials": "true"
   },
-  "size": 0,
+  "size": 33,
   "compressed": false
 }
