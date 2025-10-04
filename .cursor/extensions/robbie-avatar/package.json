@@ -28,7 +28,8 @@
       "robbie-sidebar": [
         {
           "id": "robbie-avatar-view",
-          "name": "Avatar & Status"
+          "name": "Avatar & Status",
+          "type": "webview"
         },
         {
           "id": "robbie-memory-view",
