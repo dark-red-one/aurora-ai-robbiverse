@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestPilot Chat MVP</title>
+    <link rel="stylesheet" href="/static/css/chat.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">TP</div>
+                <span class="logo-text">TestPilot</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-indicators">
+                <div class="status-item">
+                    <i class="fas fa-cloud"></i>
+                    <span>82°F</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>$735K/$1M (73%)</span>
+                </div>
+                <div class="status-dot"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-item active">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-sticky-note"></i>
+            <span>Notes</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-envelope"></i>
+            <span>Comms</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-tasks"></i>
+            <span>Tasks</span>
+            <div class="nav-badge">1</div>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-newspaper"></i>
+            <span>News</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be dynamically added here -->
+            </div>
+
+            <!-- Input Container -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+                    <button id="sendButton" class="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>INTEGRATIONS</h3>
+                <div class="integration-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Gmail</span>
+                    <div class="status-dot connected"></div>
+                </div>
+                <div class="integration-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Calendar</span>
+                    <div class="status-dot connected"></div>
+                </div>
+                <div class="integration-item">
+                    <i class="fas fa-microphone"></i>
+                    <span>Fireflies</span>
+                    <div class="status-dot connected"></div>
+                </div>
+                <div class="integration-item">
+                    <i class="fas fa-database"></i>
+                    <span>CRM</span>
+                    <div class="status-dot disconnected"></div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>DEAL PIPELINE</h3>
+                <div class="deal-item">
+                    <div class="deal-name">PepsiCo Clean Label</div>
+                    <div class="deal-value">$485K</div>
+                    <div class="deal-probability">78%</div>
+                </div>
+                <div class="deal-item">
+                    <div class="deal-name">Wondercide Extension</div>
+                    <div class="deal-value">$125K</div>
+                    <div class="deal-probability">90%</div>
+                </div>
+                <div class="deal-item">
+                    <div class="deal-name">FreshBrand Discovery</div>
+                    <div class="deal-value">$125K</div>
+                    <div class="deal-probability">45%</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>PRIORITY TASKS</h3>
+                <div class="task-item">
+                    <i class="fas fa-circle"></i>
+                    <span>Close PepsiCo deal</span>
+                </div>
+                <div class="task-item">
+                    <i class="fas fa-circle"></i>
+                    <span>Wondercide presentation</span>
+                </div>
+                <div class="task-item">
+                    <i class="fas fa-circle"></i>
+                    <span>FreshBrand follow-up</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Status -->
+    <footer class="footer">
+        <div class="footer-status">
+            <span class="demo-mode">Demo Mode</span>
+            <span class="api-status">WebSocket: <span id="wsStatus">disconnected</span> | API: <span id="apiStatus">Ready</span></span>
+        </div>
+    </footer>
+
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>
+
+
+

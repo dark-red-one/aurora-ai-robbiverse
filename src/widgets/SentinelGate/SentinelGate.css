@@ -1,0 +1,520 @@
+/* Sentinel Gate Authentication Widget */
+.sentinel-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.sentinel-gate--dark {
+  background: #111827;
+  color: white;
+}
+
+.sentinel-gate--branded {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+/* Container */
+.sentinel-gate__container {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  animation: slideUp 0.4s ease-out;
+}
+
+.sentinel-gate--dark .sentinel-gate__container {
+  background: #1f2937;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.sentinel-gate--branded .sentinel-gate__container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo */
+.sentinel-gate__logo {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.sentinel-gate__logo img {
+  height: 48px;
+  width: auto;
+}
+
+/* Header */
+.sentinel-gate__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.sentinel-gate__title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+}
+
+.sentinel-gate--dark .sentinel-gate__title {
+  color: white;
+}
+
+.sentinel-gate--branded .sentinel-gate__title {
+  color: white;
+}
+
+.sentinel-gate__subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.sentinel-gate--dark .sentinel-gate__subtitle {
+  color: #d1d5db;
+}
+
+.sentinel-gate--branded .sentinel-gate__subtitle {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Alerts */
+.sentinel-gate__alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.sentinel-gate__alert--error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.sentinel-gate--dark .sentinel-gate__alert--error {
+  background: rgba(220, 38, 38, 0.1);
+  color: #fca5a5;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+/* Form */
+.sentinel-gate__form {
+  margin-bottom: 1.5rem;
+}
+
+.sentinel-gate__form-group {
+  margin-bottom: 1.5rem;
+}
+
+.sentinel-gate__label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.sentinel-gate--dark .sentinel-gate__label {
+  color: #d1d5db;
+}
+
+.sentinel-gate--branded .sentinel-gate__label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sentinel-gate__input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  color: #111827;
+}
+
+.sentinel-gate__input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sentinel-gate__input--error {
+  border-color: #dc2626;
+}
+
+.sentinel-gate__input--error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.sentinel-gate__input--center {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5rem;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.sentinel-gate--dark .sentinel-gate__input {
+  background: #374151;
+  border-color: #4b5563;
+  color: white;
+}
+
+.sentinel-gate--dark .sentinel-gate__input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.sentinel-gate--branded .sentinel-gate__input {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.sentinel-gate--branded .sentinel-gate__input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sentinel-gate--branded .sentinel-gate__input:focus {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Password Field */
+.sentinel-gate__password-field {
+  position: relative;
+}
+
+.sentinel-gate__password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.sentinel-gate__password-toggle:hover {
+  opacity: 1;
+}
+
+/* Error Messages */
+.sentinel-gate__error {
+  display: block;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.sentinel-gate--dark .sentinel-gate__error {
+  color: #fca5a5;
+}
+
+/* Help Text */
+.sentinel-gate__help-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.sentinel-gate--dark .sentinel-gate__help-text {
+  color: #9ca3af;
+}
+
+.sentinel-gate--branded .sentinel-gate__help-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Form Actions */
+.sentinel-gate__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+/* Submit Button */
+.sentinel-gate__submit {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sentinel-gate__submit:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.sentinel-gate__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sentinel-gate--branded .sentinel-gate__submit {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.sentinel-gate--branded .sentinel-gate__submit:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+/* MFA Section */
+.sentinel-gate__mfa-info {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.sentinel-gate__mfa-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.sentinel-gate__mfa-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sentinel-gate--dark .sentinel-gate__mfa-text {
+  color: #9ca3af;
+}
+
+.sentinel-gate--branded .sentinel-gate__mfa-text {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* SSO Section */
+.sentinel-gate__sso {
+  margin: 2rem 0;
+}
+
+.sentinel-gate__divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.sentinel-gate__divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.sentinel-gate--dark .sentinel-gate__divider::before {
+  background: #374151;
+}
+
+.sentinel-gate--branded .sentinel-gate__divider::before {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sentinel-gate__divider span {
+  background: white;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.sentinel-gate--dark .sentinel-gate__divider span {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+.sentinel-gate--branded .sentinel-gate__divider span {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sentinel-gate__sso-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sentinel-gate__sso-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sentinel-gate__sso-button:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.sentinel-gate--dark .sentinel-gate__sso-button {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+.sentinel-gate--dark .sentinel-gate__sso-button:hover:not(:disabled) {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.sentinel-gate--branded .sentinel-gate__sso-button {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.sentinel-gate--branded .sentinel-gate__sso-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sentinel-gate__sso-icon {
+  font-size: 1.25rem;
+}
+
+/* Footer */
+.sentinel-gate__footer {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.sentinel-gate__switch {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.sentinel-gate--dark .sentinel-gate__switch {
+  color: #9ca3af;
+}
+
+.sentinel-gate--branded .sentinel-gate__switch {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sentinel-gate__link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.sentinel-gate__link:hover {
+  color: #2563eb;
+}
+
+.sentinel-gate--branded .sentinel-gate__link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sentinel-gate--branded .sentinel-gate__link:hover {
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .sentinel-gate {
+    padding: 1rem;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+  
+  .sentinel-gate__container {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .sentinel-gate__title {
+    font-size: 1.5rem;
+  }
+  
+  .sentinel-gate__input--center {
+    font-size: 1.25rem;
+    letter-spacing: 0.25rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .sentinel-gate__container {
+    animation: none;
+  }
+  
+  .sentinel-gate__submit {
+    transition: none;
+  }
+  
+  .sentinel-gate__submit:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sentinel-gate__container {
+    border: 2px solid currentColor;
+  }
+  
+  .sentinel-gate__input {
+    border: 2px solid currentColor;
+  }
+}
