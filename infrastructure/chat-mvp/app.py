@@ -7,7 +7,7 @@ Techy dark theme with GitHub/databoxy aesthetic
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 import uvicorn
 import json
 import asyncio
@@ -293,6 +293,20 @@ class ConnectionManager:
             "sender": "robbie"
         }))
     
+    async def send_streaming_chunk(self, chunk: str, websocket: WebSocket):
+        await websocket.send_text(json.dumps({
+            "type": "chunk",
+            "content": chunk,
+            "timestamp": datetime.now().isoformat(),
+            "sender": "robbie"
+        }))
+    
+    async def send_stream_complete(self, websocket: WebSocket):
+        await websocket.send_text(json.dumps({
+            "type": "stream_complete",
+            "timestamp": datetime.now().isoformat()
+        }))
+    
     async def send_system_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(json.dumps({
             "type": "system",
@@ -324,19 +338,38 @@ async def websocket_endpoint(websocket: WebSocket):
             if message_data.get("type") == "message":
                 user_message = message_data.get("content", "")
                 
-                # Generate AI response
-                ai_response = await manager.personality.generate_response(
-                    user_message, manager.integrations
-                )
-                
-                # Send AI response
-                await manager.send_personal_message(ai_response, websocket)
+                # Stream AI response word by word
+                await stream_llm_response(user_message, manager, websocket)
                 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         manager.disconnect(websocket)
+
+async def stream_llm_response(message: str, manager: ConnectionManager, websocket: WebSocket):
+    """Stream LLM response to websocket word by word"""
+    try:
+        # Get full response from LLM
+        full_response = await manager.personality.generate_response(message, manager.integrations)
+        
+        # Split into words for streaming effect
+        words = full_response.split(' ')
+        
+        for i, word in enumerate(words):
+            # Send word with space (except last word)
+            chunk = word + (' ' if i < len(words) - 1 else '')
+            await manager.send_streaming_chunk(chunk, websocket)
+            
+            # Small delay to simulate natural typing
+            await asyncio.sleep(0.03)  # 30ms per word
+        
+        # Signal streaming complete
+        await manager.send_stream_complete(websocket)
+        
+    except Exception as e:
+        logger.error(f"Streaming error: {e}")
+        await manager.send_personal_message("⚠️ Error generating response", websocket)
 
 @app.get("/api/status")
 async def get_status():

@@ -110,12 +110,91 @@ class TestPilotChat {
     }
     
     handleMessage(data) {
-        this.hideTypingIndicator();
-        
-        if (data.type === 'message') {
+        if (data.type === 'chunk') {
+            // Streaming: add chunk to current message
+            this.appendToStreamingMessage(data.content);
+        } else if (data.type === 'stream_complete') {
+            // Streaming complete
+            this.finalizeStreamingMessage();
+        } else if (data.type === 'message') {
+            // Full message (fallback)
+            this.hideTypingIndicator();
             this.addMessage('assistant', data.content, 'Robbie');
         } else if (data.type === 'system') {
+            this.hideTypingIndicator();
             this.addMessage('system', data.content, 'System');
+        }
+    }
+    
+    appendToStreamingMessage(chunk) {
+        let streamingMsg = document.getElementById('streaming-message');
+        
+        if (!streamingMsg) {
+            // First chunk - create streaming message and hide typing indicator
+            this.hideTypingIndicator();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            messageDiv.id = 'streaming-message';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const robbieAvatar = '/static/images/robbie-happy-1.png';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <img src="${robbieAvatar}" alt="Robbie" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                </div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-sender">Robbie</span>
+                        <span class="message-timestamp">${timestamp}</span>
+                    </div>
+                    <div class="message-text" id="streaming-text"></div>
+                </div>
+            `;
+            
+            this.messageContainer.appendChild(messageDiv);
+            streamingMsg = messageDiv;
+        }
+        
+        // Append chunk to streaming text
+        const streamingText = document.getElementById('streaming-text');
+        if (streamingText) {
+            streamingText.textContent += chunk;
+            this.scrollToBottom();
+        }
+    }
+    
+    finalizeStreamingMessage() {
+        const streamingMsg = document.getElementById('streaming-message');
+        if (streamingMsg) {
+            // Update avatar based on final content
+            const streamingText = document.getElementById('streaming-text');
+            const content = streamingText ? streamingText.textContent : '';
+            
+            let robbieAvatar = '/static/images/robbie-happy-1.png';
+            if (content.toLowerCase().includes('deal') || content.toLowerCase().includes('revenue')) {
+                robbieAvatar = '/static/images/robbie-content-1.png';
+            } else if (content.toLowerCase().includes('error') || content.toLowerCase().includes('problem')) {
+                robbieAvatar = '/static/images/robbie-surprised-1.png';
+            } else if (content.toLowerCase().includes('think') || content.toLowerCase().includes('consider')) {
+                robbieAvatar = '/static/images/robbie-thoughtful-1.png';
+            }
+            
+            // Update avatar
+            const avatarImg = streamingMsg.querySelector('.message-avatar img');
+            if (avatarImg) {
+                avatarImg.src = robbieAvatar;
+            }
+            
+            // Format the final message
+            if (streamingText) {
+                streamingText.innerHTML = this.formatMessage(content);
+            }
+            
+            // Remove streaming ID
+            streamingMsg.removeAttribute('id');
+            document.getElementById('streaming-text')?.removeAttribute('id');
         }
     }
     
