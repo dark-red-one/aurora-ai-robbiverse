@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 let currentMood = 0;
+let avatarPanel = null;
+
 const moods = [
     { image: 'robbie-thoughtful-1.png', text: 'Thoughtful', status: 'Analyzing...', emoji: '🤔' },
     { image: 'robbie-happy-1.png', text: 'Happy', status: 'Love this!', emoji: '😊' },
@@ -16,6 +18,179 @@ const moods = [
     { image: 'robbie-surprised-2.png', text: 'Alert', status: 'Watching!', emoji: '👁️' },
     { image: 'robbie-loving-2.png', text: 'Playful', status: 'Having fun!', emoji: '🎉' }
 ];
+
+class RobbieAvatarPanel {
+    constructor(context) {
+        this.context = context;
+        currentMood = context.globalState.get('robbieMood', 0);
+    }
+
+    resolveWebviewView(webviewView) {
+        avatarPanel = webviewView;
+        
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [
+                vscode.Uri.file(path.join(this.context.extensionPath, '../../..')),
+                vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse')
+            ]
+        };
+
+        webviewView.webview.html = this.getHtmlContent(webviewView.webview);
+
+        // Handle messages from webview
+        webviewView.webview.onDidReceiveMessage(message => {
+            switch (message.command) {
+                case 'changeMood':
+                    currentMood = (currentMood + 1) % moods.length;
+                    this.context.globalState.update('robbieMood', currentMood);
+                    this.updateMood();
+                    break;
+                case 'searchMemory':
+                    vscode.commands.executeCommand('robbie.searchMemory');
+                    break;
+            }
+        });
+    }
+
+    updateMood() {
+        if (avatarPanel) {
+            const mood = moods[currentMood];
+            avatarPanel.webview.postMessage({ 
+                command: 'updateMood', 
+                mood: currentMood,
+                text: mood.text,
+                status: mood.status,
+                image: mood.image
+            });
+            updateBackendMood(mood.text);
+        }
+    }
+
+    getHtmlContent(webview) {
+        const mood = moods[currentMood];
+        const imagePath = webview.asWebviewUri(
+            vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions/' + mood.image)
+        );
+
+        return `<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    margin: 0;
+                    padding: 15px;
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    color: white;
+                    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .avatar-container {
+                    width: 150px;
+                    height: 150px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    border: 3px solid #00d4ff;
+                    cursor: pointer;
+                    transition: transform 0.3s;
+                    margin-bottom: 15px;
+                }
+                .avatar-container:hover {
+                    transform: scale(1.05);
+                }
+                .avatar-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .mood-text {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #00d4ff;
+                    margin-bottom: 5px;
+                    text-align: center;
+                }
+                .status-text {
+                    font-size: 14px;
+                    color: #888;
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .btn {
+                    background: #00d4ff;
+                    border: none;
+                    color: #000;
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    margin: 5px;
+                    width: 90%;
+                }
+                .btn:hover {
+                    background: #4caf50;
+                }
+                .stats {
+                    width: 100%;
+                    margin-top: 15px;
+                    padding: 10px;
+                    background: rgba(0,0,0,0.3);
+                    border-radius: 8px;
+                    font-size: 12px;
+                }
+                .stat-line {
+                    margin: 5px 0;
+                    color: #ccc;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="avatar-container" onclick="changeMood()" id="avatarContainer">
+                <img class="avatar-image" id="avatarImage" src="${imagePath}" alt="Robbie">
+            </div>
+            <div class="mood-text" id="moodText">${mood.text}</div>
+            <div class="status-text" id="statusText">${mood.status}</div>
+            
+            <button class="btn" onclick="changeMood()">✨ Change Mood</button>
+            <button class="btn" onclick="searchMemory()">🔍 Search Memory</button>
+            
+            <div class="stats">
+                <div class="stat-line">💬 Session: Active</div>
+                <div class="stat-line">🧠 Memory: ChromaDB</div>
+                <div class="stat-line">🎨 Expressions: 10</div>
+            </div>
+
+            <script>
+                const vscode = acquireVsCodeApi();
+                let currentMoodIndex = ${currentMood};
+
+                function changeMood() {
+                    vscode.postMessage({ command: 'changeMood' });
+                }
+
+                function searchMemory() {
+                    vscode.postMessage({ command: 'searchMemory' });
+                }
+
+                // Listen for mood updates from extension
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    if (message.command === 'updateMood') {
+                        const basePath = '${webview.asWebviewUri(vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions')).toString()}';
+                        document.getElementById('avatarImage').src = basePath + '/' + message.image;
+                        document.getElementById('moodText').textContent = message.text;
+                        document.getElementById('statusText').textContent = message.status;
+                    }
+                });
+            </script>
+        </body>
+        </html>`;
+    }
+}
 
 class RobbieAvatarProvider {
     constructor(context) {
@@ -107,9 +282,15 @@ class RobbieItem extends vscode.TreeItem {
 function activate(context) {
     console.log('🤖 Robbie Avatar extension activated!');
 
-    // Avatar View Provider
+    // Avatar Webview Panel (with actual images!)
+    const avatarPanelProvider = new RobbieAvatarPanel(context);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider('robbie-avatar-view', avatarPanelProvider)
+    );
+
+    // Memory View Provider (tree view)
     const avatarProvider = new RobbieAvatarProvider(context);
-    vscode.window.registerTreeDataProvider('robbie-avatar-view', avatarProvider);
+    vscode.window.registerTreeDataProvider('robbie-avatar-view-legacy', avatarProvider);
 
     // Memory View Provider
     const memoryProvider = new RobbieMemoryProvider();
