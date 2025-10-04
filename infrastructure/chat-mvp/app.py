@@ -215,8 +215,26 @@ class BusinessPersonality:
                 "Complete legal review by Wednesday"
             ]
         }
-    
+
+    async def _call_ollama(self, prompt: str, model: str = "llama3.1:8b") -> Optional[str]:
+        """Call local Ollama backend wrapper for a completion."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "http://127.0.0.1:9000/api/chat",
+                    json={"message": prompt, "model": model},
+                    timeout=60,
+                ) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        return data.get("response")
+                    return f"Error from Ollama backend: HTTP {resp.status}"
+        except Exception as e:
+            logger.error(f"Ollama call failed: {e}")
+            return None
+
     async def generate_response(self, message: str, integrations: BusinessIntegrations) -> str:
+<<<<<<< Updated upstream:infrastructure/chat-mvp/app.py
         """Generate business-contextualized response using Aurora Town LLM Gateway"""
         
         # Get business context
@@ -235,10 +253,46 @@ Personality traits:
 - Pragmatic: Focus on what's actionable
 
 Current Business Context:
+=======
+        """Generate business-contextualized response using Ollama if available."""
+        # Get business context (best-effort)
+        gmail_summary = await integrations.get_gmail_summary()
+        calendar_events = await integrations.get_calendar_events()
+        fireflies_summary = await integrations.get_fireflies_summary()
+
+        # Compose a concise business-aware prompt
+        deals_str = "\n".join(
+            f"• {d['name']}: {d['value']} ({d['probability']})" for d in self.context["current_deals"]
+        )
+        tasks_str = "\n".join(f"• {t}" for t in self.context["priority_tasks"])
+        user_part = message.strip() or "Give Allan a helpful business status and ask a clarifying question."
+
+        system_preamble = (
+            "You are Robbie, Allan's business AI assistant. Reply concisely, professional, helpful. "
+            "Use the context below. If context is missing, continue gracefully without fabricating data."
+        )
+        context_block = (
+            f"Business Context:\n{gmail_summary}\n{calendar_events}\n{fireflies_summary}\n\n"
+            f"Active Deals:\n{deals_str}\n\nPriority Tasks:\n{tasks_str}"
+        )
+        prompt = (
+            f"{system_preamble}\n\n{context_block}\n\nUser: {user_part}\n\nRobbie:"
+        )
+
+        # Try Ollama
+        ollama_reply = await self._call_ollama(prompt)
+        if isinstance(ollama_reply, str) and ollama_reply.strip():
+            return ollama_reply.strip()
+
+        # Fallback to existing templated logic if Ollama not available
+        context = f"""
+Business Context:
+>>>>>>> Stashed changes:chat-mvp/app.py
 {gmail_summary}
 {calendar_events}
 {fireflies_summary}
 
+<<<<<<< Updated upstream:infrastructure/chat-mvp/app.py
 Active Deals: {', '.join(d['name'] for d in self.context['current_deals'])}
 Priority Tasks: {', '.join(self.context['priority_tasks'])}
 
@@ -268,6 +322,69 @@ Keep it brief but strategic. Focus on revenue and action."""
         except Exception as e:
             logger.error(f"LLM Gateway error: {e}")
             return f"⚠️ Connection issue with my brain (LLM gateway). Let me try to reconnect... Error: {str(e)}"
+=======
+Active Deals: {len(self.context['current_deals'])} worth ${sum(int(d['value'].replace('$', '').replace('K', '000')) for d in self.context['current_deals'])}K total
+Priority Tasks: {len(self.context['priority_tasks'])} pending
+"""
+        msg_lower = (message or "").lower()
+        if "deal" in msg_lower or "pipeline" in msg_lower:
+            return f"""🤖 **Robbie - Business AI Assistant**
+
+{context}
+
+**Deal Pipeline Status:**
+{chr(10).join(f"• {deal['name']}: {deal['value']} ({deal['probability']} close probability)" for deal in self.context['current_deals'])}
+
+**Next Actions:**
+{chr(10).join(f"• {task}" for task in self.context['priority_tasks'])}
+
+How can I help you move these deals forward?"""
+        elif "meeting" in msg_lower or "calendar" in msg_lower:
+            return f"""🤖 **Robbie - Business AI Assistant**
+
+{context}
+
+**Today's Focus:**
+{calendar_events}
+
+**Meeting Prep:**
+• Review PepsiCo proposal one more time
+• Prepare Wondercide timeline updates
+• Research prospect background
+
+Ready to dominate these meetings! What do you need?"""
+        elif "email" in msg_lower or "gmail" in msg_lower:
+            return f"""🤖 **Robbie - Business AI Assistant**
+
+{context}
+
+**Email Status:**
+{gmail_summary}
+
+**Suggested Actions:**
+• Prioritize PepsiCo follow-up (high value, high probability)
+• Draft Wondercide contract terms
+• Schedule prospect discovery call
+
+Want me to help draft any responses?"""
+        else:
+            return f"""🤖 **Robbie - Business AI Assistant**
+
+{context}
+
+**Quick Status:**
+• {len(self.context['current_deals'])} active deals in pipeline
+• {len(self.context['priority_tasks'])} priority tasks pending
+• Today's focus: PepsiCo decision meeting
+
+**How I can help:**
+• Deal pipeline analysis and next steps
+• Meeting preparation and follow-up
+• Email prioritization and drafting
+• Task management and scheduling
+
+What's on your mind?"""
+>>>>>>> Stashed changes:chat-mvp/app.py
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -372,9 +489,25 @@ async def stream_llm_response(message: str, manager: ConnectionManager, websocke
 @app.get("/api/status")
 async def get_status():
     """API status endpoint"""
+    try:
+        integrations_status = {
+            "gmail": "connected" if getattr(manager.integrations, "google_refresh_token", None) else "disconnected",
+            "calendar": "connected" if getattr(manager.integrations, "google_refresh_token", None) else "disconnected",
+            "fireflies": "connected" if getattr(manager.integrations, "fireflies_api_key", None) else "disconnected",
+            "openai": "connected" if getattr(manager.integrations, "openai_api_key", None) else "disconnected",
+        }
+    except Exception:
+        integrations_status = {
+            "gmail": "unknown",
+            "calendar": "unknown",
+            "fireflies": "unknown",
+            "openai": "unknown",
+        }
+
     return {
         "status": "online",
         "service": "TestPilot Chat MVP",
+<<<<<<< Updated upstream:infrastructure/chat-mvp/app.py
         "integrations": {
             "llm_gateway": "connected",
             "database": "connected",
@@ -383,6 +516,11 @@ async def get_status():
         "personality": manager.personality.name,
         "capabilities": manager.personality.capabilities,
         "model": "llama3.1:8b"
+=======
+        "integrations": integrations_status,
+        "personality": manager.personality.name,
+        "capabilities": manager.personality.capabilities,
+>>>>>>> Stashed changes:chat-mvp/app.py
     }
 
 if __name__ == "__main__":

@@ -1,9 +1,16 @@
 {
   "url": "http://httpbin.org/status/200",
+<<<<<<< Updated upstream
   "timestamp": 1759608563.7551308,
   "status_code": 200,
   "headers": {
     "Date": "Sat, 04 Oct 2025 20:09:23 GMT",
+=======
+  "timestamp": 1759608480.26111,
+  "status_code": 200,
+  "headers": {
+    "Date": "Sat, 04 Oct 2025 20:08:00 GMT",
+>>>>>>> Stashed changes
     "Content-Type": "text/html; charset=utf-8",
     "Content-Length": "0",
     "Connection": "keep-alive",

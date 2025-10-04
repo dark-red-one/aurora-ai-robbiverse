@@ -5,6 +5,7 @@ Real-time monitoring and control for RobbieBook1
 """
 import asyncio
 import aiohttp
+import aiofiles
 import json
 import time
 import os
@@ -122,6 +123,8 @@ class RobbieBookDashboard:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RobbieBook1.testpilot.ai - Aurora AI Empire Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ 
@@ -340,6 +343,31 @@ class RobbieBookDashboard:
                     </button>
                 </div>
             </div>
+            
+            <!-- Robbie Chat Apps -->
+            <div class="card">
+                <h3>🤖 Robbie Chat Apps</h3>
+                <div class="metric">
+                    <button onclick="window.open('http://localhost:8005', '_blank')" style="background: #9C27B0; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                        💬 TestPilot Chat MVP
+                    </button>
+                </div>
+                <div class="metric">
+                    <button onclick="window.open('http://localhost:8005/chat', '_blank')" style="background: #E91E63; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                        🚀 Robbie Web Chat
+                    </button>
+                </div>
+                <div class="metric">
+                    <button onclick="window.open('http://localhost:8000/api/v1/chat', '_blank')" style="background: #673AB7; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                        🧠 Aurora AI Chat API
+                    </button>
+                </div>
+                <div class="metric">
+                    <button onclick="runChatCLI()" style="background: #795548; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                        💻 CLI Chat Terminal
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -349,6 +377,68 @@ class RobbieBookDashboard:
     <script>
         // Auto-refresh every 5 seconds
         setTimeout(() => location.reload(), 5000);
+        
+        // Run CLI Chat Terminal
+        function runChatCLI() {{
+            // Create a popup window with terminal-like interface
+            const terminalWindow = window.open('', 'ChatCLI', 'width=800,height=600,scrollbars=yes');
+            terminalWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Robbie CLI Chat Terminal</title>
+                    <style>
+                        body {{ 
+                            background: #1a1a1a; 
+                            color: #00ff00; 
+                            font-family: 'Courier New', monospace; 
+                            padding: 20px; 
+                            margin: 0;
+                        }}
+                        .terminal {{ 
+                            background: #000; 
+                            padding: 20px; 
+                            border-radius: 5px; 
+                            border: 1px solid #333;
+                            height: 500px;
+                            overflow-y: auto;
+                        }}
+                        .prompt {{ color: #ffff00; }}
+                        .command {{ color: #00aaff; }}
+                        .response {{ color: #ff6b6b; margin-left: 20px; }}
+                        .input {{ 
+                            background: transparent; 
+                            border: none; 
+                            color: #00ff00; 
+                            font-family: inherit; 
+                            font-size: 14px;
+                            width: 80%;
+                            outline: none;
+                        }}
+                        .cursor {{ animation: blink 1s infinite; }}
+                        @keyframes blink {{ 0%, 50% {{ opacity: 1; }} 51%, 100% {{ opacity: 0; }} }}
+                    </style>
+                </head>
+                <body>
+                    <h2>🤖 Robbie CLI Chat Terminal</h2>
+                    <div class="terminal" id="terminal">
+                        <div class="prompt">🚀 TestPilot Chat CLI (type /quit to exit)</div>
+                        <div class="prompt">==========================================</div>
+                        <div class="prompt">Connected to: ws://localhost:8005/ws</div>
+                        <br>
+                        <div class="response">[Robbie] Hello Allan! I'm ready to chat. What would you like to discuss?</div>
+                        <br>
+                        <div class="prompt">> <span id="command"></span><span class="cursor">_</span></div>
+                    </div>
+                    <br>
+                    <div>
+                        <strong>Instructions:</strong> This is a demo terminal. In the real CLI, you would type commands here.<br>
+                        <strong>Real CLI Command:</strong> <code>cd /Users/allanperetz/aurora-ai-robbiverse && python3 chat-mvp/cli_chat.py</code>
+                    </div>
+                </body>
+                </html>
+            `);
+        }}
     </script>
 </body>
 </html>
@@ -363,8 +453,22 @@ class RobbieBookDashboard:
             html = await self.generate_dashboard_html()
             return web.Response(text=html, content_type='text/html')
         
+        async def favicon_handler(request):
+            # Serve the favicon
+            favicon_path = Path("./robbiebook-favicon.svg")
+            if favicon_path.exists():
+                async with aiofiles.open(favicon_path, 'rb') as f:
+                    content = await f.read()
+                return web.Response(
+                    body=content,
+                    content_type='image/svg+xml',
+                    headers={'Cache-Control': 'public, max-age=86400'}
+                )
+            return web.Response(status=404)
+        
         app = web.Application()
         app.router.add_get('/', dashboard_handler)
+        app.router.add_get('/favicon.svg', favicon_handler)
         
         runner = web.AppRunner(app)
         await runner.setup()
