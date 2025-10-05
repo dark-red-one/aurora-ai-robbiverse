@@ -142,26 +142,43 @@
             background: rgba(255, 255, 255, 0.05);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 0 25px;
+            gap: 0;
         }
 
         .tab {
-            padding: 15px 25px;
+            padding: 20px 30px;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #cccccc;
+            position: relative;
         }
 
         .tab:hover {
             background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
         }
 
         .tab.active {
             border-bottom-color: #4CAF50;
             color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #4CAF50;
+            border-radius: 2px 2px 0 0;
         }
 
         .tab-icon {
@@ -257,15 +274,310 @@
             51%, 100% { opacity: 0; }
         }
 
-        /* Notes Tab Styles */
-        .notes-container {
+        /* Chat Tab Styles */
+        .chat-container {
             height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
             padding: 20px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chat-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px 20px;
+            max-width: 70%;
+            line-height: 1.5;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #4CAF50;
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Notes Tab Styles */
+        .notes-layout {
+            height: 100%;
+            display: flex;
+        }
+
+        .notes-sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-section h3 {
+            color: #888;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        .category-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .category-item.active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .category-item .count {
+            margin-left: auto;
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.yellow { background: #FFC107; }
+        .dot.green { background: #4CAF50; }
+        .dot.blue { background: #2196F3; }
+        .dot.red { background: #F44336; }
+        .dot.purple { background: #9C27B0; }
+
+        .author-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .author-filter label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #4CAF50;
+        }
+
+        .notes-main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .notes-header h1 {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .new-note-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .new-note-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .notes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            align-content: start;
+        }
+
+        .note-card {
+            background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .note-card:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 1001;
+        }
+
+        .note-card.intel {
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+        }
+
+        .note-card.reference {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .note-card.drafts {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .note-card.connections {
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+        }
+
+        .note-card.allan {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+            color: white;
+        }
+
+        .note-card.pinned {
+            position: relative;
+        }
+
+        .note-card.pinned::before {
+            content: '📌';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+        }
+
+        .note-category {
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .note-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .note-author {
+            font-weight: bold;
+        }
+
+        .note-attachment {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 16px;
         }
 
         .sticky-note {
@@ -487,37 +799,102 @@
         </div>
 
         <div class="tabs">
-            <div class="tab active" data-tab="terminal">
-                <span class="tab-icon">🖥️</span>
-                <span>Terminal</span>
+            <div class="tab" data-tab="chat">
+                <span class="tab-icon">💬</span>
+                <span>Chat</span>
             </div>
-            <div class="tab" data-tab="notes">
+            <div class="tab active" data-tab="notes">
                 <span class="tab-icon">📝</span>
                 <span>Notes</span>
             </div>
             <div class="tab" data-tab="comms">
-                <span class="tab-icon">💬</span>
+                <span class="tab-icon">📧</span>
                 <span>Comms</span>
+            </div>
+            <div class="tab" data-tab="tasks">
+                <span class="tab-icon">✅</span>
+                <span>Tasks</span>
+            </div>
+            <div class="tab" data-tab="news">
+                <span class="tab-icon">📰</span>
+                <span>News</span>
             </div>
         </div>
 
         <div class="content">
-            <!-- Terminal Tab -->
-            <div class="tab-content active" id="terminal-tab">
-                <div class="terminal-container" id="terminal-container">
-                    <!-- Terminal content will be populated here -->
-                </div>
-                <div class="terminal-input-area">
-                    <span class="terminal-prompt" id="terminal-prompt">allan@aurora-town:~/robbie$ </span>
-                    <input type="text" class="terminal-input" id="terminal-input" placeholder="Type 'robbie' to start chat, 'help' for commands" autocomplete="off" spellcheck="false">
-                    <span class="cursor"></span>
+            <!-- Chat Tab -->
+            <div class="tab-content" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Chat messages will be populated here -->
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="What should I do next, Robbie?" autocomplete="off">
+                        <button class="send-btn" id="send-btn">✈️</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Notes Tab -->
-            <div class="tab-content" id="notes-tab">
-                <div class="notes-container" id="notes-container">
-                    <!-- Notes will be populated here -->
+            <div class="tab-content active" id="notes-tab">
+                <div class="notes-layout">
+                    <div class="notes-sidebar">
+                        <div class="sidebar-section">
+                            <h3>CATEGORIES</h3>
+                            <div class="category-item active" data-category="all">
+                                <span>All Notes</span>
+                                <span class="count">22</span>
+                            </div>
+                            <div class="category-item" data-category="intel">
+                                <span class="dot yellow"></span>
+                                <span>Intel</span>
+                                <span class="count">8</span>
+                            </div>
+                            <div class="category-item" data-category="reference">
+                                <span class="dot green"></span>
+                                <span>Reference</span>
+                                <span class="count">5</span>
+                            </div>
+                            <div class="category-item" data-category="drafts">
+                                <span class="dot blue"></span>
+                                <span>Drafts</span>
+                                <span class="count">2</span>
+                            </div>
+                            <div class="category-item" data-category="connections">
+                                <span class="dot red"></span>
+                                <span>Connections</span>
+                                <span class="count">5</span>
+                            </div>
+                            <div class="category-item" data-category="shower-thoughts">
+                                <span class="dot purple"></span>
+                                <span>Shower Thoughts</span>
+                                <span class="count">2</span>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <h3>AUTHOR</h3>
+                            <div class="author-filter">
+                                <label><input type="checkbox" checked> Robbie's Notes</label>
+                                <label><input type="checkbox" checked> Allan's Notes</label>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <h3>SEARCH</h3>
+                            <input type="text" placeholder="Search notes..." class="search-input">
+                        </div>
+                    </div>
+                    
+                    <div class="notes-main">
+                        <div class="notes-header">
+                            <h1>Notes</h1>
+                            <button class="new-note-btn">+ New Note</button>
+                        </div>
+                        <div class="notes-grid" id="notes-grid">
+                            <!-- Notes will be populated here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -532,6 +909,22 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Tasks Tab -->
+            <div class="tab-content" id="tasks-tab">
+                <div class="tasks-container">
+                    <h1>Tasks</h1>
+                    <p>Task management interface coming soon...</p>
+                </div>
+            </div>
+
+            <!-- News Tab -->
+            <div class="tab-content" id="news-tab">
+                <div class="news-container">
+                    <h1>News</h1>
+                    <p>News feed interface coming soon...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -539,7 +932,7 @@
         class AuroraDashboard {
             constructor() {
                 this.websocket = null;
-                this.currentTab = 'terminal';
+                this.currentTab = 'notes';
                 this.user = null;
                 this.sessionId = null;
                 
@@ -579,18 +972,23 @@
                     });
                 });
                 
-                // Terminal input
-                document.getElementById('terminal-input').addEventListener('keydown', (e) => {
+                // Chat input
+                document.getElementById('chat-input').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        this.sendTerminalCommand();
+                        this.sendChatMessage();
                     }
                 });
                 
-                // Keep terminal input focused
+                // Send button
+                document.getElementById('send-btn').addEventListener('click', () => {
+                    this.sendChatMessage();
+                });
+                
+                // Keep appropriate input focused
                 document.addEventListener('click', () => {
-                    if (this.currentTab === 'terminal') {
-                        document.getElementById('terminal-input').focus();
+                    if (this.currentTab === 'chat') {
+                        document.getElementById('chat-input').focus();
                     }
                 });
             }
@@ -681,25 +1079,73 @@
                 }
                 
                 // Focus appropriate input
-                if (tabName === 'terminal') {
-                    document.getElementById('terminal-input').focus();
+                if (tabName === 'chat') {
+                    document.getElementById('chat-input').focus();
+                }
+                
+                // Load sample data for demo
+                if (tabName === 'notes') {
+                    this.updateNotes({});
+                }
+                
+                if (tabName === 'chat') {
+                    this.loadSampleChat();
                 }
             }
             
-            sendTerminalCommand() {
-                const input = document.getElementById('terminal-input');
-                const command = input.value.trim();
+            sendChatMessage() {
+                const input = document.getElementById('chat-input');
+                const message = input.value.trim();
                 
-                if (!command) return;
+                if (!message) return;
+                
+                // Add user message to chat
+                this.addChatMessage(message, 'user');
                 
                 if (this.websocket) {
                     this.websocket.send(JSON.stringify({
-                        type: 'terminal_command',
-                        command: command
+                        type: 'chat_message',
+                        message: message
                     }));
                 }
                 
                 input.value = '';
+            }
+            
+            addChatMessage(content, sender) {
+                const container = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                        <div class="chat-bubble" style="margin-left: auto; background: rgba(76, 175, 80, 0.2);">
+                            ${content}
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="chat-avatar">🤖</div>
+                        <div class="chat-bubble">${content}</div>
+                    `;
+                }
+                
+                container.appendChild(messageDiv);
+                container.scrollTop = container.scrollHeight;
+            }
+            
+            loadSampleChat() {
+                const container = document.getElementById('chat-messages');
+                container.innerHTML = '';
+                
+                // Add sample Robbie message
+                this.addChatMessage(`Good afternoon Allan -
+
+Today's a training day with the **OUTREACH** block running from 8:00 AM to 5:20 PM. You're in the final stretch now, with just this session left on the calendar.
+
+Nice work powering through a packed morning — you've already wrapped up 5 meetings including the Tom // Allan 1:1, Weekly Revenue Meeting, and Data / Automation session. ✅ Solid momentum today.
+
+With your calendar clear after this, it's a great window to refocus on overdue deals. 🚨 There are several key accounts — like [blue redacted text], and [blue redacted text] that are significantly past their expected close dates. If you have the energy, this evening could be a good time to`, 'robbie');
             }
             
             addTerminalLine(content, type = 'normal') {
@@ -722,36 +1168,87 @@
             }
             
             updateNotes(notes) {
-                const container = document.getElementById('notes-container');
+                const container = document.getElementById('notes-grid');
                 container.innerHTML = '';
                 
-                // Combine all notes
-                const allNotes = [
-                    ...notes.allan_notes || [],
-                    ...notes.robbie_notes || [],
-                    ...notes.pin_codes || []
+                // Sample notes matching the screenshots
+                const sampleNotes = [
+                    {
+                        id: "1",
+                        category: "intel",
+                        title: "Jennifer Martinez - TechStartup Inc",
+                        content: "Former P&G innovation lead, now heading product at TechStartup. Connected via LinkedIn. Interested in TestPilot methodology...",
+                        author: "Robbie",
+                        date: "Today",
+                        pinned: false
+                    },
+                    {
+                        id: "2",
+                        category: "reference",
+                        title: "Zoom Backgrounds",
+                        content: "Professional: Bookshelf, Creative clients: Innovation lab, Casual: Home office, Never use: Beach scenes",
+                        author: "Allan",
+                        date: "Yesterday",
+                        pinned: true
+                    },
+                    {
+                        id: "3",
+                        category: "drafts",
+                        title: "Blog: The Hidden Cost of Playing It Safe",
+                        content: "Opening: \"Every safe choice in CPG is a future regret waiting to happen. Here's why the biggest risk is not taking one...\"",
+                        author: "Allan",
+                        date: "3 days ago",
+                        pinned: false
+                    },
+                    {
+                        id: "4",
+                        category: "intel",
+                        title: "Competitor Analysis - FreshBrand",
+                        content: "They just landed Target. Using similar test methodology but 2x our pricing. Clients complaining about their slow turnaround...",
+                        author: "Allan",
+                        date: "Yesterday",
+                        pinned: false,
+                        attachment: "📄"
+                    },
+                    {
+                        id: "5",
+                        category: "connections",
+                        title: "Sarah Johnson - PepsiCo",
+                        content: "VP of Innovation at PepsiCo. Interested in Clean Label Initiative. Mentioned budget constraints and timeline pressure.",
+                        author: "Robbie",
+                        date: "2 hours ago",
+                        pinned: false
+                    },
+                    {
+                        id: "6",
+                        category: "shower-thoughts",
+                        title: "AI-Powered CPG Testing",
+                        content: "What if we could predict product success before launch using AI analysis of consumer sentiment and market trends?",
+                        author: "Allan",
+                        date: "1 week ago",
+                        pinned: false
+                    }
                 ];
                 
-                allNotes.forEach(note => {
-                    const noteElement = this.createNoteElement(note);
+                sampleNotes.forEach(note => {
+                    const noteElement = this.createNoteCard(note);
                     container.appendChild(noteElement);
                 });
             }
             
-            createNoteElement(note) {
+            createNoteCard(note) {
                 const noteDiv = document.createElement('div');
-                noteDiv.className = `sticky-note ${note.type}`;
-                
-                const typeLabel = note.type === 'allan' ? 'Allan' : 
-                                note.type === 'robbie' ? 'Robbie' : 
-                                note.type.toUpperCase();
+                noteDiv.className = `note-card ${note.category} ${note.pinned ? 'pinned' : ''}`;
                 
                 noteDiv.innerHTML = `
-                    <div class="note-header">
-                        <div class="note-type">${typeLabel}</div>
-                        <div class="note-time">${note.timestamp}</div>
-                    </div>
+                    <div class="note-category">${note.category.toUpperCase()}</div>
+                    <div class="note-title">${note.title}</div>
                     <div class="note-content">${note.content}</div>
+                    <div class="note-meta">
+                        <span class="note-author">${note.author}</span>
+                        <span class="note-date">${note.date}</span>
+                    </div>
+                    ${note.attachment ? `<div class="note-attachment">${note.attachment}</div>` : ''}
                 `;
                 
                 return noteDiv;
