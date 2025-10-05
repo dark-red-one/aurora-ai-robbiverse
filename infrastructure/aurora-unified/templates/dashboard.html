@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +29,7 @@
         .header {
             background: rgba(255, 255, 255, 0.05);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
+            padding: 12px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -38,7 +39,7 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 30px;
         }
 
         .logo {
@@ -47,12 +48,20 @@
             gap: 12px;
         }
 
+        .logo-icon {
+            font-size: 1.5em;
+        }
+
         .logo h1 {
-            font-size: 1.8em;
-            background: linear-gradient(45deg, #4CAF50, #2196F3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .logo .tm {
+            font-size: 0.7em;
+            vertical-align: super;
+            color: #888;
         }
 
         .user-info {
@@ -94,10 +103,25 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
-        .status-indicator {
+        .weather-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        .weather-icon {
+            font-size: 1.1em;
+        }
+
+        .connection-status {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -117,9 +141,17 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .logout-btn {
@@ -270,8 +302,16 @@
         }
 
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
         }
 
         /* Chat Tab Styles */
@@ -413,11 +453,25 @@
             border-radius: 50%;
         }
 
-        .dot.yellow { background: #FFC107; }
-        .dot.green { background: #4CAF50; }
-        .dot.blue { background: #2196F3; }
-        .dot.red { background: #F44336; }
-        .dot.purple { background: #9C27B0; }
+        .dot.yellow {
+            background: #FFC107;
+        }
+
+        .dot.green {
+            background: #4CAF50;
+        }
+
+        .dot.blue {
+            background: #2196F3;
+        }
+
+        .dot.red {
+            background: #F44336;
+        }
+
+        .dot.purple {
+            background: #9C27B0;
+        }
 
         .author-filter {
             display: flex;
@@ -746,55 +800,53 @@
             .header {
                 padding: 10px 15px;
             }
-            
+
             .header-left {
                 gap: 10px;
             }
-            
+
             .logo h1 {
                 font-size: 1.5em;
             }
-            
+
             .user-info {
                 padding: 6px 12px;
             }
-            
+
             .tabs {
                 padding: 0 15px;
             }
-            
+
             .tab {
                 padding: 12px 15px;
                 font-size: 0.9em;
             }
-            
+
             .notes-container {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
         <div class="header">
             <div class="header-left">
                 <div class="logo">
-                    <h1>🚀 Aurora AI Empire</h1>
-                </div>
-                <div class="user-info" id="user-info">
-                    <div class="user-avatar" id="user-avatar">A</div>
-                    <div class="user-details">
-                        <div class="user-name" id="user-name">Loading...</div>
-                        <div class="user-role" id="user-role">Loading...</div>
-                    </div>
+                    <span class="logo-icon">✈️</span>
+                    <h1>TestPilot<span class="tm">™</span></h1>
                 </div>
             </div>
             <div class="header-right">
-                <div class="status-indicator">
-                    <div class="status-dot"></div>
-                    <span id="connection-status">Connecting...</span>
+                <div class="weather-status">
+                    <span class="weather-icon">☀️</span>
+                    <span id="weather-temp">67°F</span>
                 </div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span id="connection-status">Connected</span>
+                </div>
             </div>
         </div>
 
@@ -829,7 +881,8 @@
                         <!-- Chat messages will be populated here -->
                     </div>
                     <div class="chat-input-area">
-                        <input type="text" class="chat-input" id="chat-input" placeholder="What should I do next, Robbie?" autocomplete="off">
+                        <input type="text" class="chat-input" id="chat-input"
+                            placeholder="What should I do next, Robbie?" autocomplete="off">
                         <button class="send-btn" id="send-btn">✈️</button>
                     </div>
                 </div>
@@ -871,7 +924,7 @@
                                 <span class="count">2</span>
                             </div>
                         </div>
-                        
+
                         <div class="sidebar-section">
                             <h3>AUTHOR</h3>
                             <div class="author-filter">
@@ -879,13 +932,13 @@
                                 <label><input type="checkbox" checked> Allan's Notes</label>
                             </div>
                         </div>
-                        
+
                         <div class="sidebar-section">
                             <h3>SEARCH</h3>
                             <input type="text" placeholder="Search notes..." class="search-input">
                         </div>
                     </div>
-                    
+
                     <div class="notes-main">
                         <div class="notes-header">
                             <h1>Notes</h1>
@@ -935,16 +988,16 @@
                 this.currentTab = 'notes';
                 this.user = null;
                 this.sessionId = null;
-                
+
                 this.init();
             }
-            
+
             init() {
                 this.loadUserData();
                 this.setupEventListeners();
                 this.connectWebSocket();
             }
-            
+
             loadUserData() {
                 const sessionId = localStorage.getItem('aurora_session');
                 const userData = localStorage.getItem('aurora_user');
@@ -957,12 +1010,47 @@
                 this.sessionId = sessionId;
                 this.user = JSON.parse(userData);
                 
-                // Update UI
-                document.getElementById('user-name').textContent = this.user.name;
-                document.getElementById('user-role').textContent = this.user.role;
-                document.getElementById('user-avatar').textContent = this.user.name.charAt(0).toUpperCase();
+                // Initialize weather and connection status
+                this.updateWeatherStatus();
+                this.startWeatherUpdates();
             }
             
+            updateWeatherStatus() {
+                // Simulate weather data - in production, this would call a weather API
+                const weatherData = [
+                    { icon: '☀️', temp: '67°F', condition: 'Sunny' },
+                    { icon: '⛅', temp: '72°F', condition: 'Partly Cloudy' },
+                    { icon: '🌧️', temp: '65°F', condition: 'Light Rain' },
+                    { icon: '❄️', temp: '32°F', condition: 'Snow' }
+                ];
+                
+                const currentWeather = weatherData[Math.floor(Math.random() * weatherData.length)];
+                document.getElementById('weather-temp').textContent = currentWeather.temp;
+                document.querySelector('.weather-icon').textContent = currentWeather.icon;
+            }
+            
+            startWeatherUpdates() {
+                // Update weather every 30 seconds
+                setInterval(() => {
+                    this.updateWeatherStatus();
+                }, 30000);
+            }
+            
+            updateConnectionStatus(status, connected) {
+                const statusElement = document.getElementById('connection-status');
+                const statusDot = document.querySelector('.status-dot');
+                
+                statusElement.textContent = status;
+                
+                if (connected) {
+                    statusDot.style.background = '#4CAF50';
+                    statusDot.style.animation = 'pulse 2s infinite';
+                } else {
+                    statusDot.style.background = '#F44336';
+                    statusDot.style.animation = 'none';
+                }
+            }
+
             setupEventListeners() {
                 // Tab switching
                 document.querySelectorAll('.tab').forEach(tab => {
@@ -971,7 +1059,7 @@
                         this.switchTab(tabName);
                     });
                 });
-                
+
                 // Chat input
                 document.getElementById('chat-input').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
@@ -979,12 +1067,12 @@
                         this.sendChatMessage();
                     }
                 });
-                
+
                 // Send button
                 document.getElementById('send-btn').addEventListener('click', () => {
                     this.sendChatMessage();
                 });
-                
+
                 // Keep appropriate input focused
                 document.addEventListener('click', () => {
                     if (this.currentTab === 'chat') {
@@ -992,16 +1080,16 @@
                     }
                 });
             }
-            
+
             connectWebSocket() {
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 const wsUrl = `${protocol}//${window.location.host}/ws`;
-                
+
                 this.websocket = new WebSocket(wsUrl);
-                
+
                 this.websocket.onopen = () => {
                     console.log('Connected to Aurora Dashboard');
-                    document.getElementById('connection-status').textContent = 'Connected';
+                    this.updateConnectionStatus('Connected', true);
                     
                     // Authenticate
                     this.websocket.send(JSON.stringify({
@@ -1017,58 +1105,58 @@
                 
                 this.websocket.onclose = () => {
                     console.log('Disconnected from Aurora Dashboard');
-                    document.getElementById('connection-status').textContent = 'Disconnected';
+                    this.updateConnectionStatus('Disconnected', false);
                     setTimeout(() => this.connectWebSocket(), 3000);
                 };
             }
-            
+
             handleMessage(data) {
                 switch (data.type) {
                     case 'authenticated':
                         console.log('Authenticated:', data.user);
                         break;
-                        
+
                     case 'auth_error':
                         console.error('Authentication error:', data.message);
                         this.redirectToLogin();
                         break;
-                        
+
                     case 'terminal_line':
                         this.addTerminalLine(data.content, data.line_type);
                         break;
-                        
+
                     case 'terminal_prompt':
                         this.showTerminalPrompt();
                         break;
-                        
+
                     case 'terminal_clear':
                         this.clearTerminal();
                         break;
-                        
+
                     case 'notes_update':
                         this.updateNotes(data.notes);
                         break;
-                        
+
                     case 'comms_update':
                         this.updateComms(data.messages);
                         break;
                 }
             }
-            
+
             switchTab(tabName) {
                 // Update tab UI
                 document.querySelectorAll('.tab').forEach(tab => {
                     tab.classList.remove('active');
                 });
                 document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-                
+
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.remove('active');
                 });
                 document.getElementById(`${tabName}-tab`).classList.add('active');
-                
+
                 this.currentTab = tabName;
-                
+
                 // Notify server
                 if (this.websocket) {
                     this.websocket.send(JSON.stringify({
@@ -1077,46 +1165,46 @@
                         tab: tabName
                     }));
                 }
-                
+
                 // Focus appropriate input
                 if (tabName === 'chat') {
                     document.getElementById('chat-input').focus();
                 }
-                
+
                 // Load sample data for demo
                 if (tabName === 'notes') {
                     this.updateNotes({});
                 }
-                
+
                 if (tabName === 'chat') {
                     this.loadSampleChat();
                 }
             }
-            
+
             sendChatMessage() {
                 const input = document.getElementById('chat-input');
                 const message = input.value.trim();
-                
+
                 if (!message) return;
-                
+
                 // Add user message to chat
                 this.addChatMessage(message, 'user');
-                
+
                 if (this.websocket) {
                     this.websocket.send(JSON.stringify({
                         type: 'chat_message',
                         message: message
                     }));
                 }
-                
+
                 input.value = '';
             }
-            
+
             addChatMessage(content, sender) {
                 const container = document.getElementById('chat-messages');
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'chat-message';
-                
+
                 if (sender === 'user') {
                     messageDiv.innerHTML = `
                         <div class="chat-bubble" style="margin-left: auto; background: rgba(76, 175, 80, 0.2);">
@@ -1129,15 +1217,15 @@
                         <div class="chat-bubble">${content}</div>
                     `;
                 }
-                
+
                 container.appendChild(messageDiv);
                 container.scrollTop = container.scrollHeight;
             }
-            
+
             loadSampleChat() {
                 const container = document.getElementById('chat-messages');
                 container.innerHTML = '';
-                
+
                 // Add sample Robbie message
                 this.addChatMessage(`Good afternoon Allan -
 
@@ -1147,30 +1235,30 @@ Nice work powering through a packed morning — you've already wrapped up 5 meet
 
 With your calendar clear after this, it's a great window to refocus on overdue deals. 🚨 There are several key accounts — like [blue redacted text], and [blue redacted text] that are significantly past their expected close dates. If you have the energy, this evening could be a good time to`, 'robbie');
             }
-            
+
             addTerminalLine(content, type = 'normal') {
                 const container = document.getElementById('terminal-container');
                 const line = document.createElement('div');
                 line.className = `terminal-line ${type}`;
                 line.textContent = content;
-                
+
                 container.appendChild(line);
                 container.scrollTop = container.scrollHeight;
             }
-            
+
             showTerminalPrompt() {
                 // Terminal prompt is always visible
                 document.getElementById('terminal-input').focus();
             }
-            
+
             clearTerminal() {
                 document.getElementById('terminal-container').innerHTML = '';
             }
-            
+
             updateNotes(notes) {
                 const container = document.getElementById('notes-grid');
                 container.innerHTML = '';
-                
+
                 // Sample notes matching the screenshots
                 const sampleNotes = [
                     {
@@ -1229,17 +1317,17 @@ With your calendar clear after this, it's a great window to refocus on overdue d
                         pinned: false
                     }
                 ];
-                
+
                 sampleNotes.forEach(note => {
                     const noteElement = this.createNoteCard(note);
                     container.appendChild(noteElement);
                 });
             }
-            
+
             createNoteCard(note) {
                 const noteDiv = document.createElement('div');
                 noteDiv.className = `note-card ${note.category} ${note.pinned ? 'pinned' : ''}`;
-                
+
                 noteDiv.innerHTML = `
                     <div class="note-category">${note.category.toUpperCase()}</div>
                     <div class="note-title">${note.title}</div>
@@ -1250,10 +1338,10 @@ With your calendar clear after this, it's a great window to refocus on overdue d
                     </div>
                     ${note.attachment ? `<div class="note-attachment">${note.attachment}</div>` : ''}
                 `;
-                
+
                 return noteDiv;
             }
-            
+
             updateComms(messages) {
                 // Update stats
                 const allMsgs = [
@@ -1262,12 +1350,12 @@ With your calendar clear after this, it's a great window to refocus on overdue d
                     ...messages.slack || [],
                     ...messages.notes || []
                 ];
-                
+
                 const unread = allMsgs.filter(msg => !msg.read).length;
                 const emails = (messages.email || []).length;
                 const sms = (messages.sms || []).length;
                 const slack = (messages.slack || []).length;
-                
+
                 document.getElementById('comms-stats').innerHTML = `
                     <div class="stat-card">
                         <div class="stat-number">${allMsgs.length}</div>
@@ -1290,28 +1378,28 @@ With your calendar clear after this, it's a great window to refocus on overdue d
                         <div class="stat-label">Slack</div>
                     </div>
                 `;
-                
+
                 // Update message list
                 const messageList = document.getElementById('message-list');
                 messageList.innerHTML = '';
-                
+
                 allMsgs.slice(0, 10).forEach(message => {
                     const messageElement = this.createMessageElement(message);
                     messageList.appendChild(messageElement);
                 });
             }
-            
+
             createMessageElement(message) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message-item ${message.read ? '' : 'unread'}`;
-                
+
                 const iconMap = {
                     'email': '📧',
                     'sms': '📱',
                     'slack': '💬',
                     'note': '📝'
                 };
-                
+
                 messageDiv.innerHTML = `
                     <div class="message-header">
                         <div class="message-subject">
@@ -1325,27 +1413,28 @@ With your calendar clear after this, it's a great window to refocus on overdue d
                         ${message.body}
                     </div>
                 `;
-                
+
                 return messageDiv;
             }
-            
+
             redirectToLogin() {
                 localStorage.removeItem('aurora_session');
                 localStorage.removeItem('aurora_user');
                 window.location.href = '/';
             }
-            
+
             logout() {
                 if (confirm('Are you sure you want to logout?')) {
                     this.redirectToLogin();
                 }
             }
         }
-        
+
         // Initialize dashboard when page loads
         document.addEventListener('DOMContentLoaded', () => {
             new AuroraDashboard();
         });
     </script>
 </body>
+
 </html>
