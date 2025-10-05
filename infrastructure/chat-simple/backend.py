@@ -143,7 +143,7 @@ async def stream_llm_response(message, websocket):
                             full_response = data.get('response', 'Sorry, I had trouble processing that.')
             except:
                 # Fallback to local Ollama
-            try:
+                try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
                         'http://localhost:11434/api/generate',
