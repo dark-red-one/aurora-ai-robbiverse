@@ -113,7 +113,7 @@ async def stream_llm_response(message, websocket):
                         "personality": "robbie",
                         "stream": False
                     },
-                    timeout=aiohttp.ClientTimeout(total=10)
+                    timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
@@ -126,10 +126,16 @@ async def stream_llm_response(message, websocket):
                         'http://localhost:11434/api/generate',
                         json={
                             "model": "llama3.1:8b",
-                            "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Respond to: {message}",
-                            "stream": False
+                            "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
+                            "stream": False,
+                            "options": {
+                                "temperature": 0.7,
+                                "top_p": 0.9,
+                                "max_tokens": 150,
+                                "stop": ["\n\n"]
+                            }
                         },
-                        timeout=aiohttp.ClientTimeout(total=15)
+                        timeout=aiohttp.ClientTimeout(total=8)
                     ) as response:
                         if response.status == 200:
                             data = await response.json()
@@ -144,7 +150,7 @@ async def stream_llm_response(message, websocket):
         words = full_response.split()
         for word in words:
             await manager.send_streaming_chunk(word + " ", websocket)
-            await asyncio.sleep(0.03)  # Faster streaming
+            await asyncio.sleep(0.01)  # Much faster streaming
         
         await manager.send_stream_complete(websocket)
         
