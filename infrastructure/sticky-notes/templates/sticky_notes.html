@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie F - PIN Code Sticky Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+            color: #cccccc;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .pin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .pin-input {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #4CAF50;
+            backdrop-filter: blur(10px);
+        }
+
+        .pin-input h2 {
+            margin-bottom: 20px;
+            color: #4CAF50;
+            font-size: 1.8em;
+        }
+
+        .pin-input input {
+            width: 200px;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #cccccc;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .pin-input input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .pin-input button {
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .pin-input button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .notes-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            z-index: 999;
+            padding: 10px;
+        }
+
+        .sticky-note {
+            background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+            color: #333;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            font-size: 0.9em;
+        }
+
+        .sticky-note:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 1001;
+        }
+
+        .sticky-note.allan {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+            color: white;
+        }
+
+        .sticky-note.robbie {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .sticky-note.pin {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .sticky-note.twofa {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .sticky-note.critical {
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: rotate(-2deg) scale(1); }
+            50% { transform: rotate(-2deg) scale(1.05); }
+            100% { transform: rotate(-2deg) scale(1); }
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .note-type {
+            font-weight: bold;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .note-time {
+            font-size: 0.7em;
+            opacity: 0.8;
+        }
+
+        .note-content {
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .note-source {
+            font-size: 0.7em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .note-action {
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7em;
+            color: inherit;
+            transition: background 0.3s ease;
+        }
+
+        .note-action:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .add-note-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .add-note-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar styling */
+        .notes-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notes-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .notes-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .notes-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="pin-overlay" id="pin-overlay">
+        <div class="pin-input">
+            <h2>🔐 Enter PIN to View Notes</h2>
+            <input type="password" id="pin-input" placeholder="Enter PIN" maxlength="10">
+            <br>
+            <button onclick="checkPin()">Unlock</button>
+        </div>
+    </div>
+
+    <div class="notes-container hidden" id="notes-container">
+        <!-- Notes will be populated here -->
+    </div>
+
+    <div class="controls hidden" id="controls">
+        <button class="control-btn" onclick="lockNotes()">🔒 Lock</button>
+        <button class="control-btn" onclick="refreshNotes()">🔄 Refresh</button>
+    </div>
+
+    <button class="add-note-btn hidden" id="add-note-btn" onclick="showAddNoteDialog()">+</button>
+
+    <script>
+        let websocket = null;
+        let isUnlocked = false;
+
+        function init() {
+            connectWebSocket();
+            
+            // Allow Enter key to submit PIN
+            document.getElementById('pin-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPin();
+                }
+            });
+        }
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            
+            websocket = new WebSocket(wsUrl);
+            
+            websocket.onopen = () => {
+                console.log('Connected to Sticky Notes');
+            };
+            
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            };
+            
+            websocket.onclose = () => {
+                console.log('Disconnected from Sticky Notes');
+                setTimeout(() => connectWebSocket(), 3000);
+            };
+        }
+
+        function handleMessage(data) {
+            switch (data.type) {
+                case 'pin_verified':
+                    if (data.valid) {
+                        unlockNotes();
+                    } else {
+                        alert('Invalid PIN');
+                    }
+                    break;
+                    
+                case 'notes_update':
+                    updateNotes(data.notes);
+                    break;
+            }
+        }
+
+        function checkPin() {
+            const pin = document.getElementById('pin-input').value;
+            
+            if (websocket) {
+                websocket.send(JSON.stringify({
+                    type: 'verify_pin',
+                    pin: pin
+                }));
+            }
+        }
+
+        function unlockNotes() {
+            isUnlocked = true;
+            document.getElementById('pin-overlay').classList.add('hidden');
+            document.getElementById('notes-container').classList.remove('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('add-note-btn').classList.remove('hidden');
+            
+            // Request current notes
+            if (websocket) {
+                websocket.send(JSON.stringify({
+                    type: 'get_notes'
+                }));
+            }
+        }
+
+        function lockNotes() {
+            isUnlocked = false;
+            document.getElementById('pin-overlay').classList.remove('hidden');
+            document.getElementById('notes-container').classList.add('hidden');
+            document.getElementById('controls').classList.add('hidden');
+            document.getElementById('add-note-btn').classList.add('hidden');
+            document.getElementById('pin-input').value = '';
+        }
+
+        function updateNotes(notes) {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+            
+            // Combine all notes
+            const allNotes = [
+                ...notes.allan_notes,
+                ...notes.robbie_notes,
+                ...notes.pin_codes
+            ];
+            
+            // Sort by timestamp (newest first)
+            allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            allNotes.forEach(note => {
+                const noteElement = createNoteElement(note);
+                container.appendChild(noteElement);
+            });
+        }
+
+        function createNoteElement(note) {
+            const noteDiv = document.createElement('div');
+            noteDiv.className = `sticky-note ${note.type} ${note.priority || ''}`;
+            
+            const typeLabel = note.type === 'allan' ? 'Allan' : 
+                            note.type === 'robbie' ? 'Robbie' : 
+                            note.type === '2fa' ? '2FA' : 
+                            note.type.toUpperCase();
+            
+            noteDiv.innerHTML = `
+                <div class="note-header">
+                    <div class="note-type">${typeLabel}</div>
+                    <div class="note-time">${note.timestamp}</div>
+                </div>
+                <div class="note-content">${note.content}</div>
+                <div class="note-source">${note.source}</div>
+                <div class="note-actions">
+                    <button class="note-action" onclick="copyNote('${note.content}')">Copy</button>
+                    <button class="note-action" onclick="deleteNote('${note.id}')">Delete</button>
+                </div>
+            `;
+            
+            return noteDiv;
+        }
+
+        function copyNote(content) {
+            navigator.clipboard.writeText(content).then(() => {
+                // Show brief success indicator
+                const originalBtn = event.target;
+                const originalText = originalBtn.textContent;
+                originalBtn.textContent = 'Copied!';
+                originalBtn.style.background = '#4CAF50';
+                
+                setTimeout(() => {
+                    originalBtn.textContent = originalText;
+                    originalBtn.style.background = '';
+                }, 1000);
+            });
+        }
+
+        function deleteNote(noteId) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                if (websocket) {
+                    websocket.send(JSON.stringify({
+                        type: 'delete_note',
+                        note_id: noteId
+                    }));
+                }
+            }
+        }
+
+        function showAddNoteDialog() {
+            const content = prompt('Enter note content:');
+            const type = prompt('Note type (allan/robbie/pin/2fa):', 'robbie');
+            
+            if (content && websocket) {
+                websocket.send(JSON.stringify({
+                    type: 'add_note',
+                    note_type: type,
+                    content: content,
+                    source: 'Manual'
+                }));
+            }
+        }
+
+        function refreshNotes() {
+            if (websocket) {
+                websocket.send(JSON.stringify({
+                    type: 'get_notes'
+                }));
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
