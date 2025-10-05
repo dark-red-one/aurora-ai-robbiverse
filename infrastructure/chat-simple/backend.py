@@ -126,7 +126,7 @@ async def stream_llm_response(message, websocket):
                     async with session.post(
                         'http://209.170.80.132:8000/api/generate',
                         json={
-                            "model": "llama3.1:8b",
+                            "model": "qwen2.5:7b",
                             "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
                             "stream": False,
                             "options": {
@@ -148,7 +148,7 @@ async def stream_llm_response(message, websocket):
                     async with session.post(
                         'http://localhost:11434/api/generate',
                         json={
-                            "model": "llama3.1:8b",
+                            "model": "qwen2.5:7b",
                             "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
                             "stream": False,
                             "options": {
