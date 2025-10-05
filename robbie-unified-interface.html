@@ -1638,10 +1638,18 @@
                     img.alt = 'Robbie - Your AI Strategic Partner';
                     img.style.transform = 'scale(1.1)'; // Slightly larger for presence
                     img.onerror = () => {
-                        // 🔴 Fallback if image doesn't load
-                        sidebarFace.innerHTML = '🤖';
-                        sidebarFace.style.fontSize = '80px';
-                        console.log('⚠️ Could not load Robbie avatar PNG - check static path');
+                        // Retry once by recreating the img element instead of emoji fallback
+                        const retry = document.createElement('img');
+                        retry.src = `/static/avatars/${avatarFile}`;
+                        retry.alt = 'Robbie - Your AI Strategic Partner';
+                        retry.style.transform = 'scale(1.1)';
+                        retry.onerror = () => {
+                            // final fallback keeps layout stable
+                            sidebarFace.innerHTML = '';
+                        };
+                        sidebarFace.innerHTML = '';
+                        sidebarFace.appendChild(retry);
+                        console.log('⚠️ Retrying Robbie avatar PNG load');
                     };
                     sidebarFace.appendChild(img);
                 }
