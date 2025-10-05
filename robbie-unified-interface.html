@@ -436,7 +436,8 @@
         }
 
         .message.system {
-            color: #ffaa00;
+            color: #ff6b35;
+            font-weight: 600;
         }
 
         .message.robbie .username {
@@ -986,8 +987,8 @@
         <div class="sidebar-nav">
             <div class="sidebar-logo-centered">
                 <div class="logo-pill">
-                    <img src="/static/logos/testpilot-logo-main.png" alt="TestPilot CPG"
-                        onerror="console.error('❌ Logo failed to load:', this.src);">
+                    <img src="https://i.imgur.com/9vYHxKZ.png" alt="TestPilot CPG"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2230%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23333%22 font-family=%22Arial%22 font-size=%2214%22 font-weight=%22bold%22%3ETestPilot%3C/text%3E%3C/svg%3E';">
                 </div>
             </div>
             <div class="sidebar-nav-item active" data-tab="chat">
@@ -1024,9 +1025,9 @@
             </div>
             <div class="header-right">
                 <div class="header-info">
-                    <span id="currentTime">--:--:--</span> •
-                    <span>CPU: AMD EPYC</span> •
-                    <span>Latency: ~100ms</span>
+                    <span id="localTime">--:--:--</span> •
+                    <span id="localWeather">☁️ --°F</span> •
+                    <span id="nextEvent">📅 No events</span>
                 </div>
             </div>
         </div>
@@ -1062,7 +1063,6 @@
                                 📎
                             </div>
                             -->
-                            <button class="send-button" id="sendButton" title="Send message (Enter)">🚀</button>
                         </div>
                     </div>
 
@@ -1272,19 +1272,21 @@
             updateClock() {
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-                document.getElementById('currentTime').textContent = timeStr;
-                document.getElementById('statusRight').textContent = `${timeStr.split(':')[0]}:${timeStr.split(':')[1]} | Latency: ~100ms`;
+                const currentTimeEl = document.getElementById('currentTime');
+                const statusRightEl = document.getElementById('statusRight');
+                if (currentTimeEl) currentTimeEl.textContent = timeStr;
+                if (statusRightEl) statusRightEl.textContent = `${timeStr.split(':')[0]}:${timeStr.split(':')[1]} | Latency: ~100ms`;
             }
 
             initializeBootSequence() {
                 const bootLines = [
-                    'ROBBIE TERMINAL SYSTEM v3.0',
-                    'Initializing neural networks...',
-                    '[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)',
-                    '[OK] LLM loaded: qwen2.5:7b (Robbie personality)',
-                    '[OK] WebSocket connection established',
-                    '[OK] VPN tunnel: aurora-town active',
-                    '[READY] Robbie personality systems online'
+                    '<span style="color: #ff6b35; font-weight: 600;">ROBBIE TERMINAL SYSTEM v3.0</span>',
+                    '<span style="color: #ff6b35;">Initializing neural networks...</span>',
+                    '<span style="color: #ff6b35;">[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)</span>',
+                    '<span style="color: #ff6b35;">[OK] LLM loaded: qwen2.5:7b (Robbie personality)</span>',
+                    '<span style="color: #ff6b35;">[OK] WebSocket connection established</span>',
+                    '<span style="color: #ff6b35;">[OK] VPN tunnel: aurora-town active</span>',
+                    '<span style="color: #ff6b35; font-weight: 600;">[READY] Robbie personality systems online</span>'
                 ];
 
                 // Robbie Avatar (17 lines of HTML pixel art - 50 blocks wide!)
@@ -1410,28 +1412,6 @@
                         this.sendMessage();
                     }
                 });
-
-                // Handle file uploads with vision analysis
-                const fileInput = document.getElementById('fileInput');
-                const fileAttachments = document.getElementById('fileAttachments');
-                this.attachedFiles = [];
-
-                fileInput.addEventListener('change', async (e) => {
-                    const files = Array.from(e.target.files);
-                    for (const file of files) {
-                        // Check if it's an image for vision analysis
-                        if (file.type.startsWith('image/')) {
-                            await this.analyzeImage(file);
-                        }
-                        this.attachedFiles.push(file);
-                        this.addFileTag(file);
-                    }
-                    fileInput.value = ''; // Reset input
-                });
-
-                // Handle send button click
-                const sendButton = document.getElementById('sendButton');
-                sendButton.addEventListener('click', () => this.sendMessage());
             }
 
             async analyzeImage(file) {
@@ -1629,6 +1609,10 @@
             updateSystemMonitors();
             setInterval(updateSystemMonitors, 2000);
 
+            // 🕐 Start time/weather/event updates (every second)
+            updateHeaderInfo();
+            setInterval(updateHeaderInfo, 1000);
+
             // 💡 Render Robbie's beautiful PNG face in sidebar
             setTimeout(() => {
                 const sidebarFace = document.getElementById('robbieAvatarSidebar');
@@ -1706,6 +1690,23 @@
             }
         }
 
+        // 🕐 Update local time, weather, and next event
+        function updateHeaderInfo() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const timeEl = document.getElementById('localTime');
+            if (timeEl) timeEl.textContent = timeStr;
+
+            // Mock weather (replace with real API)
+            const temp = 72 + Math.floor(Math.random() * 5);
+            const weatherEl = document.getElementById('localWeather');
+            if (weatherEl) weatherEl.textContent = `☀️ ${temp}°F`;
+
+            // Mock next event (replace with calendar API)
+            const eventEl = document.getElementById('nextEvent');
+            if (eventEl) eventEl.textContent = `📅 Team Meeting, 15 min`;
+        }
+
         // 💕 Function to change Robbie's mood/expression
         function setMood(moodName, imageName) {
             const avatarFace = document.getElementById('robbieAvatarSidebar');
@@ -1757,4 +1758,4 @@
     </script>
 </body>
 
-</html>--:--:-- • CPU: AMD EPYC • Latency: ~100ms
+</html>
