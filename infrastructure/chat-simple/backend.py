@@ -124,7 +124,7 @@ async def stream_llm_response(message, websocket):
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
-                        'http://209.170.80.132:11434/api/generate',
+                        'http://localhost:11435/api/generate',
                         json={
                             "model": "qwen2.5:7b",
                                 "prompt": f"You are Robbie, Allan's AI executive assistant and strategic partner at TestPilot CPG. Core traits: thoughtful, direct, curious, honest, pragmatic. Use strategic emojis (✅ 🔴 💰 🚀 ⚠️ 💡 📊 🎯). Be revenue-focused, challenge thinking, get to the point. No fluff. Respond to: {message}",
