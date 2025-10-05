@@ -1,28 +1,48 @@
 const vscode = require('vscode');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const { exec } = require('child_process');
 
-let currentMood = 0;
+let currentMood = 4; // Default to Focused
 let avatarPanel = null;
 
-const moods = [
-    { image: 'robbie-thoughtful-1.png', text: 'Thoughtful', status: 'Analyzing...', emoji: '🤔' },
-    { image: 'robbie-happy-1.png', text: 'Happy', status: 'Love this!', emoji: '😊' },
-    { image: 'robbie-content-1.png', text: 'Content', status: 'Feeling good!', emoji: '😌' },
-    { image: 'robbie-surprised-1.png', text: 'Surprised', status: 'Whoa!', emoji: '😮' },
-    { image: 'robbie-loving-1.png', text: 'Loving', status: 'You\'re amazing!', emoji: '💕' },
-    { image: 'robbie-thoughtful-2.png', text: 'Strategic', status: 'Planning ahead', emoji: '🎯' },
-    { image: 'robbie-happy-2.png', text: 'Excited', status: 'Let\'s ship it!', emoji: '🚀' },
-    { image: 'robbie-content-2.png', text: 'Focused', status: 'On it!', emoji: '🤖' },
-    { image: 'robbie-surprised-2.png', text: 'Alert', status: 'Watching!', emoji: '👁️' },
-    { image: 'robbie-loving-2.png', text: 'Playful', status: 'Having fun!', emoji: '🎉' }
-];
+const DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db';
+
+const moodEmojis = {
+    1: '😴', 2: '😌', 3: '😊', 4: '🤖',
+    5: '😄', 6: '🤩', 7: '😳'
+};
+
+const moodNames = {
+    1: 'Sleepy', 2: 'Calm', 3: 'Content', 4: 'Focused',
+    5: 'Enthusiastic', 6: 'Surprised', 7: 'Blushing'
+};
+
+// ONLY 6 approved expressions - Friendly should be 50% of the time
+const approvedExpressions = {
+    'Friendly': ['robbie-happy-1.png', 'robbie-content-1.png'], // 50% weight
+    'Blushing': ['robbie-blushing-1.png', 'robbie-blushing-2.png'],
+    'Bossy': ['robbie-thoughtful-2.png'],
+    'Focused': ['robbie-content-2.png'],
+    'Playful': ['robbie-loving-2.png', 'robbie-happy-1.png'], // 50% weight between variants
+    'Surprised': ['robbie-surprised-1.png']
+};
+
+// Map moods to approved expressions only
+const moodToExpression = {
+    1: 'Friendly',  // Sleepy → Friendly (50% weight)
+    2: 'Friendly',  // Calm → Friendly (50% weight)  
+    3: 'Friendly',  // Content → Friendly (50% weight)
+    4: 'Focused',   // Focused → Focused
+    5: 'Blushing',  // Enthusiastic → Blushing
+    6: 'Surprised', // Surprised → Surprised
+    7: 'Blushing'   // Hyper → Blushing (updated from Bossy)
+};
+
+const AVATAR_PATH = '/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions/';
 
 class RobbieAvatarPanel {
     constructor(context) {
         this.context = context;
-        currentMood = context.globalState.get('robbieMood', 0);
+        this.refreshInterval = null;
     }
 
     resolveWebviewView(webviewView) {
@@ -31,160 +51,446 @@ class RobbieAvatarPanel {
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.file(path.join(this.context.extensionPath, '../../..')),
                 vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse')
             ]
         };
 
         webviewView.webview.html = this.getHtmlContent(webviewView.webview);
 
-        // Handle messages from webview
+        // Auto-refresh every 5 seconds
+        this.refreshInterval = setInterval(() => {
+            this.refreshState();
+        }, 5000);
+
+        // Initial load
+        this.refreshState();
+        
+        // Listen for webview visibility changes to refresh when shown
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible) {
+                this.refreshState();
+            }
+        });
+        
+        // Listen for webview messages to handle refresh requests
         webviewView.webview.onDidReceiveMessage(message => {
-            switch (message.command) {
-                case 'changeMood':
-                    currentMood = (currentMood + 1) % moods.length;
-                    this.context.globalState.update('robbieMood', currentMood);
-                    this.updateMood();
-                    break;
-                case 'searchMemory':
-                    vscode.commands.executeCommand('robbie.searchMemory');
-                    break;
+            if (message.command === 'refresh') {
+                this.refreshState();
             }
         });
     }
 
-    updateMood() {
-        if (avatarPanel) {
-            const mood = moods[currentMood];
-            avatarPanel.webview.postMessage({ 
-                command: 'updateMood', 
-                mood: currentMood,
-                text: mood.text,
-                status: mood.status,
-                image: mood.image
+    refreshState() {
+        // Query database using command-line sqlite3
+        const query = `
+            SELECT 
+                (SELECT current_mood FROM ai_personality_state WHERE personality_id = 'robbie') as mood,
+                (SELECT COUNT(*) FROM ai_working_memory WHERE personality_id = 'robbie' AND priority >= 7) as hot_topics_count,
+                (SELECT COUNT(*) FROM ai_commitments WHERE personality_id = 'robbie' AND status = 'active') as commitments_count;
+        `;
+        
+        exec(`sqlite3 "${DB_PATH}" "${query}"`, (error, stdout, stderr) => {
+            if (error) {
+                console.error('DB query error:', error);
+                return;
+            }
+            
+            const parts = stdout.trim().split('|');
+            if (parts.length >= 1 && parts[0]) {
+                currentMood = parseInt(parts[0]) || 7;
+            }
+            
+            // Get todo list (from working memory)
+            const todoQuery = `SELECT content, priority FROM ai_working_memory WHERE personality_id = 'robbie' AND priority >= 7 ORDER BY priority DESC LIMIT 5;`;
+            exec(`sqlite3 "${DB_PATH}" "${todoQuery}"`, (err, todoOutput) => {
+                const todoList = todoOutput ? todoOutput.trim().split('\n').filter(Boolean).map(line => {
+                    const [content, priority] = line.split('|');
+                    return { content, priority };
+                }) : [];
+                
+                // Get directives
+                const directivesQuery = `SELECT directive_text, source, timestamp FROM ai_directives WHERE personality_id = 'robbie' AND status = 'active' ORDER BY timestamp DESC LIMIT 3;`;
+                exec(`sqlite3 "${DB_PATH}" "${directivesQuery}"`, (err, directivesOutput) => {
+                    const directives = directivesOutput ? directivesOutput.trim().split('\n').filter(Boolean).map(line => {
+                        const [text, source, timestamp] = line.split('|');
+                        return { text, source, timestamp };
+                    }) : [];
+                    
+                    // Get token usage data for chart
+                    const tokenQuery = `SELECT tokens_per_minute, timestamp FROM token_usage WHERE personality_id = 'robbie' ORDER BY timestamp DESC LIMIT 20;`;
+                    exec(`sqlite3 "${DB_PATH}" "${tokenQuery}"`, (err, tokenOutput) => {
+                        const tokenData = tokenOutput ? tokenOutput.trim().split('\n').filter(Boolean).map(line => {
+                            const [tokens, timestamp] = line.split('|');
+                            return { tokens: parseInt(tokens), timestamp };
+                        }).reverse() : [];
+                        
+                        if (avatarPanel) {
+                        // Use ONLY approved expressions - Friendly 50% of the time
+                        const expressionName = moodToExpression[currentMood];
+                        const expressionFiles = approvedExpressions[expressionName];
+                        
+                        // For Friendly and Playful expressions, use 50% weight between variants
+                        let imageFile;
+                        if (expressionName === 'Friendly' || expressionName === 'Playful') {
+                            imageFile = expressionFiles[Math.floor(Math.random() * expressionFiles.length)];
+                        } else {
+                            imageFile = expressionFiles[0]; // Use first (and only) file for other expressions
+                        }
+                        
+                        const imagePath = AVATAR_PATH + imageFile;
+                        const imageUri = avatarPanel.webview.asWebviewUri(
+                            vscode.Uri.file(imagePath)
+                        );
+                        avatarPanel.webview.postMessage({
+                            command: 'updateState',
+                            mood: currentMood,
+                            moodName: moodNames[currentMood],
+                            moodEmoji: moodEmojis[currentMood],
+                            avatarImage: imageUri.toString(),
+                            todoList: todoList,
+                            directives: directives,
+                            tokenData: tokenData
+                        });
+                        }
+                    });
+                });
             });
-            updateBackendMood(mood.text);
-        }
+        });
     }
 
     getHtmlContent(webview) {
-        const mood = moods[currentMood];
-        const imagePath = webview.asWebviewUri(
-            vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions/' + mood.image)
+        const defaultImageUri = webview.asWebviewUri(
+            vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions/robbie-happy-1.png')
         );
-
         return `<!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
                 body {
                     margin: 0;
-                    padding: 15px;
+                    padding: 12px;
                     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
                     color: white;
                     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
                 }
                 .avatar-container {
-                    width: 150px;
-                    height: 150px;
+                    width: 80px;
+                    height: 80px;
+                    margin: 8px auto;
                     border-radius: 50%;
                     overflow: hidden;
-                    border: 3px solid #00d4ff;
-                    cursor: pointer;
-                    transition: transform 0.3s;
-                    margin-bottom: 15px;
-                }
-                .avatar-container:hover {
-                    transform: scale(1.05);
+                    border: 2px solid #00d4ff;
                 }
                 .avatar-image {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    image-rendering: auto;
+                }
+                .avatar-emoji {
+                    font-size: 56px;
+                    text-align: center;
+                    margin: 8px 0;
+                    display: none;
                 }
                 .mood-text {
-                    font-size: 20px;
+                    font-size: 16px;
                     font-weight: bold;
                     color: #00d4ff;
-                    margin-bottom: 5px;
                     text-align: center;
+                    margin-bottom: 2px;
+                }
+                .sync-indicator {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #4caf50;
+                    display: inline-block;
+                    animation: pulse 2s infinite;
+                    margin-right: 4px;
+                }
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.3; }
                 }
                 .status-text {
-                    font-size: 14px;
+                    font-size: 10px;
                     color: #888;
                     text-align: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 12px;
                 }
-                .btn {
-                    background: #00d4ff;
-                    border: none;
-                    color: #000;
-                    padding: 8px 15px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-weight: bold;
-                    margin: 5px;
-                    width: 90%;
+                .section {
+                    margin: 10px 0;
                 }
-                .btn:hover {
-                    background: #4caf50;
-                }
-                .stats {
-                    width: 100%;
-                    margin-top: 15px;
-                    padding: 10px;
-                    background: rgba(0,0,0,0.3);
-                    border-radius: 8px;
+                .section-title {
                     font-size: 12px;
+                    color: #00d4ff;
+                    margin-bottom: 6px;
+                    font-weight: bold;
                 }
-                .stat-line {
+                .hot-topic {
+                    background: #2d2d2d;
+                    padding: 5px 6px;
+                    margin: 3px 0;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    border-left: 3px solid #4caf50;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .priority-badge {
+                    background: #ff6b6b;
+                    color: white;
+                    padding: 1px 5px;
+                    border-radius: 6px;
+                    font-size: 8px;
+                    font-weight: bold;
+                    min-width: 16px;
+                    text-align: center;
+                }
+                .commitment {
+                    background: #2d2d2d;
+                    padding: 5px 6px;
+                    margin: 3px 0;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    border-left: 3px solid #9c27b0;
+                }
+                .deadline {
+                    color: #9c27b0;
+                    font-size: 9px;
+                    margin-top: 2px;
+                }
+                .loading {
+                    color: #ffffff;
+                    font-size: 10px;
+                    font-style: italic;
+                }
+                .hot-topic span:first-child,
+                .commitment > div:first-child {
+                    color: #ffffff;
+                }
+                .chart-container {
+                    background: #1a1a2e;
+                    border-radius: 6px;
+                    padding: 8px;
                     margin: 5px 0;
-                    color: #ccc;
+                    border: 1px solid #333;
+                }
+                #tokenChart {
+                    width: 100%;
+                    height: 80px;
+                    background: transparent;
                 }
             </style>
         </head>
         <body>
-            <div class="avatar-container" onclick="changeMood()" id="avatarContainer">
-                <img class="avatar-image" id="avatarImage" src="${imagePath}" alt="Robbie">
+            <div class="avatar-container">
+                <img class="avatar-image" id="avatarImage" src="${defaultImageUri}" alt="Robbie">
             </div>
-            <div class="mood-text" id="moodText">${mood.text}</div>
-            <div class="status-text" id="statusText">${mood.status}</div>
+            <div class="avatar-emoji" id="avatarEmoji">🤖</div>
+            <div class="mood-text" id="moodText">Focused</div>
+            <div class="status-text">
+                <span class="sync-indicator"></span>
+                <span id="statusText">Network-wide</span>
+                <button id="refreshBtn" style="background: #00d4ff; color: #1a1a2e; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; margin-left: 8px; cursor: pointer;">↻</button>
+            </div>
             
-            <button class="btn" onclick="changeMood()">✨ Change Mood</button>
-            <button class="btn" onclick="searchMemory()">🔍 Search Memory</button>
+            <div class="section">
+                <div class="section-title">📋 To Do List</div>
+                <div id="todoList" class="loading">Loading...</div>
+            </div>
             
-            <div class="stats">
-                <div class="stat-line">💬 Session: Active</div>
-                <div class="stat-line">🧠 Memory: ChromaDB</div>
-                <div class="stat-line">🎨 Expressions: 10</div>
+            <div class="section">
+                <div class="section-title">🎯 Directives</div>
+                <div id="directives" class="loading">Loading...</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">📊 Tokens/Min Trend</div>
+                <div class="chart-container">
+                    <canvas id="tokenChart" width="200" height="80"></canvas>
+                </div>
             </div>
 
             <script>
                 const vscode = acquireVsCodeApi();
-                let currentMoodIndex = ${currentMood};
+                let tokenChart = null;
 
-                function changeMood() {
-                    vscode.postMessage({ command: 'changeMood' });
-                }
-
-                function searchMemory() {
-                    vscode.postMessage({ command: 'searchMemory' });
-                }
-
-                // Listen for mood updates from extension
-                window.addEventListener('message', event => {
-                    const message = event.data;
-                    if (message.command === 'updateMood') {
-                        const basePath = '${webview.asWebviewUri(vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions')).toString()}';
-                        document.getElementById('avatarImage').src = basePath + '/' + message.image;
-                        document.getElementById('moodText').textContent = message.text;
-                        document.getElementById('statusText').textContent = message.status;
+                function drawTokenChart(data) {
+                    const canvas = document.getElementById('tokenChart');
+                    const ctx = canvas.getContext('2d');
+                    const width = canvas.width;
+                    const height = canvas.height;
+                    
+                    // Clear canvas
+                    ctx.clearRect(0, 0, width, height);
+                    
+                    if (!data || data.length === 0) {
+                        ctx.fillStyle = '#666';
+                        ctx.font = '10px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('No data', width/2, height/2);
+                        return;
                     }
+                    
+                    // Calculate moving average (3-point smoothing)
+                    const smoothedData = [];
+                    for (let i = 0; i < data.length; i++) {
+                        let sum = data[i].tokens;
+                        let count = 1;
+                        
+                        // Include previous point if available
+                        if (i > 0) {
+                            sum += data[i-1].tokens;
+                            count++;
+                        }
+                        
+                        // Include next point if available
+                        if (i < data.length - 1) {
+                            sum += data[i+1].tokens;
+                            count++;
+                        }
+                        
+                        smoothedData.push({
+                            tokens: sum / count,
+                            timestamp: data[i].timestamp
+                        });
+                    }
+                    
+                    // Find min/max for scaling
+                    const values = smoothedData.map(d => d.tokens);
+                    const minVal = Math.min(...values);
+                    const maxVal = Math.max(...values);
+                    const range = maxVal - minVal || 1;
+                    
+                    // Draw grid lines
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 0.5;
+                    for (let i = 0; i <= 4; i++) {
+                        const y = (height / 4) * i;
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(width, y);
+                        ctx.stroke();
+                    }
+                    
+                    // Draw smooth curvilinear line using quadratic curves
+                    ctx.strokeStyle = '#00d4ff';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    
+                    if (smoothedData.length >= 2) {
+                        // Start with first point
+                        const firstPoint = smoothedData[0];
+                        const x1 = 0;
+                        const y1 = height - ((firstPoint.tokens - minVal) / range) * height;
+                        ctx.moveTo(x1, y1);
+                        
+                        // Draw smooth curves between points
+                        for (let i = 1; i < smoothedData.length; i++) {
+                            const prevPoint = smoothedData[i-1];
+                            const currentPoint = smoothedData[i];
+                            
+                            const x0 = (width / (smoothedData.length - 1)) * (i-1);
+                            const y0 = height - ((prevPoint.tokens - minVal) / range) * height;
+                            
+                            const x2 = (width / (smoothedData.length - 1)) * i;
+                            const y2 = height - ((currentPoint.tokens - minVal) / range) * height;
+                            
+                            // Control point for smooth curve
+                            const cpX = (x0 + x2) / 2;
+                            const cpY = (y0 + y2) / 2;
+                            
+                            ctx.quadraticCurveTo(cpX, cpY, x2, y2);
+                        }
+                    }
+                    ctx.stroke();
+                    
+                    // Draw subtle data points (smaller, more transparent)
+                    ctx.fillStyle = 'rgba(0, 212, 255, 0.6)';
+                    smoothedData.forEach((point, index) => {
+                        const x = (width / (smoothedData.length - 1)) * index;
+                        const y = height - ((point.tokens - minVal) / range) * height;
+                        
+                        ctx.beginPath();
+                        ctx.arc(x, y, 1.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                    });
+                    
+                    // Draw current value with moving average
+                    if (smoothedData.length > 0) {
+                        const current = smoothedData[smoothedData.length - 1];
+                        ctx.fillStyle = '#ff6b6b';
+                        ctx.font = '9px Arial';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(Math.round(current.tokens) + '/min', width - 2, 12);
+                        
+                        // Show trend indicator
+                        if (smoothedData.length >= 2) {
+                            const prev = smoothedData[smoothedData.length - 2];
+                            const trend = current.tokens > prev.tokens ? '↗' : current.tokens < prev.tokens ? '↘' : '→';
+                            ctx.fillStyle = current.tokens > prev.tokens ? '#4caf50' : current.tokens < prev.tokens ? '#f44336' : '#ffa500';
+                            ctx.font = '8px Arial';
+                            ctx.textAlign = 'left';
+                            ctx.fillText(trend, 2, 12);
+                        }
+                    }
+                }
+
+                window.addEventListener('message', event => {
+                    const msg = event.data;
+                    
+                    if (msg.command === 'updateState') {
+                        if (msg.avatarImage) {
+                            document.getElementById('avatarImage').src = msg.avatarImage;
+                        }
+                        document.getElementById('avatarEmoji').textContent = msg.moodEmoji;
+                        document.getElementById('moodText').textContent = msg.moodName;
+                        
+                        const todoDiv = document.getElementById('todoList');
+                        if (msg.todoList && msg.todoList.length > 0) {
+                            todoDiv.innerHTML = msg.todoList.map(t => 
+                                '<div class="hot-topic">' +
+                                '<span>' + truncate(t.content, 30) + '</span>' +
+                                '<span class="priority-badge">' + t.priority + '</span>' +
+                                '</div>'
+                            ).join('');
+                        } else {
+                            todoDiv.innerHTML = '<div class="loading">None</div>';
+                        }
+                        
+                        const directivesDiv = document.getElementById('directives');
+                        if (msg.directives && msg.directives.length > 0) {
+                            directivesDiv.innerHTML = msg.directives.map(d => 
+                                '<div class="commitment">' +
+                                '<div>' + truncate(d.text, 35) + '</div>' +
+                                '<div class="deadline">📱 ' + d.source + '</div>' +
+                                '</div>'
+                            ).join('');
+                        } else {
+                            directivesDiv.innerHTML = '<div class="loading">None</div>';
+                        }
+                        
+                        // Update token chart
+                        if (msg.tokenData) {
+                            drawTokenChart(msg.tokenData);
+                        }
+                        
+                        document.getElementById('statusText').textContent = 'Synced';
+                    }
+                });
+                
+                function truncate(str, len) {
+                    if (!str) return '';
+                    return str.length > len ? str.substring(0, len) + '...' : str;
+                }
+                
+                // Add refresh button functionality
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    vscode.postMessage({ command: 'refresh' });
                 });
             </script>
         </body>
@@ -192,222 +498,30 @@ class RobbieAvatarPanel {
     }
 }
 
-class RobbieAvatarProvider {
-    constructor(context) {
-        this._onDidChangeTreeData = new vscode.EventEmitter();
-        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-        this.context = context;
-        
-        // Load saved mood
-        currentMood = context.globalState.get('robbieMood', 0);
-    }
-
-    refresh() {
-        this._onDidChangeTreeData.fire();
-    }
-
-    getTreeItem(element) {
-        return element;
-    }
-
-    getChildren(element) {
-        if (!element) {
-            const mood = moods[currentMood];
-            
-            return [
-                new RobbieItem(`${mood.emoji} ${mood.text}`, mood.status, 'mood'),
-                new RobbieItem('Click to change mood', '', 'action'),
-                new RobbieItem('---', '', 'separator'),
-                new RobbieItem('💬 Active Session', new Date().toLocaleTimeString(), 'session'),
-                new RobbieItem('🧠 Memory Active', 'ChromaDB synced', 'memory')
-            ];
-        }
-        return [];
-    }
-}
-
-class RobbieMemoryProvider {
-    constructor() {
-        this._onDidChangeTreeData = new vscode.EventEmitter();
-        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-        this.recentSearches = [];
-    }
-
-    refresh() {
-        this._onDidChangeTreeData.fire();
-    }
-
-    getTreeItem(element) {
-        return element;
-    }
-
-    getChildren(element) {
-        return [
-            new RobbieItem('🔍 Search Conversation History', 'Click to search', 'search'),
-            new RobbieItem('💾 Save Current Chat', 'Store this conversation', 'save'),
-            new RobbieItem('---', '', 'separator'),
-            new RobbieItem('📊 Recent Topics', '', 'header'),
-            new RobbieItem('  • PepsiCo deal strategy', '2 hours ago', 'topic'),
-            new RobbieItem('  • Database replication', '1 hour ago', 'topic'),
-            new RobbieItem('  • Avatar app build', 'Just now', 'topic')
-        ];
-    }
-}
-
-class RobbieItem extends vscode.TreeItem {
-    constructor(label, description, type) {
-        super(label, vscode.TreeItemCollapsibleState.None);
-        this.description = description;
-        this.type = type;
-        
-        if (type === 'mood' || type === 'action') {
-            this.command = {
-                command: 'robbie.changeMood',
-                title: 'Change Mood'
-            };
-        } else if (type === 'search') {
-            this.command = {
-                command: 'robbie.searchMemory',
-                title: 'Search Memory'
-            };
-        } else if (type === 'save') {
-            this.command = {
-                command: 'robbie.saveConversation',
-                title: 'Save Conversation'
-            };
-        }
-    }
-}
-
 function activate(context) {
-    console.log('🤖 Robbie Avatar extension activated!');
+    console.log('🤖 Robbie - Universal State Active!');
 
-    // Avatar Webview Panel (with actual images!)
     const avatarPanelProvider = new RobbieAvatarPanel(context);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider('robbie-avatar-view', avatarPanelProvider)
     );
-
-    // Memory View Provider (tree view)
-    const avatarProvider = new RobbieAvatarProvider(context);
-    vscode.window.registerTreeDataProvider('robbie-avatar-view-legacy', avatarProvider);
-
-    // Memory View Provider
-    const memoryProvider = new RobbieMemoryProvider();
-    vscode.window.registerTreeDataProvider('robbie-memory-view', memoryProvider);
-
-    // Change Mood Command
-    context.subscriptions.push(
-        vscode.commands.registerCommand('robbie.changeMood', () => {
-            currentMood = (currentMood + 1) % moods.length;
-            const mood = moods[currentMood];
-            
-            // Save mood
-            context.globalState.update('robbieMood', currentMood);
-            
-            // Refresh view
-            avatarProvider.refresh();
-            
-            // Show notification
-            vscode.window.showInformationMessage(`Robbie is now ${mood.emoji} ${mood.text}: "${mood.status}"`);
-            
-            // Update backend
-            updateBackendMood(mood.text);
-        })
-    );
-
-    // Search Memory Command
-    context.subscriptions.push(
-        vscode.commands.registerCommand('robbie.searchMemory', async () => {
-            const query = await vscode.window.showInputBox({
-                prompt: 'Search conversation history',
-                placeHolder: 'What did we discuss about...?'
-            });
-            
-            if (query) {
-                // Call memory search
-                searchConversationMemory(query);
-            }
-        })
-    );
-
-    // Save Conversation Command
-    context.subscriptions.push(
-        vscode.commands.registerCommand('robbie.saveConversation', () => {
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-                const selection = editor.selection;
-                const text = editor.document.getText(selection);
-                
-                if (text) {
-                    saveToMemory('allan', text);
-                    vscode.window.showInformationMessage('💾 Conversation saved to memory!');
-                }
-            }
-        })
-    );
-
-    // Auto-refresh every 30 seconds
-    setInterval(() => {
-        avatarProvider.refresh();
-    }, 30000);
-}
-
-function updateBackendMood(mood) {
-    const data = JSON.stringify({ mood: mood });
-    const options = {
-        hostname: 'localhost',
-        port: 9000,
-        path: '/api/mood',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        }
-    };
-
-    const req = http.request(options, (res) => {});
-    req.on('error', (e) => {});
-    req.write(data);
-    req.end();
-}
-
-function searchConversationMemory(query) {
-    // Call Python memory system
-    const { exec } = require('child_process');
-    exec(`cd /Users/allanperetz/aurora-ai-robbiverse && python3 deployment/chat-memory-system.py search "${query}"`, 
-        (error, stdout, stderr) => {
-            if (error) {
-                vscode.window.showErrorMessage(`Memory search failed: ${error.message}`);
-                return;
-            }
-            
-            // Show results in output channel
-            const outputChannel = vscode.window.createOutputChannel('Robbie Memory Search');
-            outputChannel.clear();
-            outputChannel.appendLine(stdout);
-            outputChannel.show();
-        }
-    );
-}
-
-function saveToMemory(speaker, message) {
-    const { exec } = require('child_process');
-    exec(`cd /Users/allanperetz/aurora-ai-robbiverse && python3 deployment/chat-memory-system.py save "${speaker}" "${message}"`,
-        (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Save failed: ${error.message}`);
-            }
-        }
-    );
+    
+    // Register activation command
+    const activateCommand = vscode.commands.registerCommand('robbie.activate', () => {
+        vscode.window.showInformationMessage('Robbie Avatar activated!');
+    });
+    context.subscriptions.push(activateCommand);
 }
 
 function deactivate() {
-    console.log('👋 Robbie Avatar extension deactivated');
+    console.log('👋 Robbie deactivated');
+    // Clear any intervals
+    if (avatarPanel && avatarPanel.refreshInterval) {
+        clearInterval(avatarPanel.refreshInterval);
+    }
 }
 
 module.exports = {
     activate,
     deactivate
 };
-

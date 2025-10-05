@@ -30,25 +30,13 @@
           "id": "robbie-avatar-view",
           "name": "Avatar & Status",
           "type": "webview"
-        },
-        {
-          "id": "robbie-memory-view",
-          "name": "Conversation Memory"
         }
       ]
     },
     "commands": [
       {
-        "command": "robbie.changeMood",
-        "title": "Robbie: Change Mood"
-      },
-      {
-        "command": "robbie.searchMemory",
-        "title": "Robbie: Search Memory"
-      },
-      {
-        "command": "robbie.saveConversation",
-        "title": "Robbie: Save Conversation"
+        "command": "robbie.activate",
+        "title": "Activate Robbie Avatar"
       }
     ]
   }

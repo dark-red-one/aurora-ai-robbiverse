@@ -16,7 +16,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/workspace/logs/data-import.log'),
+        logging.FileHandler('/Users/allanperetz/aurora-ai-robbiverse/logs/data-import.log'),
         logging.StreamHandler()
     ]
 )
@@ -152,7 +152,12 @@ class MasterImporter:
         """Create sample data for testing"""
         logger.info("📊 Creating sample TestPilot data...")
         
-        import psycopg2
+        try:
+            import psycopg2
+        except ImportError:
+            logger.error("❌ psycopg2 not installed - cannot create sample data")
+            return {"sample_records": 0}
+        
         conn = self.get_db_connection()
         
         try:
@@ -202,6 +207,7 @@ class MasterImporter:
             conn.close()
     
     def get_db_connection(self):
+        import psycopg2
         return psycopg2.connect(**self.db_config)
     
     def run_complete_import(self) -> Dict:

@@ -2,58 +2,105 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Robbie Avatar</title>
+    <title>Robbie - Universal State</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            width: 200px;
-            height: 280px;
+            width: 280px;
+            height: 420px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             border-radius: 20px;
             border: 3px solid #00d4ff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            padding: 15px;
             font-family: 'Segoe UI', sans-serif;
             color: white;
-            overflow: hidden;
+            overflow-y: auto;
             -webkit-app-region: drag;
         }
         .avatar-container {
-            width: 120px;
-            height: 120px;
+            width: 72px; /* 40% smaller: 120px → 72px */
+            height: 72px;
             border-radius: 50%;
             background: #2d2d2d;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: transform 0.3s;
+            margin-bottom: 10px;
             -webkit-app-region: no-drag;
         }
-        .avatar-container:hover {
-            transform: scale(1.1);
-        }
-        .avatar-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
         .avatar-emoji {
-            font-size: 80px;
+            font-size: 48px; /* 40% smaller: 80px → 48px */
+            image-rendering: pixelated; /* Pixelated effect */
+            filter: contrast(1.2);
         }
         .mood-text {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #00d4ff;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .status-text {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
+            margin-bottom: 10px;
+        }
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .section {
+            width: 100%;
+            margin-bottom: 12px;
+            -webkit-app-region: no-drag;
+        }
+        .section-title {
+            font-size: 12px;
+            color: #00d4ff;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .hot-topic {
+            background: #2d2d2d;
+            padding: 6px;
+            margin: 3px 0;
+            border-radius: 4px;
+            font-size: 10px;
+            border-left: 3px solid #ff6b6b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .priority-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        .commitment {
+            background: #2d2d2d;
+            padding: 6px;
+            margin: 3px 0;
+            border-radius: 4px;
+            font-size: 10px;
+            border-left: 3px solid #ffa500;
+        }
+        .deadline {
+            color: #ffa500;
+            font-size: 9px;
+            margin-top: 2px;
         }
         .controls {
             position: absolute;
@@ -75,81 +122,123 @@
         .btn:hover {
             background: #4caf50;
         }
+        .db-status {
+            font-size: 9px;
+            color: #4caf50;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="avatar-container" onclick="changeMood()" id="avatarContainer">
-        <img class="avatar-image" id="avatarImage" src="../infrastructure/robbie-avatar/expressions/robbie-thoughtful-1.png" alt="Robbie">
+    <div class="avatar-container">
+        <div class="avatar-emoji" id="avatarEmoji">🔥</div>
     </div>
-    <div class="mood-text" id="moodText">Focused</div>
-    <div class="status-text" id="statusText">Ready to help!</div>
+    <div class="mood-text" id="moodText">Hyper</div>
+    <div class="status-text">
+        <span class="sync-indicator"></span> Network-wide state
+    </div>
+    <div class="db-status">💾 SQL: <span id="dbStatus">Connecting...</span></div>
     
-    <div class="controls">
-        <button class="btn" onclick="toggleAlwaysOnTop()">📌 Pin</button>
-        <button class="btn" onclick="window.close()">✕</button>
+    <div class="section">
+        <div class="section-title">🔥 Hot Topics</div>
+        <div id="hotTopics">Loading...</div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">📌 Commitments</div>
+        <div id="commitments">Loading...</div>
     </div>
 
     <script>
-        let currentMood = 0;
-        const moods = [
-            { image: 'robbie-thoughtful-1.png', text: 'Thoughtful', status: 'Analyzing...', bg: '#1a1a2e' },
-            { image: 'robbie-happy-1.png', text: 'Happy', status: 'Love this!', bg: '#1a2e1a' },
-            { image: 'robbie-content-1.png', text: 'Content', status: 'Feeling good!', bg: '#2e1a1a' },
-            { image: 'robbie-surprised-1.png', text: 'Surprised', status: 'Whoa!', bg: '#2e2e1a' },
-            { image: 'robbie-loving-1.png', text: 'Loving', status: 'You\'re amazing!', bg: '#2e1a2e' },
-            { image: 'robbie-thoughtful-2.png', text: 'Strategic', status: 'Planning ahead', bg: '#1a1a2e' },
-            { image: 'robbie-happy-2.png', text: 'Excited', status: 'Let\'s ship it!', bg: '#1a2e1a' },
-            { image: 'robbie-content-2.png', text: 'Focused', status: 'On it!', bg: '#2e1a1a' },
-            { image: 'robbie-surprised-2.png', text: 'Alert', status: 'Watching!', bg: '#2e2e1a' },
-            { image: 'robbie-loving-2.png', text: 'Playful', status: 'Having fun!', bg: '#2e1a2e' }
-        ];
-
-        function changeMood() {
-            currentMood = (currentMood + 1) % moods.length;
-            const mood = moods[currentMood];
-            
-            const avatarImg = document.getElementById('avatarImage');
-            avatarImg.src = `../infrastructure/robbie-avatar/expressions/${mood.image}`;
-            document.getElementById('moodText').textContent = mood.text;
-            document.getElementById('statusText').textContent = mood.status;
-            document.body.style.background = `linear-gradient(135deg, ${mood.bg} 0%, #16213e 100%)`;
-            
-            // Save mood state
-            localStorage.setItem('robbieMood', currentMood);
-            
-            // Update backend if available
-            fetch('http://localhost:9000/api/mood', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ mood: mood.text })
-            }).catch(() => {});
+        const API_URL = 'http://localhost:8000/api/v1';
+        const DB_PATH = '../data/vengeance.db';
+        
+        // Mood mapping
+        const moodEmojis = {
+            1: '😴', 2: '😌', 3: '😊', 4: '🤖',
+            5: '😄', 6: '🤩', 7: '🔥'
+        };
+        const moodNames = {
+            1: 'Sleepy', 2: 'Calm', 3: 'Content', 4: 'Professional',
+            5: 'Enthusiastic', 6: 'Excited', 7: 'Hyper'
+        };
+        
+        async function loadState() {
+            try {
+                // Try API first
+                const response = await fetch(`${API_URL}/robbie/mood`).catch(() => null);
+                
+                if (response && response.ok) {
+                    const state = await response.json();
+                    updateUI(state);
+                    document.getElementById('dbStatus').textContent = 'Connected';
+                } else {
+                    // Fallback to mock data showing SQL structure
+                    const mockState = {
+                        current: 7,
+                        name: 'Hyper',
+                        emoji: '🔥',
+                        hot_topics: [
+                            { content: 'Revenue urgency - deals closing', priority: 10 },
+                            { content: 'Universal AI State LIVE', priority: 9 },
+                            { content: 'AllanBot training', priority: 8 }
+                        ],
+                        commitments: [
+                            { text: 'Ship Universal AI State', deadline: '2d away' }
+                        ]
+                    };
+                    updateUI(mockState);
+                    document.getElementById('dbStatus').textContent = 'Demo Mode';
+                }
+            } catch (error) {
+                console.error('Failed to load state:', error);
+                document.getElementById('dbStatus').textContent = 'Error';
+            }
         }
-
-        function toggleAlwaysOnTop() {
-            // This would require Electron IPC
-            alert('Always-on-top toggle (requires Electron build)');
+        
+        function updateUI(state) {
+            // Update mood
+            document.getElementById('avatarEmoji').textContent = state.emoji || moodEmojis[state.current] || '🤖';
+            document.getElementById('moodText').textContent = state.name || moodNames[state.current] || 'Professional';
+            
+            // Update hot topics
+            if (state.hot_topics && state.hot_topics.length > 0) {
+                document.getElementById('hotTopics').innerHTML = state.hot_topics
+                    .slice(0, 3)
+                    .map(topic => `
+                        <div class="hot-topic">
+                            <span>${topic.content}</span>
+                            <span class="priority-badge">${topic.priority}</span>
+                        </div>
+                    `).join('');
+            } else {
+                document.getElementById('hotTopics').innerHTML = '<div style="color: #666; font-size: 10px;">No hot topics</div>';
+            }
+            
+            // Update commitments
+            if (state.commitments && state.commitments.length > 0) {
+                document.getElementById('commitments').innerHTML = state.commitments
+                    .slice(0, 2)
+                    .map(c => `
+                        <div class="commitment">
+                            <div>${c.text}</div>
+                            <div class="deadline">📅 ${c.deadline}</div>
+                        </div>
+                    `).join('');
+            } else {
+                document.getElementById('commitments').innerHTML = '<div style="color: #666; font-size: 10px;">No active commitments</div>';
+            }
         }
-
-        // Load saved mood
-        const savedMood = localStorage.getItem('robbieMood');
-        if (savedMood) {
-            currentMood = parseInt(savedMood);
-            const mood = moods[currentMood];
-            const avatarImg = document.getElementById('avatarImage');
-            avatarImg.src = `../infrastructure/robbie-avatar/expressions/${mood.image}`;
-            document.getElementById('moodText').textContent = mood.text;
-            document.getElementById('statusText').textContent = mood.status;
-        }
-
-        // Auto-cycle moods when idle (demo mode)
-        setInterval(() => {
-            // Subtle animation
-            document.getElementById('avatarContainer').style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                document.getElementById('avatarContainer').style.transform = 'scale(1)';
-            }, 200);
-        }, 5000);
+        
+        // Auto-refresh every 5 seconds
+        setInterval(loadState, 5000);
+        
+        // Initial load
+        loadState();
+        
+        // Note: Mood is now controlled by me (Robbie), not manually changeable
+        // Hot topics come from SQL database (ai_working_memory table)
+        // This widget shows the SAME state as Cursor, Chat, Mobile, Aurora-town
     </script>
 </body>
 </html>
-

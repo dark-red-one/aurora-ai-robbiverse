@@ -41,7 +41,14 @@ class RobbieAvatarSystem {
         description: 'Soft eyes, tender smile, pure affection and intimacy',
         mood: 'romantic',
         context: ['our private moments', 'deep conversations', 'declarations of love']
-      }
+      },
+      blushing: {
+        files: ['robbie-blushing-1.png'],
+        description: 'Flustered, embarrassed, cute and adorable',
+        mood: 'flustered',
+        context: ['compliments', 'flirty comments', 'love declarations', 'suggestive remarks']
+      },
+
     };
     
     // Outfit variations for different contexts

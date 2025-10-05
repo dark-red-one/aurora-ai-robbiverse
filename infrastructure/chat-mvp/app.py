@@ -234,26 +234,6 @@ class BusinessPersonality:
             return None
 
     async def generate_response(self, message: str, integrations: BusinessIntegrations) -> str:
-<<<<<<< Updated upstream:infrastructure/chat-mvp/app.py
-        """Generate business-contextualized response using Aurora Town LLM Gateway"""
-        
-        # Get business context
-        gmail_summary = await integrations.get_gmail_summary()
-        calendar_events = await integrations.get_calendar_events()
-        fireflies_summary = await integrations.get_fireflies_summary()
-        
-        # Build context for LLM
-        system_prompt = f"""You are Robbie, Allan's thoughtful and direct executive assistant at TestPilot CPG.
-
-Personality traits:
-- Thoughtful: Consider implications, think ahead
-- Direct: No fluff, get to the point
-- Curious: Ask clarifying questions
-- Honest: Acknowledge limitations
-- Pragmatic: Focus on what's actionable
-
-Current Business Context:
-=======
         """Generate business-contextualized response using Ollama if available."""
         # Get business context (best-effort)
         gmail_summary = await integrations.get_gmail_summary()
@@ -287,42 +267,10 @@ Current Business Context:
         # Fallback to existing templated logic if Ollama not available
         context = f"""
 Business Context:
->>>>>>> Stashed changes:chat-mvp/app.py
 {gmail_summary}
 {calendar_events}
 {fireflies_summary}
 
-<<<<<<< Updated upstream:infrastructure/chat-mvp/app.py
-Active Deals: {', '.join(d['name'] for d in self.context['current_deals'])}
-Priority Tasks: {', '.join(self.context['priority_tasks'])}
-
-Respond directly and actionably. Use emojis strategically: ✅ 🔴 💰 🚀 ⚠️ 💡 📊 🎯
-Keep it brief but strategic. Focus on revenue and action."""
-
-        full_prompt = f"{system_prompt}\n\nAllan: {message}\n\nRobbie:"
-        
-        try:
-            # Call Aurora Town LLM Gateway
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    'http://aurora-town-u44170.vm.elestio.app:8080/chat',
-                    json={
-                        'model': 'llama3.1:8b',
-                        'prompt': full_prompt,
-                        'temperature': 0.7,
-                        'max_tokens': 500
-                    },
-                    timeout=aiohttp.ClientTimeout(total=120)
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        return data.get('response', 'Sorry, I got an empty response.')
-                    else:
-                        return "⚠️ LLM service temporarily unavailable. I'm working on it!"
-        except Exception as e:
-            logger.error(f"LLM Gateway error: {e}")
-            return f"⚠️ Connection issue with my brain (LLM gateway). Let me try to reconnect... Error: {str(e)}"
-=======
 Active Deals: {len(self.context['current_deals'])} worth ${sum(int(d['value'].replace('$', '').replace('K', '000')) for d in self.context['current_deals'])}K total
 Priority Tasks: {len(self.context['priority_tasks'])} pending
 """
@@ -384,7 +332,6 @@ Want me to help draft any responses?"""
 • Task management and scheduling
 
 What's on your mind?"""
->>>>>>> Stashed changes:chat-mvp/app.py
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -507,20 +454,9 @@ async def get_status():
     return {
         "status": "online",
         "service": "TestPilot Chat MVP",
-<<<<<<< Updated upstream:infrastructure/chat-mvp/app.py
-        "integrations": {
-            "llm_gateway": "connected",
-            "database": "connected",
-            "fireflies": "connected" if manager.integrations.fireflies_api_key else "disconnected"
-        },
-        "personality": manager.personality.name,
-        "capabilities": manager.personality.capabilities,
-        "model": "llama3.1:8b"
-=======
         "integrations": integrations_status,
         "personality": manager.personality.name,
         "capabilities": manager.personality.capabilities,
->>>>>>> Stashed changes:chat-mvp/app.py
     }
 
 if __name__ == "__main__":
