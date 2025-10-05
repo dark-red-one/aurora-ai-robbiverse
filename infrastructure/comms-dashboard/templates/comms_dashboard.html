@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie F - Universal Comms Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+            color: #cccccc;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .inbox-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #cccccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        .message-list {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .message-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .message-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .message-item.unread {
+            border-left-color: #2196F3;
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        .message-item.critical {
+            border-left-color: #F44336;
+            background: rgba(244, 67, 54, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .message-item.high {
+            border-left-color: #FF9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        .message-item.email {
+            border-left-color: #2196F3;
+        }
+
+        .message-item.sms {
+            border-left-color: #4CAF50;
+        }
+
+        .message-item.slack {
+            border-left-color: #9C27B0;
+        }
+
+        .message-item.note {
+            border-left-color: #FFC107;
+        }
+
+        @keyframes pulse {
+            0% { transform: translateX(5px); }
+            50% { transform: translateX(8px); }
+            100% { transform: translateX(5px); }
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .message-subject {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .message-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .message-body {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .message-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: #4CAF50;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            color: #cccccc;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.read {
+            background: #2196F3;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #F44336;
+            color: white;
+        }
+
+        .action-btn.important {
+            background: #FF9800;
+            color: white;
+        }
+
+        .compose-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .compose-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar styling */
+        .message-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .message-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .message-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        .message-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-bar {
+                gap: 10px;
+            }
+            
+            .stat-card {
+                min-width: 100px;
+                padding: 10px 15px;
+            }
+            
+            .inbox-controls {
+                gap: 10px;
+            }
+            
+            .filter-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>📧 Robbie F - Universal Comms Dashboard</h1>
+            <p>Unified email, SMS, Slack, and notes management</p>
+        </div>
+
+        <div class="stats-bar fade-in">
+            <div class="stat-card">
+                <div class="stat-number" id="total-messages">0</div>
+                <div class="stat-label">Total Messages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="unread-messages">0</div>
+                <div class="stat-label">Unread</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="critical-messages">0</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="email-count">0</div>
+                <div class="stat-label">Emails</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sms-count">0</div>
+                <div class="stat-label">SMS</div>
+            </div>
+        </div>
+
+        <div class="inbox-controls fade-in">
+            <button class="filter-btn active" onclick="filterMessages('all')">All Messages</button>
+            <button class="filter-btn" onclick="filterMessages('unread')">Unread</button>
+            <button class="filter-btn" onclick="filterMessages('critical')">Critical</button>
+            <button class="filter-btn" onclick="filterMessages('email')">Email</button>
+            <button class="filter-btn" onclick="filterMessages('sms')">SMS</button>
+            <button class="filter-btn" onclick="filterMessages('slack')">Slack</button>
+            <button class="filter-btn" onclick="filterMessages('notes')">Notes</button>
+        </div>
+
+        <div class="message-list fade-in" id="message-list">
+            <!-- Messages will be populated here -->
+        </div>
+    </div>
+
+    <button class="compose-btn" onclick="composeMessage()">+</button>
+
+    <script>
+        let websocket = null;
+        let currentFilter = 'all';
+        let allMessages = {};
+
+        function init() {
+            connectWebSocket();
+        }
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            
+            websocket = new WebSocket(wsUrl);
+            
+            websocket.onopen = () => {
+                console.log('Connected to Comms Dashboard');
+                // Request initial messages
+                websocket.send(JSON.stringify({
+                    type: 'get_messages'
+                }));
+            };
+            
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            };
+            
+            websocket.onclose = () => {
+                console.log('Disconnected from Comms Dashboard');
+                setTimeout(() => connectWebSocket(), 3000);
+            };
+        }
+
+        function handleMessage(data) {
+            switch (data.type) {
+                case 'messages_update':
+                    allMessages = data.messages;
+                    updateStats();
+                    displayMessages(data.filter || currentFilter);
+                    break;
+            }
+        }
+
+        function updateStats() {
+            const allMsgs = [
+                ...allMessages.email || [],
+                ...allMessages.sms || [],
+                ...allMessages.slack || [],
+                ...allMessages.notes || []
+            ];
+            
+            const unread = allMsgs.filter(msg => !msg.read).length;
+            const critical = allMsgs.filter(msg => msg.priority === 'critical').length;
+            const emails = (allMessages.email || []).length;
+            const sms = (allMessages.sms || []).length;
+            
+            document.getElementById('total-messages').textContent = allMsgs.length;
+            document.getElementById('unread-messages').textContent = unread;
+            document.getElementById('critical-messages').textContent = critical;
+            document.getElementById('email-count').textContent = emails;
+            document.getElementById('sms-count').textContent = sms;
+        }
+
+        function displayMessages(filter = 'all') {
+            const container = document.getElementById('message-list');
+            container.innerHTML = '';
+            
+            let messages = [
+                ...allMessages.email || [],
+                ...allMessages.sms || [],
+                ...allMessages.slack || [],
+                ...allMessages.notes || []
+            ];
+            
+            // Apply filter
+            if (filter !== 'all') {
+                messages = messages.filter(msg => {
+                    if (filter === 'unread') return !msg.read;
+                    if (filter === 'critical') return msg.priority === 'critical';
+                    return msg.type === filter;
+                });
+            }
+            
+            // Sort by timestamp (newest first)
+            messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            messages.forEach(message => {
+                const messageElement = createMessageElement(message);
+                container.appendChild(messageElement);
+            });
+        }
+
+        function createMessageElement(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-item ${message.type} ${message.priority || ''} ${message.read ? '' : 'unread'}`;
+            
+            const iconMap = {
+                'email': '📧',
+                'sms': '📱',
+                'slack': '💬',
+                'note': '📝'
+            };
+            
+            const priorityMap = {
+                'critical': '🔴',
+                'high': '🟡',
+                'medium': '🟢',
+                'low': '⚪'
+            };
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="message-subject">
+                        ${iconMap[message.type] || '📄'} ${message.subject || message.body.substring(0, 50) + '...'}
+                        ${message.priority === 'critical' ? ' 🔴' : ''}
+                    </div>
+                    <div class="message-meta">
+                        <span>${message.from || message.channel || 'System'}</span>
+                        <span>•</span>
+                        <span>${message.timestamp}</span>
+                        ${message.priority ? `<span>•</span><span>${priorityMap[message.priority] || ''}</span>` : ''}
+                    </div>
+                </div>
+                <div class="message-body">
+                    ${message.body}
+                </div>
+                ${message.tags ? `
+                    <div class="message-tags">
+                        ${message.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                    </div>
+                ` : ''}
+                <div class="message-actions">
+                    ${!message.read ? `<button class="action-btn read" onclick="markAsRead('${message.id}')">Mark Read</button>` : ''}
+                    <button class="action-btn ${message.priority === 'critical' ? 'important' : ''}" onclick="toggleImportant('${message.id}')">
+                        ${message.priority === 'critical' ? 'Not Critical' : 'Important'}
+                    </button>
+                    <button class="action-btn delete" onclick="deleteMessage('${message.id}')">Delete</button>
+                </div>
+            `;
+            
+            return messageDiv;
+        }
+
+        function filterMessages(filter) {
+            currentFilter = filter;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            displayMessages(filter);
+        }
+
+        function markAsRead(messageId) {
+            if (websocket) {
+                websocket.send(JSON.stringify({
+                    type: 'mark_read',
+                    message_id: messageId
+                }));
+            }
+        }
+
+        function toggleImportant(messageId) {
+            // TODO: Implement importance toggle
+            console.log('Toggle important:', messageId);
+        }
+
+        function deleteMessage(messageId) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                if (websocket) {
+                    websocket.send(JSON.stringify({
+                        type: 'delete_message',
+                        message_id: messageId
+                    }));
+                }
+            }
+        }
+
+        function composeMessage() {
+            alert('Compose message functionality coming soon!');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
