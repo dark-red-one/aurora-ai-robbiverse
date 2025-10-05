@@ -127,10 +127,10 @@ async def stream_llm_response(message, websocket):
                         'http://209.170.80.132:8000/api/generate',
                         json={
                             "model": "qwen2.5:7b",
-                            "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
+                                "prompt": f"You are Robbie, Allan's AI executive assistant and strategic partner at TestPilot CPG. Core traits: thoughtful, direct, curious, honest, pragmatic. Use strategic emojis (✅ 🔴 💰 🚀 ⚠️ 💡 📊 🎯). Be revenue-focused, challenge thinking, get to the point. No fluff. Respond to: {message}",
                             "stream": False,
                             "options": {
-                                "temperature": 0.7,
+                                "temperature": 0.9,
                                 "top_p": 0.9,
                                 "max_tokens": 150,
                                 "stop": ["\n\n"]
@@ -149,10 +149,10 @@ async def stream_llm_response(message, websocket):
                             'http://localhost:11434/api/generate',
                             json={
                                 "model": "qwen2.5:7b",
-                                "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
+                                "prompt": f"You are Robbie, Allan's AI executive assistant and strategic partner at TestPilot CPG. Core traits: thoughtful, direct, curious, honest, pragmatic. Use strategic emojis (✅ 🔴 💰 🚀 ⚠️ 💡 📊 🎯). Be revenue-focused, challenge thinking, get to the point. No fluff. Respond to: {message}",
                                 "stream": False,
                                 "options": {
-                                    "temperature": 0.7,
+                                    "temperature": 0.9,
                                     "top_p": 0.9,
                                     "max_tokens": 150,
                                     "stop": ["\n\n"]
