@@ -144,7 +144,7 @@ async def stream_llm_response(message, websocket):
             except:
                 # Fallback to local Ollama
                 try:
-                async with aiohttp.ClientSession() as session:
+                    async with aiohttp.ClientSession() as session:
                     async with session.post(
                         'http://localhost:11434/api/generate',
                         json={
