@@ -132,11 +132,11 @@ async def stream_llm_response(message, websocket):
                             "options": {
                                 "temperature": 0.9,
                                 "top_p": 0.9,
-                                "max_tokens": 150,
+                                "max_tokens": 50,
                                 "stop": ["\n\n"]
                             }
                         },
-                        timeout=aiohttp.ClientTimeout(total=10)
+                        timeout=aiohttp.ClientTimeout(total=5)
                     ) as response:
                         if response.status == 200:
                             data = await response.json()
@@ -154,11 +154,11 @@ async def stream_llm_response(message, websocket):
                                 "options": {
                                     "temperature": 0.9,
                                     "top_p": 0.9,
-                                    "max_tokens": 150,
+                                    "max_tokens": 50,
                                     "stop": ["\n\n"]
                                 }
                             },
-                            timeout=aiohttp.ClientTimeout(total=8)
+                            timeout=aiohttp.ClientTimeout(total=3)
                         ) as response:
                             if response.status == 200:
                                 data = await response.json()
@@ -173,7 +173,7 @@ async def stream_llm_response(message, websocket):
         words = full_response.split()
         for word in words:
             await manager.send_streaming_chunk(word + " ", websocket)
-            await asyncio.sleep(0.01)  # Much faster streaming
+                await asyncio.sleep(0.005)  # Much faster streaming
         
         await manager.send_stream_complete(websocket)
         
