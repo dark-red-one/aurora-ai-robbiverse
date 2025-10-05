@@ -9,10 +9,13 @@
 </head>
 
 <body>
-    <!-- Header -->
+    <!-- Header with TestPilot Branding -->
     <header class="header">
         <div class="header-left">
-            <div class="logo">🤖 Robbie Simple</div>
+            <div class="logo">
+                <span class="logo-icon">✈️</span>
+                <h1>TestPilot<span class="tm">™</span></h1>
+            </div>
 
             <!-- Mood Control -->
             <div class="mood-control" id="moodControl" title="Click to cycle mood">
@@ -22,7 +25,17 @@
         </div>
 
         <div class="header-right">
-            <span id="connectionStatus" style="font-size:12px;color:var(--text-muted);">connecting...</span>
+            <!-- Weather Status -->
+            <div class="weather-status">
+                <span class="weather-icon">☀️</span>
+                <span id="weather-temp">67°F</span>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="connection-status">
+                <div class="status-dot"></div>
+                <span id="connectionStatus">Connecting...</span>
+            </div>
         </div>
     </header>
 

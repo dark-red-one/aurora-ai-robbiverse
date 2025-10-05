@@ -56,9 +56,26 @@ body {
 }
 
 .logo {
-    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    font-size: 1.8em;
+}
+
+.logo h1 {
+    font-size: 1.4em;
     font-weight: 600;
-    color: var(--accent-blue);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.logo .tm {
+    font-size: 0.6em;
+    vertical-align: super;
+    color: var(--text-muted);
 }
 
 .mood-control {
@@ -91,7 +108,54 @@ body {
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
+}
+
+.weather-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.weather-icon {
+    font-size: 1.1em;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid var(--accent-green);
+    border-radius: 15px;
+    font-size: 0.9em;
+    color: var(--accent-green);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 /* ============================================================================
@@ -120,8 +184,9 @@ body {
 }
 
 .tab.active {
-    color: var(--accent-blue);
-    border-bottom-color: var(--accent-blue);
+    color: var(--text-primary);
+    border-bottom-color: var(--accent-green);
+    border-bottom-width: 3px;
     background: var(--bg-primary);
 }
 

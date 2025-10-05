@@ -249,10 +249,7 @@ GRANT EXECUTE ON FUNCTION get_conversation_context(UUID, INTEGER) TO aurora;
 GRANT EXECUTE ON FUNCTION get_rollback_history(UUID) TO aurora;
 GRANT EXECUTE ON FUNCTION compress_conversation_context(UUID) TO aurora;
 
--- Insert some sample data for testing
-INSERT INTO conversations (id, user_id, title, context_window_size) VALUES
-(uuid_generate_v4(), 'test_user', 'Test Conversation with Context', 10)
-ON CONFLICT DO NOTHING;
+-- Production-ready schema - No test data
 
 COMMENT ON TABLE conversation_branches IS 'Stores conversation branches for exploring different AI responses';
 COMMENT ON TABLE context_snapshots IS 'Stores compressed context snapshots for long conversations';

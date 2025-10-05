@@ -94,71 +94,6 @@ def get_upcoming_meetings(limit=3):
         print(f"Meeting fetch error: {e}")
         return ""
 
-def save_conversation_memory(user_message, robbie_response, context_used):
-    """Save conversation to memory (PostgreSQL + Qdrant)"""
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        # Create table if not exists
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS conversation_history (
-                id SERIAL PRIMARY KEY,
-                user_id VARCHAR(100) DEFAULT 'allan_peretz',
-                user_message TEXT NOT NULL,
-                robbie_response TEXT NOT NULL,
-                context_used TEXT,
-                importance_score INTEGER DEFAULT 5,
-                timestamp TIMESTAMPTZ DEFAULT NOW()
-            )
-        """)
-        
-        # Insert conversation
-        cur.execute("""
-            INSERT INTO conversation_history (user_message, robbie_response, context_used)
-            VALUES (%s, %s, %s)
-            RETURNING id
-        """, (user_message, robbie_response, context_used))
-        
-        conv_id = cur.fetchone()[0]
-        conn.commit()
-        conn.close()
-        
-        print(f"💾 Saved conversation {conv_id} to memory")
-        return conv_id
-    except Exception as e:
-        print(f"Memory save failed: {e}")
-        return None
-
-def search_conversation_memory(query, limit=3):
-    """Search past conversations for context"""
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        cur.execute("""
-            SELECT user_message, robbie_response, timestamp
-            FROM conversation_history
-            WHERE user_message ILIKE %s OR robbie_response ILIKE %s
-            ORDER BY timestamp DESC
-            LIMIT %s
-        """, (f"%{query}%", f"%{query}%", limit))
-        
-        results = cur.fetchall()
-        conn.close()
-        
-        if results:
-            memory = "\n📚 PAST CONVERSATIONS:\n"
-            for user_msg, robbie_msg, ts in results:
-                memory += f"[{ts.strftime('%b %d')}] You: {user_msg[:80]}\n"
-                memory += f"         Robbie: {robbie_msg[:80]}\n"
-            return memory
-        
-    except Exception as e:
-        print(f"Memory search failed: {e}")
-    
-    return ""
-
 def get_business_context():
     """Get comprehensive business context for Robbie"""
     context = "\n=== BUSINESS CONTEXT ===\n"
@@ -227,11 +162,9 @@ async def stream_llm_response(message, websocket):
     try:
         full_response = None
         
-        # Get business context + conversation memory
+        # Get business context
         business_context = get_business_context()
-        conversation_memory = search_conversation_memory(message, limit=2)
-        
-        enhanced_prompt = f"{business_context}{conversation_memory}\n\nAllan asks: {message}\n\nRobbie (strategic, direct, revenue-focused):"
+        enhanced_prompt = f"{business_context}\n\nAllan asks: {message}\n\nRobbie (strategic, direct, revenue-focused):"
         
         # 🚀 PRIORITY 1: LOCAL RTX 4090 - BATCH MODE for formatting
         try:
@@ -292,9 +225,6 @@ async def stream_llm_response(message, websocket):
         if not full_response:
             full_response = "Hey Allan! I'm here but having some technical difficulties. Give me a moment to get back up to speed! 💪"
         
-        # Save conversation to memory
-        save_conversation_memory(message, full_response, business_context)
-        
         # Send the FULL formatted response at once
         await manager.send_streaming_chunk(full_response, websocket)
         await manager.send_stream_complete(websocket)
@@ -321,19 +251,15 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            print(f"📨 Received WebSocket message: {data}")  # Debug logging
             message_data = json.loads(data)
             
-            # Support both formats: { message: "text" } and { type: "message", content: "text" }
-            message = message_data.get("message") or message_data.get("content", "")
-            
-            if message.strip():
-                print(f"🚀 Processing message: {message}")
-                await stream_llm_response(message, websocket)
+            if message_data.get("type") == "message":
+                content = message_data.get("content", "")
+                if content.strip():
+                    await stream_llm_response(content, websocket)
             
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        print("🔌 WebSocket disconnected")
 
 @app.get("/api/status")
 async def get_status():
@@ -383,13 +309,6 @@ async def update_mood(request: Request):
         return {"success": True, "mood": mood_number}
     except Exception as e:
         return {"success": False, "error": str(e)}
-
-
-@app.get("/unified", response_class=HTMLResponse)
-async def unified_interface(request: Request):
-    """Serve the unified tabbed interface"""
-    with open("robbie-unified-interface.html", "r") as f:
-        return HTMLResponse(content=f.read())
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8007)

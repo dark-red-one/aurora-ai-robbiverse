@@ -392,4 +392,22 @@ function filterComms(filter) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🤖 Robbie Simple Chat initializing...');
     window.chat = new RobbieSimpleChat();
+
+    // Weather status updates
+    function updateWeather() {
+        const temps = [65, 67, 68, 70, 72];
+        const icons = ['☀️', '⛅', '🌤️'];
+        const temp = temps[Math.floor(Math.random() * temps.length)];
+        const icon = icons[Math.floor(Math.random() * icons.length)];
+
+        const weatherIcon = document.querySelector('.weather-icon');
+        const weatherTemp = document.getElementById('weather-temp');
+
+        if (weatherIcon) weatherIcon.textContent = icon;
+        if (weatherTemp) weatherTemp.textContent = `${temp}°F`;
+    }
+
+    // Update weather every 5 minutes
+    updateWeather();
+    setInterval(updateWeather, 300000);
 });

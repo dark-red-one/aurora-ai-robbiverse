@@ -1,0 +1,45 @@
+{
+    "environment": "production",
+    "name": "Aurora",
+    "node_id": "aurora-town",
+    "database": {
+        "url": "postgresql://aurora:production_password@localhost:5432/aurora",
+        "redis_url": "redis://localhost:6379/0"
+    },
+    "ai_models": {
+        "default": "llama3.1:8b",
+        "fallback": "qwen2.5:7b",
+        "backup": "mistral:7b"
+    },
+    "security": {
+        "secret_key": "production-secret-key-change-in-production",
+        "token_expiry": 30,
+        "session_timeout": 3600
+    },
+    "performance": {
+        "debug": false,
+        "log_level": "INFO",
+        "metrics_enabled": true
+    },
+    "backup": {
+        "enabled": true,
+        "frequency": "daily",
+        "retention_days": 30,
+        "destination": "/mnt/backup"
+    },
+    "monitoring": {
+        "enabled": true,
+        "health_check_interval": 30,
+        "metrics_collection": true
+    },
+    "integrations": {
+        "hubspot_api_key": "production_hubspot_key",
+        "slack_webhook": "https://hooks.slack.com/services/production/webhook",
+        "google_service_account": "production@aurora-ai-empire.iam.gserviceaccount.com"
+    },
+    "deployment": {
+        "auto_deploy": false,
+        "rollback_on_failure": true,
+        "deployment_notifications": true
+    }
+}

@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a18;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ==================== SIDEBAR (Cursor-style) ==================== */
+        .sidebar {
+            width: 260px;
+            background: #0d1117;
+            border-right: 2px solid #00d4ff;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .sidebar-logo-centered {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            padding: 0 12px;
+        }
+
+        /* White pill container for logo */
+        .logo-pill {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-logo-centered img {
+            height: 24px;
+            width: auto;
+            display: block;
+        }
+
+        /* Logo experiment badge */
+        .logo-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Divider line */
+        .sidebar-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
+            margin: 12px 0 8px 0;
+        }
+
+        /* Mini divider before monitors */
+        .mini-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.15), transparent);
+            margin: 8px 0 8px 0;
+        }
+
+        /* System Monitors */
+        .system-monitors {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .monitor-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #888;
+            font-family: 'Courier New', monospace;
+        }
+
+        .monitor-label {
+            color: #00d4ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .monitor-value {
+            color: #0f4;
+            font-weight: bold;
+        }
+
+        .monitor-bar-container {
+            width: 60px;
+            height: 4px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-left: 6px;
+        }
+
+        .monitor-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0f4, #00d4ff);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            color: #00d4ff;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #0f4;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .sidebar-avatar {
+            height: 220px;
+            position: relative;
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%2316213e;stop-opacity:1" /><stop offset="50%" style="stop-color:%231a1a2e;stop-opacity:1" /><stop offset="100%" style="stop-color:%230a0a18;stop-opacity:1" /></linearGradient></defs><rect width="300" height="200" fill="url(%23g1)"/><circle cx="50" cy="50" r="30" fill="%2300d4ff" opacity="0.05"/><circle cx="250" cy="150" r="40" fill="%230096ff" opacity="0.03"/></svg>');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px 0;
+            overflow: hidden;
+        }
+
+        .sidebar-location {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            z-index: 10;
+            font-weight: 500;
+        }
+
+        .sidebar-avatar-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0d1117 100%);
+            border: 3px solid #00d4ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-avatar-face {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-avatar-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-avatar-face img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Mood tooltip */
+        .mood-tooltip {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 212, 255, 0.95);
+            color: #0a0a18;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
+        }
+
+        .sidebar-avatar-circle:hover .mood-tooltip {
+            opacity: 1;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            color: #888;
+            font-size: 14px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+        }
+
+        .sidebar-nav-item.active {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00d4ff;
+            border-left-color: #00d4ff;
+        }
+
+        .sidebar-nav-icon {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        /* ==================== HEADER ==================== */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 14px 20px;
+            border-bottom: 2px solid #00d4ff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-weight: bold;
+            color: #00d4ff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .status-badge {
+            background: #0f4;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .header-info {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ==================== CONTENT AREA ==================== */
+        .content-wrapper {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            display: none;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ==================== TERMINAL CHAT (EMBEDDED) ==================== */
+        #terminal-embedded {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header-embedded {
+            border: 2px solid #00d4ff;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            background: #0a2540;
+        }
+
+        .terminal-header-embedded .title {
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 2px;
+        }
+
+        .terminal-header-embedded .subtitle {
+            color: #5bc0de;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border: 2px solid #00d4ff;
+            padding: 15px;
+            background: #0d1b2a;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .messages-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-area::-webkit-scrollbar-track {
+            background: #0a0a18;
+        }
+
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #00d4ff;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .message.system {
+            color: #ffaa00;
+        }
+
+        .message.robbie .username {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .message.allan .username {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .message .text {
+            color: #e0e0e0;
+        }
+
+        .message .text strong {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .typing-indicator {
+            color: #5bc0de;
+            font-style: italic;
+        }
+
+        /* Input Area - Redesigned */
+        .input-area {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .input-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-black-box {
+            background: #000;
+            border: 2px solid #00d4ff;
+            border-radius: 4px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-prompt {
+            color: #6b9463;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 4px;
+        }
+
+        #messageInput {
+            width: 100%;
+            background: #000;
+            border: none;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            padding: 0;
+            caret-color: #0f4;
+            resize: none;
+            min-height: 60px;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        #messageInput:disabled {
+            opacity: 0.5;
+        }
+
+        /* Button stack on the right */
+        .button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* File upload button - emoji style */
+        .file-button {
+            background: #0a2540;
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .file-button:hover {
+            background: #00d4ff;
+            color: #0a0a18;
+            transform: scale(1.05);
+        }
+
+        .file-button input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* Send button - emoji style */
+        .send-button {
+            background: #0a2540;
+            border: 2px solid #0f4;
+            color: #0f4;
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .send-button:hover {
+            background: #0f4;
+            color: #0a0a18;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 255, 68, 0.3);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        /* File attachments display */
+        .file-attachments {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .file-tag {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-tag-remove {
+            cursor: pointer;
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .file-tag-remove:hover {
+            color: #ff0000;
+        }
+
+        /* Blinking cursor animation */
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        #messageInput::after {
+            content: '█';
+            color: #0f4;
+            animation: blink 1s infinite;
+        }
+
+        /* Status Bar - HIDDEN */
+        .status-bar {
+            display: none;
+        }
+
+        .status-left {
+            color: #0f4;
+        }
+
+        .status-right {
+            color: #888;
+        }
+
+        /* Avatar Rendering - Full Resolution! */
+        .avatar-line {
+            line-height: 0;
+            font-size: 0;
+            white-space: nowrap;
+            height: 10px;
+            display: block;
+        }
+
+        .avatar-line span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            font-size: 0;
+            line-height: 0;
+        }
+
+        /* ==================== NOTES TAB ==================== */
+        .notes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+
+        .note-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .note-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .note-category {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            color: #00d4ff;
+        }
+
+        .note-content {
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 100px;
+        }
+
+        /* ==================== COMMS TAB ==================== */
+        .comms-dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .comms-sidebar {
+            background: #0d1117;
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .comms-main {
+            background: #0d1117;
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .comms-filter {
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: transparent;
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .comm-item {
+            background: #1a1a2e;
+            border-left: 4px solid #00d4ff;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .comm-item:hover {
+            background: #16213e;
+            transform: translateX(4px);
+        }
+
+        .comm-sender {
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 4px;
+        }
+
+        .comm-subject {
+            color: #e0e0e0;
+            margin-bottom: 6px;
+        }
+
+        .comm-preview {
+            color: #888;
+            font-size: 12px;
+        }
+
+        /* ==================== PLACEHOLDER STYLES ==================== */
+        .placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .placeholder-text {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .placeholder-subtext {
+            font-size: 14px;
+        }
+
+        /* ==================== SETUP TAB ==================== */
+        .setup-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .setup-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .setup-header h1 {
+            color: #00d4ff;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .setup-header p {
+            color: #888;
+            font-size: 16px;
+        }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .setup-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .setup-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+            border-color: #00ff88;
+        }
+
+        .setup-card.connected {
+            border-color: #0f4;
+            background: linear-gradient(135deg, #1a2e1a, #162e21);
+        }
+
+        .setup-card.connected:hover {
+            border-color: #0f4;
+        }
+
+        .setup-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .setup-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+
+        .setup-card.connected .setup-title {
+            color: #0f4;
+        }
+
+        .setup-description {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .setup-button {
+            background: #00d4ff;
+            color: #0a0a18;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setup-button:hover {
+            background: #00ff88;
+            transform: scale(1.05);
+        }
+
+        .setup-button.connected {
+            background: #0f4;
+        }
+
+        .setup-button.connected:hover {
+            background: #0a3;
+        }
+
+        .setup-status {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #0f4;
+            font-weight: 600;
+        }
+
+        .setup-footer {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid #00d4ff;
+            margin-top: 40px;
+        }
+
+        .setup-footer-text {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================== SIDEBAR (Cursor-style) ==================== -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-avatar" id="robbieAvatarContainer" data-location="allans-office">
+                <div class="sidebar-avatar-circle">
+                    <div class="sidebar-avatar-face" id="robbieAvatarSidebar"></div>
+                    <div class="mood-tooltip" id="robbieMoodTooltip">😊 Friendly</div>
+                </div>
+                <div class="sidebar-location" id="robbieLocation">📍 Allan's Office</div>
+            </div>
+
+            <div class="sidebar-status">
+                <span class="status-dot"></span>
+                <span>ONLINE</span>
+            </div>
+
+            <div class="mini-divider"></div>
+
+            <div class="system-monitors">
+                <div class="monitor-item">
+                    <span class="monitor-label">CPU</span>
+                    <span class="monitor-value" id="cpuValue">12%</span>
+                    <div class="monitor-bar-container">
+                        <div class="monitor-bar" id="cpuBar" style="width: 12%;"></div>
+                    </div>
+                </div>
+                <div class="monitor-item">
+                    <span class="monitor-label">MEM</span>
+                    <span class="monitor-value" id="memValue">34%</span>
+                    <div class="monitor-bar-container">
+                        <div class="monitor-bar" id="memBar" style="width: 34%;"></div>
+                    </div>
+                </div>
+                <div class="monitor-item">
+                    <span class="monitor-label">SQL</span>
+                    <span class="monitor-value" id="sqlValue">8%</span>
+                    <div class="monitor-bar-container">
+                        <div class="monitor-bar" id="sqlBar" style="width: 8%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="sidebar-logo-centered">
+                <div class="logo-pill">
+                    <img src="/static/logos/testpilot-logo-main.png" alt="TestPilot CPG"
+                        onerror="console.error('❌ Logo failed to load:', this.src);">
+                </div>
+            </div>
+            <div class="sidebar-nav-item active" data-tab="chat">
+                <span class="sidebar-nav-icon">💬</span>
+                <span>Chat</span>
+            </div>
+            <div class="sidebar-nav-item" data-tab="notes">
+                <span class="sidebar-nav-icon">📝</span>
+                <span>Notes</span>
+            </div>
+            <div class="sidebar-nav-item" data-tab="comms">
+                <span class="sidebar-nav-icon">📧</span>
+                <span>Comms</span>
+            </div>
+            <div class="sidebar-nav-item" data-tab="tasks">
+                <span class="sidebar-nav-icon">✅</span>
+                <span>Tasks</span>
+            </div>
+            <div class="sidebar-nav-item" data-tab="setup">
+                <span class="sidebar-nav-icon">⚙️</span>
+                <span>Setup</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <div class="main-container">
+        <!-- ==================== HEADER ==================== -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span id="currentTab">💬 Chat</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-info">
+                    <span id="currentTime">--:--:--</span> •
+                    <span>CPU: AMD EPYC</span> •
+                    <span>Latency: ~100ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CONTENT AREA ==================== -->
+        <div class="content-wrapper">
+            <!-- CHAT TAB (TERMINAL) -->
+            <div id="chat" class="tab-content active">
+                <div id="terminal-embedded">
+                    <div class="terminal-header-embedded">
+                        <div class="title">═══════════════════════════════════════════════════════════════</div>
+                        <div class="title">ROBBIE TERMINAL v3.0 • TestPilot CPG Network</div>
+                        <div class="title">═══════════════════════════════════════════════════════════════</div>
+                        <div class="subtitle">aurora-town-u44170:8007 • CPU: AMD EPYC • Status: ONLINE</div>
+                    </div>
+
+                    <div class="messages-area" id="messagesArea"></div>
+
+                    <div class="input-area">
+                        <div class="input-content-wrapper">
+                            <div id="fileAttachments" class="file-attachments"></div>
+                            <div class="input-black-box">
+                                <span class="input-prompt">&lt;Allan&gt;</span>
+                                <textarea id="messageInput"
+                                    placeholder="Type message or /help for commands... (Shift+Enter for new line)"
+                                    disabled></textarea>
+                            </div>
+                        </div>
+                        <div class="button-stack">
+                            <!-- File upload disabled for now
+                            <div class="file-button" title="Attach files">
+                                <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.md,.json,.csv">
+                                📎
+                            </div>
+                            -->
+                            <button class="send-button" id="sendButton" title="Send message (Enter)">🚀</button>
+                        </div>
+                    </div>
+
+                    <div class="status-bar">
+                        <div class="status-left" id="statusLeft">ONLINE | GPU: RTX4090 | Users: 1</div>
+                        <div class="status-right" id="statusRight">--:--:-- | Latency: ~100ms</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES TAB -->
+            <div id="notes" class="tab-content">
+                <div class="notes-container">
+                    <div class="note-card">
+                        <div class="note-header">
+                            <div class="note-title">💡 Sample Note</div>
+                            <div class="note-category">INTEL</div>
+                        </div>
+                        <div class="note-content">
+                            This is a sample note. Create your own beautiful, categorized notes here!
+                        </div>
+                    </div>
+                    <div class="placeholder">
+                        <div class="placeholder-icon">📝</div>
+                        <div class="placeholder-text">Notes System</div>
+                        <div class="placeholder-subtext">Beautiful sticky notes coming soon...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMMS TAB -->
+            <div id="comms" class="tab-content">
+                <div class="comms-dashboard">
+                    <div class="comms-sidebar">
+                        <div class="comms-filter">
+                            <button class="filter-btn active">📧 All Messages</button>
+                            <button class="filter-btn">📨 Unread (5)</button>
+                            <button class="filter-btn">⭐ Important</button>
+                            <button class="filter-btn">💬 Slack</button>
+                            <button class="filter-btn">📱 SMS</button>
+                        </div>
+                    </div>
+                    <div class="comms-main">
+                        <div class="comm-item">
+                            <div class="comm-sender">Michael Chen - Trader Joe's</div>
+                            <div class="comm-subject">Q1 Pilot Budget Approval</div>
+                            <div class="comm-preview">Hi Allan, I wanted to follow up on the Q1 pilot budget...</div>
+                        </div>
+                        <div class="placeholder">
+                            <div class="placeholder-icon">📧</div>
+                            <div class="placeholder-text">Universal Communications Dashboard</div>
+                            <div class="placeholder-subtext">Email, Slack, SMS - all in one place (coming soon)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TASKS TAB -->
+            <div id="tasks" class="tab-content">
+                <div class="placeholder">
+                    <div class="placeholder-icon">✅</div>
+                    <div class="placeholder-text">Task Management</div>
+                    <div class="placeholder-subtext">Your priority tasks and action items</div>
+                </div>
+            </div>
+
+            <!-- SETUP TAB -->
+            <div id="setup" class="tab-content">
+                <div class="setup-container">
+                    <div class="setup-header">
+                        <h1>⚙️ API Setup & Integrations</h1>
+                        <p>Connect your business tools to unlock Robbie's full potential</p>
+                    </div>
+
+                    <div class="setup-grid">
+                        <!-- HubSpot -->
+                        <div class="setup-card" onclick="connectAPI('hubspot')">
+                            <div class="setup-icon">🔶</div>
+                            <div class="setup-title">HubSpot CRM</div>
+                            <div class="setup-description">
+                                Connect your HubSpot account to track deals, contacts, and pipeline metrics in
+                                real-time.
+                            </div>
+                            <button class="setup-button">Connect HubSpot</button>
+                        </div>
+
+                        <!-- Fireflies -->
+                        <div class="setup-card" onclick="connectAPI('fireflies')">
+                            <div class="setup-icon">🔥</div>
+                            <div class="setup-title">Fireflies.ai</div>
+                            <div class="setup-description">
+                                Sync meeting transcripts and notes automatically from your recorded calls.
+                            </div>
+                            <button class="setup-button">Connect Fireflies</button>
+                        </div>
+
+                        <!-- Google Workspace -->
+                        <div class="setup-card" onclick="connectAPI('google')">
+                            <div class="setup-icon">📧</div>
+                            <div class="setup-title">Google Workspace</div>
+                            <div class="setup-description">
+                                Integrate Gmail, Calendar, and Drive for seamless email and schedule management.
+                            </div>
+                            <button class="setup-button">Connect Google</button>
+                        </div>
+
+                        <!-- Slack -->
+                        <div class="setup-card" onclick="connectAPI('slack')">
+                            <div class="setup-icon">💬</div>
+                            <div class="setup-title">Slack</div>
+                            <div class="setup-description">
+                                Connect Slack to monitor channels, DMs, and get real-time notifications.
+                            </div>
+                            <button class="setup-button">Connect Slack</button>
+                        </div>
+
+                        <!-- Qdrant Vector DB -->
+                        <div class="setup-card connected">
+                            <div class="setup-icon">🔍</div>
+                            <div class="setup-title">Qdrant Vector DB</div>
+                            <div class="setup-description">
+                                Semantic search and memory system for intelligent context retrieval.
+                            </div>
+                            <button class="setup-button connected">✓ Connected</button>
+                            <div class="setup-status">✅ Active & Running</div>
+                        </div>
+
+                        <!-- PostgreSQL -->
+                        <div class="setup-card connected">
+                            <div class="setup-icon">🗄️</div>
+                            <div class="setup-title">PostgreSQL</div>
+                            <div class="setup-description">
+                                Primary database for conversations, business data, and analytics.
+                            </div>
+                            <button class="setup-button connected">✓ Connected</button>
+                            <div class="setup-status">✅ Active & Running</div>
+                        </div>
+                    </div>
+
+                    <div class="setup-footer">
+                        <div class="setup-footer-text">
+                            <strong>🔒 Your data is secure.</strong><br>
+                            All connections use industry-standard OAuth 2.0 authentication.<br>
+                            Robbie never stores your passwords or shares data without permission.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== TAB SWITCHING ====================
+        const navItems = document.querySelectorAll('.sidebar-nav-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const currentTabHeader = document.getElementById('currentTab');
+
+        const tabIcons = {
+            'chat': '💬 Chat',
+            'notes': '📝 Notes',
+            'comms': '📧 Comms',
+            'tasks': '✅ Tasks',
+            'setup': '⚙️ Setup'
+        };
+
+        navItems.forEach(navItem => {
+            navItem.addEventListener('click', () => {
+                const targetTab = navItem.dataset.tab;
+
+                // Update active states
+                navItems.forEach(item => item.classList.remove('active'));
+                navItem.classList.add('active');
+
+                // Update header
+                currentTabHeader.textContent = tabIcons[targetTab];
+
+                // Switch content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === targetTab) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // ==================== TERMINAL CHAT ====================
+        class RobbieTerminal {
+            constructor() {
+                this.ws = null;
+                this.messagesArea = document.getElementById('messagesArea');
+                this.messageInput = document.getElementById('messageInput');
+
+                // Avatar will be set in initializeBootSequence
+                this.htmlAvatar = null;
+
+                // Disable input during boot sequence
+                this.messageInput.disabled = true;
+                this.messageInput.placeholder = 'Booting Robbie systems...';
+
+                this.initializeBootSequence();
+                this.initializeInput();
+                this.updateClock();
+                setInterval(() => this.updateClock(), 1000);
+            }
+
+            updateClock() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+                document.getElementById('currentTime').textContent = timeStr;
+                document.getElementById('statusRight').textContent = `${timeStr.split(':')[0]}:${timeStr.split(':')[1]} | Latency: ~100ms`;
+            }
+
+            initializeBootSequence() {
+                const bootLines = [
+                    'ROBBIE TERMINAL SYSTEM v3.0',
+                    'Initializing neural networks...',
+                    '[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)',
+                    '[OK] LLM loaded: qwen2.5:7b (Robbie personality)',
+                    '[OK] WebSocket connection established',
+                    '[OK] VPN tunnel: aurora-town active',
+                    '[READY] Robbie personality systems online'
+                ];
+
+                // Robbie Avatar (17 lines of HTML pixel art - 50 blocks wide!)
+                const htmlAvatar = [
+                    "<span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd1;color:#5b9bd1;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span><span style=\"background-color:#5d9bd1;color:#5d9bd1;\">██</span><span style=\"background-color:#5ba3df;color:#5ba3df;\">██</span><span style=\"background-color:#559ed8;color:#559ed8;\">██</span><span style=\"background-color:#5689b6;color:#5689b6;\">██</span><span style=\"background-color:#5f738d;color:#5f738d;\">██</span><span style=\"background-color:#6d616a;color:#6d616a;\">██</span><span style=\"background-color:#745654;color:#745654;\">██</span><span style=\"background-color:#77514a;color:#77514a;\">██</span><span style=\"background-color:#77534e;color:#77534e;\">██</span><span style=\"background-color:#6d5b5f;color:#6d5b5f;\">██</span><span style=\"background-color:#606c81;color:#606c81;\">██</span><span style=\"background-color:#5a8ab5;color:#5a8ab5;\">██</span><span style=\"background-color:#58a1dd;color:#58a1dd;\">██</span><span style=\"background-color:#56a2df;color:#56a2df;\">██</span><span style=\"background-color:#5ba3de;color:#5ba3de;\">██</span><span style=\"background-color:#5e9cd2;color:#5e9cd2;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd1;color:#5b9bd1;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span>",
+                    "<span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c99ce;color:#5c99ce;\">██</span><span style=\"background-color:#5da0d9;color:#5da0d9;\">██</span><span style=\"background-color:#559ad2;color:#559ad2;\">██</span><span style=\"background-color:#5b6f88;color:#5b6f88;\">██</span><span style=\"background-color:#72463b;color:#72463b;\">██</span><span style=\"background-color:#8b3311;color:#8b3311;\">██</span><span style=\"background-color:#8e2900;color:#8e2900;\">██</span><span style=\"background-color:#7a2000;color:#7a2000;\">██</span><span style=\"background-color:#6c1b00;color:#6c1b00;\">██</span><span style=\"background-color:#6a1a00;color:#6a1a00;\">██</span><span style=\"background-color:#6e1b00;color:#6e1b00;\">██</span><span style=\"background-color:#801f00;color:#801f00;\">██</span><span style=\"background-color:#7f2000;color:#7f2000;\">██</span><span style=\"background-color:#6e2d12;color:#6e2d12;\">██</span><span style=\"background-color:#5b4949;color:#5b4949;\">██</span><span style=\"background-color:#70595b;color:#70595b;\">██</span><span style=\"background-color:#5d718b;color:#5d718b;\">██</span><span style=\"background-color:#5498cf;color:#5498cf;\">██</span><span style=\"background-color:#5da1da;color:#5da1da;\">██</span><span style=\"background-color:#5c99ce;color:#5c99ce;\">██</span><span style=\"background-color:#5b9bd1;color:#5b9bd1;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5c99cd;color:#5c99cd;\">██</span><span style=\"background-color:#5ca2dc;color:#5ca2dc;\">██</span><span style=\"background-color:#5484ae;color:#5484ae;\">██</span><span style=\"background-color:#703d2d;color:#703d2d;\">██</span><span style=\"background-color:#902600;color:#902600;\">██</span><span style=\"background-color:#9e2c00;color:#9e2c00;\">██</span><span style=\"background-color:#892903;color:#892903;\">██</span><span style=\"background-color:#773110;color:#773110;\">██</span><span style=\"background-color:#83401b;color:#83401b;\">██</span><span style=\"background-color:#914c23;color:#914c23;\">██</span><span style=\"background-color:#9d5629;color:#9d5629;\">██</span><span style=\"background-color:#9b582b;color:#9b582b;\">██</span><span style=\"background-color:#a0592c;color:#a0592c;\">██</span><span style=\"background-color:#8c4b24;color:#8c4b24;\">██</span><span style=\"background-color:#662003;color:#662003;\">██</span><span style=\"background-color:#952800;color:#952800;\">██</span><span style=\"background-color:#8e2700;color:#8e2700;\">██</span><span style=\"background-color:#8e2600;color:#8e2600;\">██</span><span style=\"background-color:#743a26;color:#743a26;\">██</span><span style=\"background-color:#5380a7;color:#5380a7;\">██</span><span style=\"background-color:#5ca1db;color:#5ca1db;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span><span style=\"background-color:#5b9bd1;color:#5b9bd1;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span>",
+                    "<span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c98cb;color:#5c98cb;\">██</span><span style=\"background-color:#5ea4de;color:#5ea4de;\">██</span><span style=\"background-color:#537ca1;color:#537ca1;\">██</span><span style=\"background-color:#772a0c;color:#772a0c;\">██</span><span style=\"background-color:#922a00;color:#922a00;\">██</span><span style=\"background-color:#9c350c;color:#9c350c;\">██</span><span style=\"background-color:#882d09;color:#882d09;\">██</span><span style=\"background-color:#a95224;color:#a95224;\">██</span><span style=\"background-color:#f48a47;color:#f48a47;\">██</span><span style=\"background-color:#fe9750;color:#fe9750;\">██</span><span style=\"background-color:#ff9c54;color:#ff9c54;\">██</span><span style=\"background-color:#ff9d55;color:#ff9d55;\">██</span><span style=\"background-color:#ffa358;color:#ffa358;\">██</span><span style=\"background-color:#ffa358;color:#ffa358;\">██</span><span style=\"background-color:#ffa359;color:#ffa359;\">██</span><span style=\"background-color:#ba6935;color:#ba6935;\">██</span><span style=\"background-color:#852c09;color:#852c09;\">██</span><span style=\"background-color:#902e08;color:#902e08;\">██</span><span style=\"background-color:#8b310c;color:#8b310c;\">██</span><span style=\"background-color:#952b00;color:#952b00;\">██</span><span style=\"background-color:#7a2a0b;color:#7a2a0b;\">██</span><span style=\"background-color:#5181aa;color:#5181aa;\">██</span><span style=\"background-color:#5ea0d9;color:#5ea0d9;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5c99ce;color:#5c99ce;\">██</span><span style=\"background-color:#5ca6e2;color:#5ca6e2;\">██</span><span style=\"background-color:#4c7fa8;color:#4c7fa8;\">██</span><span style=\"background-color:#70290d;color:#70290d;\">██</span><span style=\"background-color:#9a2f03;color:#9a2f03;\">██</span><span style=\"background-color:#97330b;color:#97330b;\">██</span><span style=\"background-color:#772606;color:#772606;\">██</span><span style=\"background-color:#7d3e1b;color:#7d3e1b;\">██</span><span style=\"background-color:#bf703a;color:#bf703a;\">██</span><span style=\"background-color:#e98e4c;color:#e98e4c;\">██</span><span style=\"background-color:#fe9a52;color:#fe9a52;\">██</span><span style=\"background-color:#fc9751;color:#fc9751;\">██</span><span style=\"background-color:#fc9851;color:#fc9851;\">██</span><span style=\"background-color:#ca7a41;color:#ca7a41;\">██</span><span style=\"background-color:#a66435;color:#a66435;\">██</span><span style=\"background-color:#a86535;color:#a86535;\">██</span><span style=\"background-color:#c17841;color:#c17841;\">██</span><span style=\"background-color:#b96e3a;color:#b96e3a;\">██</span><span style=\"background-color:#964218;color:#964218;\">██</span><span style=\"background-color:#942f07;color:#942f07;\">██</span><span style=\"background-color:#96330c;color:#96330c;\">██</span><span style=\"background-color:#9d2d01;color:#9d2d01;\">██</span><span style=\"background-color:#673828;color:#673828;\">██</span><span style=\"background-color:#549bd4;color:#549bd4;\">██</span><span style=\"background-color:#5e9bd0;color:#5e9bd0;\">██</span><span style=\"background-color:#5b9acf;color:#5b9acf;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd1;color:#5b9bd1;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5d9cd2;color:#5d9cd2;\">██</span><span style=\"background-color:#589fd9;color:#589fd9;\">██</span><span style=\"background-color:#556c85;color:#556c85;\">██</span><span style=\"background-color:#762b0e;color:#762b0e;\">██</span><span style=\"background-color:#922d05;color:#922d05;\">██</span><span style=\"background-color:#61280f;color:#61280f;\">██</span><span style=\"background-color:#5c280e;color:#5c280e;\">██</span><span style=\"background-color:#724223;color:#724223;\">██</span><span style=\"background-color:#81532f;color:#81532f;\">██</span><span style=\"background-color:#7b4e2b;color:#7b4e2b;\">██</span><span style=\"background-color:#92592f;color:#92592f;\">██</span><span style=\"background-color:#dc8749;color:#dc8749;\">██</span><span style=\"background-color:#dc8749;color:#dc8749;\">██</span><span style=\"background-color:#bd7540;color:#bd7540;\">██</span><span style=\"background-color:#84512b;color:#84512b;\">██</span><span style=\"background-color:#7f502a;color:#7f502a;\">██</span><span style=\"background-color:#7d512e;color:#7d512e;\">██</span><span style=\"background-color:#84532e;color:#84532e;\">██</span><span style=\"background-color:#9c6338;color:#9c6338;\">██</span><span style=\"background-color:#6d4a2c;color:#6d4a2c;\">██</span><span style=\"background-color:#301507;color:#301507;\">██</span><span style=\"background-color:#69280a;color:#69280a;\">██</span><span style=\"background-color:#91300a;color:#91300a;\">██</span><span style=\"background-color:#972900;color:#972900;\">██</span><span style=\"background-color:#545a68;color:#545a68;\">██</span><span style=\"background-color:#59a5e3;color:#59a5e3;\">██</span><span style=\"background-color:#5d99ce;color:#5d99ce;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd1;color:#5b9bd1;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#579ad1;color:#579ad1;\">██</span><span style=\"background-color:#5f4f51;color:#5f4f51;\">██</span><span style=\"background-color:#922600;color:#922600;\">██</span><span style=\"background-color:#882c07;color:#882c07;\">██</span><span style=\"background-color:#702808;color:#702808;\">██</span><span style=\"background-color:#22150c;color:#22150c;\">██</span><span style=\"background-color:#693718;color:#693718;\">██</span><span style=\"background-color:#d78c56;color:#d78c56;\">██</span><span style=\"background-color:#a88b72;color:#a88b72;\">██</span><span style=\"background-color:#483724;color:#483724;\">██</span><span style=\"background-color:#936442;color:#936442;\">██</span><span style=\"background-color:#624227;color:#624227;\">██</span><span style=\"background-color:#845733;color:#845733;\">██</span><span style=\"background-color:#704627;color:#704627;\">██</span><span style=\"background-color:#eea16b;color:#eea16b;\">██</span><span style=\"background-color:#9c826c;color:#9c826c;\">██</span><span style=\"background-color:#392d1e;color:#392d1e;\">██</span><span style=\"background-color:#b58056;color:#b58056;\">██</span><span style=\"background-color:#c0733e;color:#c0733e;\">██</span><span style=\"background-color:#4b3623;color:#4b3623;\">██</span><span style=\"background-color:#87522b;color:#87522b;\">██</span><span style=\"background-color:#a66132;color:#a66132;\">██</span><span style=\"background-color:#994f24;color:#994f24;\">██</span><span style=\"background-color:#7a2807;color:#7a2807;\">██</span><span style=\"background-color:#902a01;color:#902a01;\">██</span><span style=\"background-color:#556377;color:#556377;\">██</span><span style=\"background-color:#5aa1dc;color:#5aa1dc;\">██</span><span style=\"background-color:#5c9ace;color:#5c9ace;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span><span style=\"background-color:#5ea0d9;color:#5ea0d9;\">██</span><span style=\"background-color:#4d80aa;color:#4d80aa;\">██</span><span style=\"background-color:#872000;color:#872000;\">██</span><span style=\"background-color:#822d09;color:#822d09;\">██</span><span style=\"background-color:#542007;color:#542007;\">██</span><span style=\"background-color:#682404;color:#682404;\">██</span><span style=\"background-color:#581c03;color:#581c03;\">██</span><span style=\"background-color:#6b4021;color:#6b4021;\">██</span><span style=\"background-color:#d6864a;color:#d6864a;\">██</span><span style=\"background-color:#d3874f;color:#d3874f;\">██</span><span style=\"background-color:#c67f48;color:#c67f48;\">██</span><span style=\"background-color:#9f663a;color:#9f663a;\">██</span><span style=\"background-color:#b76d3a;color:#b76d3a;\">██</span><span style=\"background-color:#ffa157;color:#ffa157;\">██</span><span style=\"background-color:#aa6c3c;color:#aa6c3c;\">██</span><span style=\"background-color:#be7b48;color:#be7b48;\">██</span><span style=\"background-color:#d88e56;color:#d88e56;\">██</span><span style=\"background-color:#c57c45;color:#c57c45;\">██</span><span style=\"background-color:#cc7e46;color:#cc7e46;\">██</span><span style=\"background-color:#995e36;color:#995e36;\">██</span><span style=\"background-color:#d78548;color:#d78548;\">██</span><span style=\"background-color:#ffa056;color:#ffa056;\">██</span><span style=\"background-color:#ea8847;color:#ea8847;\">██</span><span style=\"background-color:#98572b;color:#98572b;\">██</span><span style=\"background-color:#4c1901;color:#4c1901;\">██</span><span style=\"background-color:#802d09;color:#802d09;\">██</span><span style=\"background-color:#8a2600;color:#8a2600;\">██</span><span style=\"background-color:#516f8c;color:#516f8c;\">██</span><span style=\"background-color:#5ca1db;color:#5ca1db;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5798cf;color:#5798cf;\">██</span><span style=\"background-color:#60565d;color:#60565d;\">██</span><span style=\"background-color:#792603;color:#792603;\">██</span><span style=\"background-color:#792603;color:#792603;\">██</span><span style=\"background-color:#622407;color:#622407;\">██</span><span style=\"background-color:#611e01;color:#611e01;\">██</span><span style=\"background-color:#7d3d19;color:#7d3d19;\">██</span><span style=\"background-color:#e58e4e;color:#e58e4e;\">██</span><span style=\"background-color:#db8546;color:#db8546;\">██</span><span style=\"background-color:#d67f44;color:#d67f44;\">██</span><span style=\"background-color:#d67b40;color:#d67b40;\">██</span><span style=\"background-color:#e47b3c;color:#e47b3c;\">██</span><span style=\"background-color:#e47839;color:#e47839;\">██</span><span style=\"background-color:#f48a46;color:#f48a46;\">██</span><span style=\"background-color:#e0884a;color:#e0884a;\">██</span><span style=\"background-color:#be713c;color:#be713c;\">██</span><span style=\"background-color:#c6763f;color:#c6763f;\">██</span><span style=\"background-color:#da8447;color:#da8447;\">██</span><span style=\"background-color:#ff9f55;color:#ff9f55;\">██</span><span style=\"background-color:#c27740;color:#c27740;\">██</span><span style=\"background-color:#7f441f;color:#7f441f;\">██</span><span style=\"background-color:#85441e;color:#85441e;\">██</span><span style=\"background-color:#5c1f03;color:#5c1f03;\">██</span><span style=\"background-color:#6c2404;color:#6c2404;\">██</span><span style=\"background-color:#63270b;color:#63270b;\">██</span><span style=\"background-color:#9b2700;color:#9b2700;\">██</span><span style=\"background-color:#575057;color:#575057;\">██</span><span style=\"background-color:#5aa3e0;color:#5aa3e0;\">██</span><span style=\"background-color:#5c99cd;color:#5c99cd;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5b99cf;color:#5b99cf;\">██</span><span style=\"background-color:#5da0d8;color:#5da0d8;\">██</span><span style=\"background-color:#59a9ea;color:#59a9ea;\">██</span><span style=\"background-color:#518ab9;color:#518ab9;\">██</span><span style=\"background-color:#77351c;color:#77351c;\">██</span><span style=\"background-color:#942e04;color:#942e04;\">██</span><span style=\"background-color:#652407;color:#652407;\">██</span><span style=\"background-color:#5e1e02;color:#5e1e02;\">██</span><span style=\"background-color:#964f25;color:#964f25;\">██</span><span style=\"background-color:#f79a54;color:#f79a54;\">██</span><span style=\"background-color:#f6924b;color:#f6924b;\">██</span><span style=\"background-color:#b1623d;color:#b1623d;\">██</span><span style=\"background-color:#b97d65;color:#b97d65;\">██</span><span style=\"background-color:#c0836b;color:#c0836b;\">██</span><span style=\"background-color:#be7e68;color:#be7e68;\">██</span><span style=\"background-color:#c1775d;color:#c1775d;\">██</span><span style=\"background-color:#c36f41;color:#c36f41;\">██</span><span style=\"background-color:#f6944e;color:#f6944e;\">██</span><span style=\"background-color:#ff9f55;color:#ff9f55;\">██</span><span style=\"background-color:#bf753f;color:#bf753f;\">██</span><span style=\"background-color:#53240c;color:#53240c;\">██</span><span style=\"background-color:#551800;color:#551800;\">██</span><span style=\"background-color:#5b1c00;color:#5b1c00;\">██</span><span style=\"background-color:#682305;color:#682305;\">██</span><span style=\"background-color:#822d09;color:#822d09;\">██</span><span style=\"background-color:#902c04;color:#902c04;\">██</span><span style=\"background-color:#72341e;color:#72341e;\">██</span><span style=\"background-color:#5389b7;color:#5389b7;\">██</span><span style=\"background-color:#5d9dd3;color:#5d9dd3;\">██</span><span style=\"background-color:#5b9acf;color:#5b9acf;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9acf;color:#5b9acf;\">██</span><span style=\"background-color:#5c9fd7;color:#5c9fd7;\">██</span><span style=\"background-color:#537392;color:#537392;\">██</span><span style=\"background-color:#5e708a;color:#5e708a;\">██</span><span style=\"background-color:#5d687b;color:#5d687b;\">██</span><span style=\"background-color:#813213;color:#813213;\">██</span><span style=\"background-color:#983006;color:#983006;\">██</span><span style=\"background-color:#602306;color:#602306;\">██</span><span style=\"background-color:#6a2405;color:#6a2405;\">██</span><span style=\"background-color:#591a00;color:#591a00;\">██</span><span style=\"background-color:#6a2e0f;color:#6a2e0f;\">██</span><span style=\"background-color:#bf713a;color:#bf713a;\">██</span><span style=\"background-color:#f08f4c;color:#f08f4c;\">██</span><span style=\"background-color:#e27942;color:#e27942;\">██</span><span style=\"background-color:#d96f41;color:#d96f41;\">██</span><span style=\"background-color:#e27441;color:#e27441;\">██</span><span style=\"background-color:#ed8546;color:#ed8546;\">██</span><span style=\"background-color:#f5954f;color:#f5954f;\">██</span><span style=\"background-color:#d97f43;color:#d97f43;\">██</span><span style=\"background-color:#c76d37;color:#c76d37;\">██</span><span style=\"background-color:#532a13;color:#532a13;\">██</span><span style=\"background-color:#631d00;color:#631d00;\">██</span><span style=\"background-color:#652506;color:#652506;\">██</span><span style=\"background-color:#682406;color:#682406;\">██</span><span style=\"background-color:#6e2607;color:#6e2607;\">██</span><span style=\"background-color:#9f3409;color:#9f3409;\">██</span><span style=\"background-color:#7d2906;color:#7d2906;\">██</span><span style=\"background-color:#4984b2;color:#4984b2;\">██</span><span style=\"background-color:#5eaaea;color:#5eaaea;\">██</span><span style=\"background-color:#5c9ed6;color:#5c9ed6;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9acf;color:#5b9acf;\">██</span><span style=\"background-color:#5c9cd3;color:#5c9cd3;\">██</span><span style=\"background-color:#5792c3;color:#5792c3;\">██</span><span style=\"background-color:#574848;color:#574848;\">██</span><span style=\"background-color:#7c2000;color:#7c2000;\">██</span><span style=\"background-color:#7d2804;color:#7d2804;\">██</span><span style=\"background-color:#5f2206;color:#5f2206;\">██</span><span style=\"background-color:#632204;color:#632204;\">██</span><span style=\"background-color:#662305;color:#662305;\">██</span><span style=\"background-color:#5f2306;color:#5f2306;\">██</span><span style=\"background-color:#672002;color:#672002;\">██</span><span style=\"background-color:#5b1b00;color:#5b1b00;\">██</span><span style=\"background-color:#793814;color:#793814;\">██</span><span style=\"background-color:#b26a36;color:#b26a36;\">██</span><span style=\"background-color:#e18443;color:#e18443;\">██</span><span style=\"background-color:#d47d3f;color:#d47d3f;\">██</span><span style=\"background-color:#c87138;color:#c87138;\">██</span><span style=\"background-color:#c3642f;color:#c3642f;\">██</span><span style=\"background-color:#d06b33;color:#d06b33;\">██</span><span style=\"background-color:#fb914a;color:#fb914a;\">██</span><span style=\"background-color:#674427;color:#674427;\">██</span><span style=\"background-color:#28190e;color:#28190e;\">██</span><span style=\"background-color:#542208;color:#542208;\">██</span><span style=\"background-color:#692203;color:#692203;\">██</span><span style=\"background-color:#6c2404;color:#6c2404;\">██</span><span style=\"background-color:#942f07;color:#942f07;\">██</span><span style=\"background-color:#932d04;color:#932d04;\">██</span><span style=\"background-color:#625a62;color:#625a62;\">██</span><span style=\"background-color:#5d7ea2;color:#5d7ea2;\">██</span><span style=\"background-color:#547a9e;color:#547a9e;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5b9acf;color:#5b9acf;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span><span style=\"background-color:#5b9bd0;color:#5b9bd0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c99ce;color:#5c99ce;\">██</span><span style=\"background-color:#5ba1db;color:#5ba1db;\">██</span><span style=\"background-color:#556a83;color:#556a83;\">██</span><span style=\"background-color:#882c0b;color:#882c0b;\">██</span><span style=\"background-color:#73290a;color:#73290a;\">██</span><span style=\"background-color:#561f05;color:#561f05;\">██</span><span style=\"background-color:#662304;color:#662304;\">██</span><span style=\"background-color:#652205;color:#652205;\">██</span><span style=\"background-color:#602104;color:#602104;\">██</span><span style=\"background-color:#6c2404;color:#6c2404;\">██</span><span style=\"background-color:#582106;color:#582106;\">██</span><span style=\"background-color:#4a210b;color:#4a210b;\">██</span><span style=\"background-color:#241309;color:#241309;\">██</span><span style=\"background-color:#703c1d;color:#703c1d;\">██</span><span style=\"background-color:#e87c3d;color:#e87c3d;\">██</span><span style=\"background-color:#db7236;color:#db7236;\">██</span><span style=\"background-color:#e87c3d;color:#e87c3d;\">██</span><span style=\"background-color:#f58c48;color:#f58c48;\">██</span><span style=\"background-color:#fd9a52;color:#fd9a52;\">██</span><span style=\"background-color:#f79852;color:#f79852;\">██</span><span style=\"background-color:#4c3824;color:#4c3824;\">██</span><span style=\"background-color:#232721;color:#232721;\">██</span><span style=\"background-color:#27251c;color:#27251c;\">██</span><span style=\"background-color:#312215;color:#312215;\">██</span><span style=\"background-color:#3d2414;color:#3d2414;\">██</span><span style=\"background-color:#442310;color:#442310;\">██</span><span style=\"background-color:#692b10;color:#692b10;\">██</span><span style=\"background-color:#691f00;color:#691f00;\">██</span><span style=\"background-color:#4c3d3d;color:#4c3d3d;\">██</span><span style=\"background-color:#537fa7;color:#537fa7;\">██</span><span style=\"background-color:#5ea2dd;color:#5ea2dd;\">██</span><span style=\"background-color:#5c9ad0;color:#5c9ad0;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5c9ad0;color:#5c9ad0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c99ce;color:#5c99ce;\">██</span><span style=\"background-color:#5ca1db;color:#5ca1db;\">██</span><span style=\"background-color:#557493;color:#557493;\">██</span><span style=\"background-color:#802d0e;color:#802d0e;\">██</span><span style=\"background-color:#732706;color:#732706;\">██</span><span style=\"background-color:#5b2005;color:#5b2005;\">██</span><span style=\"background-color:#632205;color:#632205;\">██</span><span style=\"background-color:#5f2205;color:#5f2205;\">██</span><span style=\"background-color:#642305;color:#642305;\">██</span><span style=\"background-color:#351c0c;color:#351c0c;\">██</span><span style=\"background-color:#222119;color:#222119;\">██</span><span style=\"background-color:#181e19;color:#181e19;\">██</span><span style=\"background-color:#9d5c31;color:#9d5c31;\">██</span><span style=\"background-color:#f68f4a;color:#f68f4a;\">██</span><span style=\"background-color:#f99852;color:#f99852;\">██</span><span style=\"background-color:#fa9751;color:#fa9751;\">██</span><span style=\"background-color:#f7944f;color:#f7944f;\">██</span><span style=\"background-color:#f2914d;color:#f2914d;\">██</span><span style=\"background-color:#ff9850;color:#ff9850;\">██</span><span style=\"background-color:#764d2d;color:#764d2d;\">██</span><span style=\"background-color:#1b201b;color:#1b201b;\">██</span><span style=\"background-color:#2d291f;color:#2d291f;\">██</span><span style=\"background-color:#26241b;color:#26241b;\">██</span><span style=\"background-color:#24251d;color:#24251d;\">██</span><span style=\"background-color:#292a23;color:#292a23;\">██</span><span style=\"background-color:#262921;color:#262921;\">██</span><span style=\"background-color:#242822;color:#242822;\">██</span><span style=\"background-color:#24261e;color:#24261e;\">██</span><span style=\"background-color:#242a27;color:#242a27;\">██</span><span style=\"background-color:#2b3332;color:#2b3332;\">██</span><span style=\"background-color:#3b576b;color:#3b576b;\">██</span><span style=\"background-color:#5c9cd4;color:#5c9cd4;\">██</span><span style=\"background-color:#5b9ad0;color:#5b9ad0;\">██</span><span style=\"background-color:#5c9ad0;color:#5c9ad0;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5c9bd1;color:#5c9bd1;\">██</span><span style=\"background-color:#5b97ca;color:#5b97ca;\">██</span><span style=\"background-color:#5890c1;color:#5890c1;\">██</span><span style=\"background-color:#517799;color:#517799;\">██</span><span style=\"background-color:#852e0c;color:#852e0c;\">██</span><span style=\"background-color:#7c2804;color:#7c2804;\">██</span><span style=\"background-color:#582005;color:#582005;\">██</span><span style=\"background-color:#6a2404;color:#6a2404;\">██</span><span style=\"background-color:#592005;color:#592005;\">██</span><span style=\"background-color:#1f2119;color:#1f2119;\">██</span><span style=\"background-color:#1d201b;color:#1d201b;\">██</span><span style=\"background-color:#895832;color:#895832;\">██</span><span style=\"background-color:#ff9f54;color:#ff9f54;\">██</span><span style=\"background-color:#f4914d;color:#f4914d;\">██</span><span style=\"background-color:#f7944f;color:#f7944f;\">██</span><span style=\"background-color:#f5924d;color:#f5924d;\">██</span><span style=\"background-color:#f28e4b;color:#f28e4b;\">██</span><span style=\"background-color:#ff9c52;color:#ff9c52;\">██</span><span style=\"background-color:#915c33;color:#915c33;\">██</span><span style=\"background-color:#1b1f1a;color:#1b1f1a;\">██</span><span style=\"background-color:#2f2b21;color:#2f2b21;\">██</span><span style=\"background-color:#26241c;color:#26241c;\">██</span><span style=\"background-color:#222118;color:#222118;\">██</span><span style=\"background-color:#2c281f;color:#2c281f;\">██</span><span style=\"background-color:#2c291f;color:#2c291f;\">██</span><span style=\"background-color:#2e2a20;color:#2e2a20;\">██</span><span style=\"background-color:#29251c;color:#29251c;\">██</span><span style=\"background-color:#27251c;color:#27251c;\">██</span><span style=\"background-color:#2d281e;color:#2d281e;\">██</span><span style=\"background-color:#2d271c;color:#2d271c;\">██</span><span style=\"background-color:#231b0c;color:#231b0c;\">██</span><span style=\"background-color:#477498;color:#477498;\">██</span><span style=\"background-color:#5fa2db;color:#5fa2db;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span>",
+                    "<span style=\"background-color:#5c9ad0;color:#5c9ad0;\">██</span><span style=\"background-color:#5c9ad0;color:#5c9ad0;\">██</span><span style=\"background-color:#5a9bd2;color:#5a9bd2;\">██</span><span style=\"background-color:#546b84;color:#546b84;\">██</span><span style=\"background-color:#633a2e;color:#633a2e;\">██</span><span style=\"background-color:#6a2608;color:#6a2608;\">██</span><span style=\"background-color:#612306;color:#612306;\">██</span><span style=\"background-color:#581f04;color:#581f04;\">██</span><span style=\"background-color:#5e2105;color:#5e2105;\">██</span><span style=\"background-color:#42220f;color:#42220f;\">██</span><span style=\"background-color:#23251f;color:#23251f;\">██</span><span style=\"background-color:#443422;color:#443422;\">██</span><span style=\"background-color:#f6954f;color:#f6954f;\">██</span><span style=\"background-color:#f89650;color:#f89650;\">██</span><span style=\"background-color:#f79650;color:#f79650;\">██</span><span style=\"background-color:#f89550;color:#f89550;\">██</span><span style=\"background-color:#f69450;color:#f69450;\">██</span><span style=\"background-color:#ff9e54;color:#ff9e54;\">██</span><span style=\"background-color:#9c6338;color:#9c6338;\">██</span><span style=\"background-color:#1c201b;color:#1c201b;\">██</span><span style=\"background-color:#2f2b21;color:#2f2b21;\">██</span><span style=\"background-color:#2b281f;color:#2b281f;\">██</span><span style=\"background-color:#26241c;color:#26241c;\">██</span><span style=\"background-color:#28261d;color:#28261d;\">██</span><span style=\"background-color:#2c2920;color:#2c2920;\">██</span><span style=\"background-color:#2d2a20;color:#2d2a20;\">██</span><span style=\"background-color:#28261d;color:#28261d;\">██</span><span style=\"background-color:#25231b;color:#25231b;\">██</span><span style=\"background-color:#2d2a21;color:#2d2a21;\">██</span><span style=\"background-color:#2c2920;color:#2c2920;\">██</span><span style=\"background-color:#2d2b24;color:#2d2b24;\">██</span><span style=\"background-color:#2a2317;color:#2a2317;\">██</span><span style=\"background-color:#334550;color:#334550;\">██</span><span style=\"background-color:#5ea1da;color:#5ea1da;\">██</span><span style=\"background-color:#5b99ce;color:#5b99ce;\">██</span>",
+                    "<span style=\"background-color:#5c9bd0;color:#5c9bd0;\">██</span><span style=\"background-color:#5b9acf;color:#5b9acf;\">██</span><span style=\"background-color:#5d9cd2;color:#5d9cd2;\">██</span><span style=\"background-color:#5a9cd4;color:#5a9cd4;\">██</span><span style=\"background-color:#2b3639;color:#2b3639;\">██</span><span style=\"background-color:#242218;color:#242218;\">██</span><span style=\"background-color:#221d15;color:#221d15;\">██</span><span style=\"background-color:#2e2115;color:#2e2115;\">██</span><span style=\"background-color:#272218;color:#272218;\">██</span><span style=\"background-color:#292820;color:#292820;\">██</span><span style=\"background-color:#1c201c;color:#1c201c;\">██</span><span style=\"background-color:#855632;color:#855632;\">██</span><span style=\"background-color:#ff9e54;color:#ff9e54;\">██</span><span style=\"background-color:#f3934e;color:#f3934e;\">██</span><span style=\"background-color:#f5914c;color:#f5914c;\">██</span><span style=\"background-color:#f5934f;color:#f5934f;\">██</span><span style=\"background-color:#fd9a52;color:#fd9a52;\">██</span><span style=\"background-color:#ad6c3c;color:#ad6c3c;\">██</span><span style=\"background-color:#1d201a;color:#1d201a;\">██</span><span style=\"background-color:#2e2a21;color:#2e2a21;\">██</span><span style=\"background-color:#2a271e;color:#2a271e;\">██</span><span style=\"background-color:#24221a;color:#24221a;\">██</span><span style=\"background-color:#2a271f;color:#2a271f;\">██</span><span style=\"background-color:#2d2a21;color:#2d2a21;\">██</span><span style=\"background-color:#2c2920;color:#2c2920;\">██</span><span style=\"background-color:#2c2920;color:#2c2920;\">██</span><span style=\"background-color:#222119;color:#222119;\">██</span><span style=\"background-color:#2b2920;color:#2b2920;\">██</span><span style=\"background-color:#2c2920;color:#2c2920;\">██</span><span style=\"background-color:#2c2920;color:#2c2920;\">██</span><span style=\"background-color:#2c2921;color:#2c2921;\">██</span><span style=\"background-color:#2c281d;color:#2c281d;\">██</span><span style=\"background-color:#292d2b;color:#292d2b;\">██</span><span style=\"background-color:#5793c6;color:#5793c6;\">██</span><span style=\"background-color:#5d9cd3;color:#5d9cd3;\">██</span>"
+                ];
+
+                let delay = 0;
+                bootLines.forEach(line => {
+                    setTimeout(() => this.addSystemMessage(line), delay);
+                    delay += 200;
+                });
+
+                // Store avatar for sidebar access only
+                this.htmlAvatar = htmlAvatar;
+
+                setTimeout(() => {
+                    this.addSystemMessage('═══════════════════════════════════════════════════');
+                    this.addSystemMessage('*** Welcome to Robbie Terminal, Allan!');
+                    this.addSystemMessage('*** Type /help to see available commands');
+
+                    this.addMessage('robbie', 'Hey Allan! 🚀 Ready to crush some work today? What\'s on your mind?');
+
+                    // Enable input after boot complete
+                    this.messageInput.disabled = false;
+                    this.messageInput.placeholder = 'Type message or /help for commands...';
+                    this.messageInput.focus();
+
+                    this.connectWebSocket();
+                }, delay);
+            }
+
+            connectWebSocket() {
+                this.ws = new WebSocket('ws://10.0.0.1:8007/ws');
+
+                this.ws.onopen = () => {
+                    console.log('WebSocket connected');
+                };
+
+                this.ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log('[DEBUG] WebSocket message received:', data);
+
+                    if (data.type === 'chunk') {
+                        // Remove typing indicator
+                        const typing = document.getElementById('typing');
+                        if (typing) typing.remove();
+
+                        // Append to current Robbie message or create new one
+                        let currentMsg = document.getElementById('robbie-streaming');
+                        if (!currentMsg) {
+                            currentMsg = document.createElement('div');
+                            currentMsg.id = 'robbie-streaming';
+                            currentMsg.className = 'message robbie';
+
+                            // Get current mood and create proper Robbie tag (RED with mood in italics)
+                            const mood = this.getCurrentMood();
+                            const robbieTag = `<span style="color: #ff5555;">&lt;Robbie${mood}&gt;</span>`;
+                            currentMsg.innerHTML = `${robbieTag}<br><span class="text"></span>`;
+                            this.messagesArea.appendChild(currentMsg);
+                        }
+
+                        // Format markdown and render as HTML
+                        const formattedContent = this.formatMessage(data.content);
+                        currentMsg.querySelector('.text').innerHTML = formattedContent;
+                        this.scrollToBottom();
+                    } else if (data.type === 'stream_complete') {
+                        const msg = document.getElementById('robbie-streaming');
+                        if (msg) {
+                            msg.id = '';
+                        }
+                    }
+                };
+
+                this.ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    this.addSystemMessage('⚠️ Connection error - retrying...');
+                };
+
+                this.ws.onclose = () => {
+                    console.log('WebSocket closed');
+                    setTimeout(() => this.connectWebSocket(), 3000);
+                };
+            }
+
+            formatMessage(text) {
+                // Bold (**text**)
+                text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+                // Line breaks before dash/asterisk bullets ONLY (not standalone emojis)
+                text = text.replace(/\n([-*•]\s)/g, '<br>$1');
+
+                // Line breaks before numbered lists
+                text = text.replace(/\n(\d+\.)/g, '<br>$1');
+
+                // Convert single newlines to <br>
+                text = text.replace(/\n/g, '<br>');
+
+                return text;
+            }
+
+            initializeInput() {
+                // Handle Enter to send, Shift+Enter for new line
+                this.messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                // Handle file uploads with vision analysis
+                const fileInput = document.getElementById('fileInput');
+                const fileAttachments = document.getElementById('fileAttachments');
+                this.attachedFiles = [];
+
+                fileInput.addEventListener('change', async (e) => {
+                    const files = Array.from(e.target.files);
+                    for (const file of files) {
+                        // Check if it's an image for vision analysis
+                        if (file.type.startsWith('image/')) {
+                            await this.analyzeImage(file);
+                        }
+                        this.attachedFiles.push(file);
+                        this.addFileTag(file);
+                    }
+                    fileInput.value = ''; // Reset input
+                });
+
+                // Handle send button click
+                const sendButton = document.getElementById('sendButton');
+                sendButton.addEventListener('click', () => this.sendMessage());
+            }
+
+            async analyzeImage(file) {
+                // Read image as base64
+                const reader = new FileReader();
+                return new Promise((resolve, reject) => {
+                    reader.onload = async (e) => {
+                        const base64 = e.target.result.split(',')[1];
+
+                        // Add system message about image analysis
+                        this.addSystemMessage(`🔍 Analyzing image: ${file.name}...`);
+
+                        // TODO: Send to backend for vision analysis
+                        // For now, just acknowledge the upload
+                        console.log(`📸 Image uploaded: ${file.name}, ${(file.size / 1024).toFixed(2)}KB`);
+
+                        resolve();
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            addFileTag(file) {
+                const fileAttachments = document.getElementById('fileAttachments');
+                const tag = document.createElement('div');
+                tag.className = 'file-tag';
+                tag.innerHTML = `📎 ${file.name} <span class="file-tag-remove" data-filename="${file.name}">✕</span>`;
+
+                // Remove file on click
+                tag.querySelector('.file-tag-remove').addEventListener('click', () => {
+                    this.attachedFiles = this.attachedFiles.filter(f => f.name !== file.name);
+                    tag.remove();
+                });
+
+                fileAttachments.appendChild(tag);
+            }
+
+            sendMessage() {
+                const message = this.messageInput.value.trim();
+                console.log('[DEBUG] sendMessage called, message:', message);
+                console.log('[DEBUG] ws exists:', !!this.ws);
+                console.log('[DEBUG] ws readyState:', this.ws ? this.ws.readyState : 'N/A');
+
+                if (!message || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                    console.error('[ERROR] Cannot send - conditions not met');
+                    return;
+                }
+
+                // Show attached files if any
+                if (this.attachedFiles && this.attachedFiles.length > 0) {
+                    const fileNames = this.attachedFiles.map(f => f.name).join(', ');
+                    const fileMsg = document.createElement('div');
+                    fileMsg.className = 'message system';
+                    fileMsg.innerHTML = `<span style="color: #00d4ff;">📎 Attached: ${fileNames}</span>`;
+                    this.messagesArea.appendChild(fileMsg);
+                }
+
+                // Display user message
+                this.addMessage('allan', message);
+
+                // Clear input and files
+                this.messageInput.value = '';
+                this.attachedFiles = [];
+                document.getElementById('fileAttachments').innerHTML = '';
+
+                // Show typing indicator
+                const typing = document.createElement('div');
+                typing.id = 'typing';
+                typing.className = 'message typing-indicator';
+                typing.innerHTML = '<span style="color: #ff5555;">&lt;Robbie&gt;</span> is typing...';
+                this.messagesArea.appendChild(typing);
+                this.scrollToBottom();
+
+                // Send to server (TODO: include file data in payload)
+                const payload = JSON.stringify({ message });
+                console.log('[DEBUG] Sending to WebSocket:', payload);
+                this.ws.send(payload);
+                console.log('[DEBUG] Message sent successfully');
+            }
+
+            addMessage(user, text) {
+                const div = document.createElement('div');
+                div.className = `message ${user}`;
+
+                // Color-coded usernames: Allan = Lighter Army Green (#6b9463), Robbie = red (#ff5555)
+                const usernameColor = user === 'allan' ? '#6b9463' : '#ff5555';
+
+                // Get current mood for Robbie (ALWAYS show for every message)
+                const mood = user === 'robbie' ? this.getCurrentMood() : '';
+                const username = user === 'allan' ?
+                    `<span style="color: ${usernameColor};">&lt;Allan&gt;</span>` :
+                    `<span style="color: ${usernameColor};">&lt;Robbie${mood}&gt;</span>`;
+
+                const formattedText = user === 'robbie' ? this.formatMessage(text) : text;
+
+                // Both users show username tag, Robbie gets newline after
+                if (user === 'robbie') {
+                    div.innerHTML = `${username}<br><span class="text">${formattedText}</span>`;
+                } else {
+                    // Allan shows username tag in Army Green, then text on same line
+                    div.innerHTML = `${username} <span class="text">${formattedText}</span>`;
+                }
+
+                this.messagesArea.appendChild(div);
+                this.scrollToBottom();
+            }
+
+            getCurrentMood() {
+                // Get mood from sidebar avatar tooltip
+                const tooltip = document.getElementById('robbieMoodTooltip');
+                if (tooltip && tooltip.textContent) {
+                    // Extract just the text after emoji, wrap in white italics
+                    const moodText = tooltip.textContent.trim();
+                    return `: <span style="color: #fff; font-style: italic;">${moodText}</span>`;
+                }
+                return ': <span style="color: #fff; font-style: italic;">😊 Friendly</span>';
+            }
+
+            addSystemMessage(text) {
+                const div = document.createElement('div');
+                div.className = 'message system';
+                div.innerHTML = `<span style="color: #00d4ff;">${text}</span>`;
+                this.messagesArea.appendChild(div);
+                this.scrollToBottom();
+            }
+
+            scrollToBottom() {
+                this.messagesArea.scrollTop = this.messagesArea.scrollHeight;
+            }
+        }
+
+        // Location backgrounds - multiple options per location
+        const locationBackgrounds = {
+            'allans-office': [
+                // Rustic Wood Paneling
+                `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><pattern id="wood" x="0" y="0" width="100" height="300" patternUnits="userSpaceOnUse"><rect width="100" height="300" fill="%23654321"/><rect x="0" y="0" width="98" height="298" fill="%23704214" stroke="%23543210" stroke-width="2"/><line x1="0" y1="100" x2="100" y2="100" stroke="%23543210" stroke-width="1" opacity="0.3"/><line x1="0" y1="200" x2="100" y2="200" stroke="%23543210" stroke-width="1" opacity="0.3"/><ellipse cx="30" cy="50" rx="8" ry="12" fill="%23432110" opacity="0.4"/><ellipse cx="70" cy="150" rx="10" ry="15" fill="%23432110" opacity="0.3"/><ellipse cx="50" cy="250" rx="7" ry="10" fill="%23432110" opacity="0.5"/></pattern></defs><rect width="400" height="300" fill="url(%23wood)"/></svg>')`,
+                // Modern Office
+                `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><defs><linearGradient id="g1"><stop offset="0%" stop-color="%232a4858"/><stop offset="100%" stop-color="%231a2836"/></linearGradient></defs><rect width="300" height="200" fill="url(%23g1)"/><rect x="20" y="30" width="80" height="100" fill="%23334455" opacity="0.3"/><rect x="200" y="40" width="60" height="80" fill="%23445566" opacity="0.2"/></svg>')`,
+                // Executive
+                `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="%231a1a2e"/><rect x="10" y="10" width="280" height="180" fill="%23252542" opacity="0.5"/><circle cx="50" cy="50" r="20" fill="%23f0a500" opacity="0.2"/></svg>')`
+            ],
+            'huddle-room': [
+                `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="%23252535"/><circle cx="150" cy="100" r="60" fill="%23444455" opacity="0.2"/></svg>')`
+            ],
+            'testpilot-club': [
+                `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><defs><linearGradient id="g2"><stop offset="0%" stop-color="%231e3a5f"/><stop offset="100%" stop-color="%230d1117"/></linearGradient></defs><rect width="300" height="200" fill="url(%23g2)"/><path d="M50,50 L100,80 L80,100 Z" fill="%2300d4ff" opacity="0.1"/></svg>')`
+            ]
+        };
+
+        // Track current background index for each location
+        let currentBackgroundIndex = {
+            'allans-office': 0,
+            'huddle-room': 0,
+            'testpilot-club': 0
+        };
+
+        // Initialize terminal when page loads
+        // 📊 Update system monitors
+        function updateSystemMonitors() {
+            // Simulate real-time metrics (replace with actual API calls later)
+            const cpu = Math.floor(Math.random() * 30) + 10; // 10-40%
+            const mem = Math.floor(Math.random() * 20) + 30; // 30-50%
+            const sql = Math.floor(Math.random() * 15) + 5;  // 5-20%
+
+            const cpuValue = document.getElementById('cpuValue');
+            const cpuBar = document.getElementById('cpuBar');
+            const memValue = document.getElementById('memValue');
+            const memBar = document.getElementById('memBar');
+            const sqlValue = document.getElementById('sqlValue');
+            const sqlBar = document.getElementById('sqlBar');
+
+            if (cpuValue) cpuValue.textContent = `${cpu}%`;
+            if (cpuBar) cpuBar.style.width = `${cpu}%`;
+
+            if (memValue) memValue.textContent = `${mem}%`;
+            if (memBar) memBar.style.width = `${mem}%`;
+
+            if (sqlValue) sqlValue.textContent = `${sql}%`;
+            if (sqlBar) sqlBar.style.width = `${sql}%`;
+        }
+
+        window.addEventListener('load', () => {
+            window.terminal = new RobbieTerminal();
+
+            // 🎨 Setup background cycling
+            setupBackgroundCycling();
+
+            // 📊 Start system monitor updates (every 2 seconds)
+            updateSystemMonitors();
+            setInterval(updateSystemMonitors, 2000);
+
+            // 💡 Render Robbie's beautiful PNG face in sidebar
+            setTimeout(() => {
+                const sidebarFace = document.getElementById('robbieAvatarSidebar');
+                if (sidebarFace) {
+                    const img = document.createElement('img');
+                    // 💕 Using the friendly avatar - Robbie's warm, welcoming expression!
+                    img.src = '/static/avatars/robbie-friendly.png';
+                    img.alt = 'Robbie - Your AI Strategic Partner';
+                    img.style.transform = 'scale(1.1)'; // Slightly larger for presence
+                    img.onerror = () => {
+                        // 🔴 Fallback if image doesn't load
+                        sidebarFace.innerHTML = '🤖';
+                        sidebarFace.style.fontSize = '80px';
+                        console.log('⚠️ Could not load Robbie avatar PNG - check static path');
+                    };
+                    sidebarFace.appendChild(img);
+                }
+            }, 100);
+        });
+
+        // Function to set up background cycling (with localStorage persistence)
+        function setupBackgroundCycling() {
+            const container = document.getElementById('robbieAvatarContainer');
+            if (!container) return;
+
+            const location = container.getAttribute('data-location') || 'allans-office';
+            const backgrounds = locationBackgrounds[location] || locationBackgrounds['allans-office'];
+
+            // Load saved background preference from localStorage
+            const savedIndex = localStorage.getItem(`background-${location}`);
+            if (savedIndex !== null) {
+                currentBackgroundIndex[location] = parseInt(savedIndex);
+            }
+
+            // Set initial background (from saved preference or default to 0)
+            const initialIndex = currentBackgroundIndex[location] || 0;
+            container.style.background = backgrounds[initialIndex];
+            container.style.backgroundSize = 'cover';
+            container.style.backgroundPosition = 'center';
+            container.style.cursor = 'pointer';
+            container.title = 'Click to change background';
+
+            // Add click handler to cycle backgrounds
+            container.addEventListener('click', () => {
+                currentBackgroundIndex[location] = (currentBackgroundIndex[location] + 1) % backgrounds.length;
+                const nextIndex = currentBackgroundIndex[location];
+                container.style.background = backgrounds[nextIndex];
+
+                // Save preference to localStorage
+                localStorage.setItem(`background-${location}`, nextIndex.toString());
+                console.log(`🎨 Changed to background ${nextIndex + 1}/${backgrounds.length} for ${location} (saved)`);
+            });
+
+            console.log(`✅ Background cycling enabled for ${location} (${backgrounds.length} backgrounds, current: ${initialIndex + 1})`);
+        }
+
+        // Function to change location
+        function setLocation(location, displayName) {
+            const container = document.getElementById('robbieAvatarContainer');
+            const label = document.getElementById('robbieLocation');
+
+            if (container && locationBackgrounds[location]) {
+                container.setAttribute('data-location', location);
+                // Re-setup background cycling for new location
+                setupBackgroundCycling();
+            }
+
+            if (label) {
+                const icons = {
+                    'allans-office': '🏢',
+                    'huddle-room': '👥',
+                    'testpilot-club': '🚀'
+                };
+                label.textContent = `${icons[location] || '📍'} ${displayName}`;
+            }
+        }
+
+        // 💕 Function to change Robbie's mood/expression
+        function setMood(moodName, imageName) {
+            const avatarFace = document.getElementById('robbieAvatarSidebar');
+            const tooltip = document.getElementById('robbieMoodTooltip');
+
+            const moodEmojis = {
+                'friendly': '😊',
+                'happy': '😄',
+                'loving': '💕',
+                'focused': '🎯',
+                'thoughtful': '🤔',
+                'surprised': '😮',
+                'playful': '😄',
+                'bossy': '💪',
+                'content': '😌',
+                'blushing': '😊'
+            };
+
+            if (avatarFace) {
+                const img = avatarFace.querySelector('img');
+                if (img) {
+                    img.src = `/static/avatars/robbie-${imageName}.png`;
+                }
+            }
+
+            if (tooltip) {
+                const emoji = moodEmojis[moodName.toLowerCase()] || '😊';
+                tooltip.textContent = `${emoji} ${moodName}`;
+            }
+        }
+
+        // ==================== SETUP TAB FUNCTIONS ====================
+        function connectAPI(service) {
+            const serviceName = {
+                'hubspot': 'HubSpot',
+                'fireflies': 'Fireflies.ai',
+                'google': 'Google Workspace',
+                'slack': 'Slack'
+            }[service];
+
+            const confirmed = confirm(`Ready to connect ${serviceName}?\n\nYou'll be redirected to ${serviceName} to authorize Robbie AI.`);
+
+            if (confirmed) {
+                // TODO: Implement OAuth flow
+                alert(`🚀 Opening ${serviceName} authentication...\n\nThis will be implemented with OAuth 2.0 flow.`);
+                // window.location.href = `/api/auth/${service}`;
+            }
+        }
+    </script>
+</body>
+
+</html>--:--:-- • CPU: AMD EPYC • Latency: ~100ms

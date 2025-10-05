@@ -1,0 +1,43 @@
+#!/bin/bash
+# Activate and configure RunPod for SSH mesh
+
+echo "🚀 RUNPOD ACTIVATION GUIDE"
+echo "=========================="
+echo ""
+echo "📋 RunPod to activate:"
+echo "   Name: allied_ivory_gerbil (Aurora Primary)"
+echo "   ID: 2tbwzatlrjdy7i"
+echo "   GPUs: 2x RTX 4090 (48GB total VRAM)"
+echo "   Cost: $1.19/hour"
+echo ""
+echo "🔧 ACTIVATION STEPS:"
+echo ""
+echo "1. Go to: https://www.runpod.io/console/pods"
+echo "2. Find pod: allied_ivory_gerbil (2tbwzatlrjdy7i)"
+echo "3. Click 'Start' button"
+echo "4. Wait 2-3 minutes for boot"
+echo "5. Click 'Connect' tab"
+echo "6. Copy the SSH command (will look like: ssh root@X.X.X.X -p XXXXX)"
+echo ""
+echo "📝 Once you have the SSH details, run:"
+echo "   ./scripts/setup-runpod-tunnel.sh <IP> <PORT>"
+echo ""
+echo "⏳ Waiting for you to activate the pod..."
+echo ""
+read -p "Press ENTER once pod is started and you have the SSH details..."
+echo ""
+read -p "Enter RunPod IP address: " RUNPOD_IP
+read -p "Enter RunPod SSH port: " RUNPOD_PORT
+echo ""
+echo "🧪 Testing connection to $RUNPOD_IP:$RUNPOD_PORT..."
+ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p "$RUNPOD_PORT" "root@$RUNPOD_IP" "hostname && nvidia-smi --query-gpu=name --format=csv,noheader" && echo "✅ Connection successful!" || echo "❌ Connection failed"
+echo ""
+echo "💾 Saving RunPod details..."
+cat > /tmp/runpod-config.sh << EOF
+RUNPOD_IP="$RUNPOD_IP"
+RUNPOD_PORT="$RUNPOD_PORT"
+RUNPOD_HOST="root@\$RUNPOD_IP"
+EOF
+echo "✅ RunPod config saved to /tmp/runpod-config.sh"
+echo ""
+echo "🔧 Next: Run ./scripts/setup-runpod-tunnel.sh to configure SSH tunnel"

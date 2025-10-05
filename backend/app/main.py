@@ -15,6 +15,7 @@ from app.core.config import get_settings
 from app.db.database import database, engine, metadata
 from app.api.routes import api_router
 from app.websockets.manager import ConnectionManager
+from app.services.config_service import config_service
 
 # Configure structured logging
 structlog.configure(
@@ -43,13 +44,17 @@ manager = ConnectionManager()
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     logger.info("Starting Aurora RobbieVerse API")
-    
+
     # Connect to database
     await database.connect()
     logger.info("Database connected")
-    
+
+    # Initialize configuration from environment variables
+    await config_service.initialize_config()
+    logger.info("Configuration initialized from environment variables")
+
     yield
-    
+
     # Disconnect from database
     await database.disconnect()
     logger.info("Database disconnected")

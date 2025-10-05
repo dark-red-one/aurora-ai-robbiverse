@@ -7,9 +7,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Drop existing duplicate tables if migration mode
--- CAUTION: Only uncomment during migration
--- DROP TABLE IF EXISTS users CASCADE;
+-- Production-ready schema - No development artifacts
 
 -- ============================================
 -- CORE USER MANAGEMENT
@@ -92,11 +90,11 @@ CREATE TABLE IF NOT EXISTS system_config (
 CREATE INDEX idx_system_config_key ON system_config(key);
 CREATE INDEX idx_system_config_category ON system_config(category);
 
--- Insert default configurations
+-- Insert default configurations (Application layer overrides these via environment variables)
 INSERT INTO system_config (key, value, category, description) VALUES
   ('deployment.primary_node', '"aurora"'::jsonb, 'deployment', 'Primary RunPod node name'),
   ('deployment.gpu_config', '{"aurora": "2x RTX 4090", "collaboration": "1x RTX 4090", "fluenti": "1x RTX 4090"}'::jsonb, 'deployment', 'GPU configurations per node'),
-  ('ai.default_model', '"gpt-4"'::jsonb, 'ai', 'Default AI model'),
+  ('ai.default_model', '"llama3.1:8b"'::jsonb, 'ai', 'Default AI model'),
   ('ai.temperature', '0.7'::jsonb, 'ai', 'Default AI temperature'),
   ('security.session_timeout', '3600'::jsonb, 'security', 'Session timeout in seconds'),
   ('features.gpu_mesh_enabled', 'true'::jsonb, 'features', 'Enable GPU mesh networking')

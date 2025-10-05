@@ -1,0 +1,45 @@
+{
+    "environment": "staging",
+    "name": "RobbieBook1",
+    "node_id": "robbiebook1-staging",
+    "database": {
+        "url": "postgresql://aurora:staging_password@localhost:5432/aurora_staging",
+        "redis_url": "redis://localhost:6379/2"
+    },
+    "ai_models": {
+        "default": "llama3.1:8b",
+        "fallback": "qwen2.5:7b",
+        "backup": "mistral:7b"
+    },
+    "security": {
+        "secret_key": "staging-secret-key-change-in-production",
+        "token_expiry": 45,
+        "session_timeout": 5400
+    },
+    "performance": {
+        "debug": true,
+        "log_level": "INFO",
+        "metrics_enabled": true
+    },
+    "backup": {
+        "enabled": true,
+        "frequency": "daily",
+        "retention_days": 14,
+        "destination": "/mnt/staging-backup"
+    },
+    "monitoring": {
+        "enabled": true,
+        "health_check_interval": 45,
+        "metrics_collection": true
+    },
+    "integrations": {
+        "hubspot_api_key": "staging_hubspot_key",
+        "slack_webhook": "https://hooks.slack.com/services/staging/webhook",
+        "google_service_account": "staging@aurora-ai-empire.iam.gserviceaccount.com"
+    },
+    "deployment": {
+        "auto_deploy": true,
+        "rollback_on_failure": true,
+        "deployment_notifications": true
+    }
+}

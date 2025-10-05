@@ -1,20 +1,24 @@
-import { fetch } from "undici";
-import { randomUUID } from "crypto";
-import { db } from "./db.js";
-import fs from "fs";
 import { exec } from "child_process";
-import { usageTracker, withUsageTracking } from "./usageTracker.js";
+import { randomUUID } from "crypto";
+import fs from "fs";
+import { fetch } from "undici";
+import { db } from "./db.js";
+import { usageTracker } from "./usageTracker.js";
 
 const LITELLM_BASE = process.env.LITELLM_BASE || "http://localhost:23936";
-const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "llama-maverick";
+// Optimized model stack per Robbie's recommendations (October 2024)
+const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "llama3.1:8b"; // Primary: Best for Robbie's personality
 
 export async function registerLLMRoutes(app) {
   app.log.info({ LITELLM_BASE, DEFAULT_MODEL }, "Registering LLM routes");
-  const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "llama-maverick"; // prefer new alias, else existing llama alias
+  // Fallback chain: llama3.1:8b → qwen2.5:7b → mistral:7b
+  const FALLBACK_MODEL = process.env.FALLBACK_MODEL || "qwen2.5:7b"; // Coding tasks
+  const BACKUP_MODEL = process.env.BACKUP_MODEL || "mistral:7b"; // Complex analysis
 
   async function postChat(payload) {
     // Try primary, then fallback models automatically
-    const candidateModels = [payload.model || DEFAULT_MODEL, FALLBACK_MODEL, "llama3-8b-local"]; // ordered attempts
+    // Model selection per Robbie's optimization: llama3.1:8b → qwen2.5:7b → mistral:7b
+    const candidateModels = [payload.model || DEFAULT_MODEL, FALLBACK_MODEL, BACKUP_MODEL]; // ordered attempts
     let lastText = null;
     let lastRes = null;
     let usedModel = candidateModels[0];
@@ -33,7 +37,7 @@ export async function registerLLMRoutes(app) {
         lastRes = res; lastText = text; usedModel = candidate;
         // consider success if HTTP OK and no top-level error field
         let ok = res.ok;
-        try { const j = JSON.parse(text); if (j.error) ok = false; } catch {}
+        try { const j = JSON.parse(text); if (j.error) ok = false; } catch { }
         if (ok) return { res, text, model: usedModel };
       } catch (e) {
         lastText = JSON.stringify({ error: e.message });
@@ -85,9 +89,10 @@ export async function registerLLMRoutes(app) {
       const inputTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
       const outputTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
       const totalTokens = usage.total_tokens ?? (inputTokens + outputTokens);
-      const costUsd = usedModel.includes('local') || usedModel.includes('ollama') ? 0.0 : 
-        totalTokens * 0.0001; // Rough estimate for external models
-      
+      // Cost calculation: Local models are free, external models cost
+      const costUsd = (usedModel.includes('gpt') || usedModel.includes('claude') || usedModel.includes('gemini')) ?
+        totalTokens * 0.0001 : 0.0; // Only charge for external API calls
+
       usageTracker.trackApiCall({
         service: 'llm',
         endpoint: '/v1/chat/completions',
@@ -180,8 +185,8 @@ export async function registerLLMRoutes(app) {
     const nodeStream = res.body?.pipe ? res.body : null;
     if (nodeStream) {
       nodeStream.pipe(reply.raw);
-      nodeStream.on("end", () => { try { reply.raw.end(); } catch {} });
-      nodeStream.on("error", () => { try { reply.raw.end(); } catch {} });
+      nodeStream.on("end", () => { try { reply.raw.end(); } catch { } });
+      nodeStream.on("error", () => { try { reply.raw.end(); } catch { } });
     } else {
       const text = await res.text();
       reply.raw.write(text);

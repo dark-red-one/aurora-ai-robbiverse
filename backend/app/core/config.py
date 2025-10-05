@@ -29,9 +29,13 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     
-    # AI Models
+    # AI Models - Optimized stack per Robbie's recommendations (October 2024)
     openai_api_key: str = Field(default="", description="OpenAI API key")
-    models_cache_dir: str = Field(default="/workspace/aurora/models")  # Renamed to avoid conflict
+    models_cache_dir: str = Field(default="/workspace/aurora/models")
+    default_model: str = Field(default="llama3.1:8b", description="Primary AI model (llama3.1:8b)")
+    coding_model: str = Field(default="qwen2.5:7b", description="Coding tasks model (qwen2.5:7b)")
+    analysis_model: str = Field(default="mistral:7b", description="Complex analysis model (mistral:7b)")
+    beast_mode_model: str = Field(default="llama4:maverick", description="Large model for special cases (on-demand)")
     
     # WebSocket
     websocket_heartbeat_interval: int = 30

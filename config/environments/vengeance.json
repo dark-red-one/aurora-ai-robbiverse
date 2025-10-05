@@ -1,0 +1,45 @@
+{
+    "environment": "development",
+    "name": "Vengeance",
+    "node_id": "vengeance-workstation",
+    "database": {
+        "url": "postgresql://aurora:dev_password@localhost:5432/aurora_dev",
+        "redis_url": "redis://localhost:6379/1"
+    },
+    "ai_models": {
+        "default": "llama3.1:8b",
+        "fallback": "qwen2.5:7b",
+        "backup": "mistral:7b"
+    },
+    "security": {
+        "secret_key": "dev-secret-key-change-in-production",
+        "token_expiry": 60,
+        "session_timeout": 7200
+    },
+    "performance": {
+        "debug": true,
+        "log_level": "DEBUG",
+        "metrics_enabled": true
+    },
+    "backup": {
+        "enabled": true,
+        "frequency": "weekly",
+        "retention_days": 7,
+        "destination": "/tmp/backup"
+    },
+    "monitoring": {
+        "enabled": true,
+        "health_check_interval": 60,
+        "metrics_collection": true
+    },
+    "integrations": {
+        "hubspot_api_key": "dev_hubspot_key",
+        "slack_webhook": "https://hooks.slack.com/services/dev/webhook",
+        "google_service_account": "dev@aurora-ai-empire.iam.gserviceaccount.com"
+    },
+    "deployment": {
+        "auto_deploy": true,
+        "rollback_on_failure": true,
+        "deployment_notifications": true
+    }
+}
