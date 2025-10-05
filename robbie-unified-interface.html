@@ -1619,7 +1619,22 @@
                 if (sidebarFace) {
                     const img = document.createElement('img');
                     // 💕 Using the friendly avatar - Robbie's warm, welcoming expression!
-                    img.src = '/static/avatars/robbie-friendly.png';
+                    // Dynamic avatar based on mood
+                    const mood = this.getCurrentMood().toLowerCase();
+                    let avatarFile = 'robbie-friendly.png'; // default
+                    
+                    if (mood.includes('friendly')) avatarFile = 'robbie-friendly.png';
+                    else if (mood.includes('focused')) avatarFile = 'robbie-focused.png';
+                    else if (mood.includes('playful')) avatarFile = 'robbie-playful.png';
+                    else if (mood.includes('bossy')) avatarFile = 'robbie-bossy.png';
+                    else if (mood.includes('surprised')) avatarFile = 'robbie-surprised.png';
+                    else if (mood.includes('blushing')) avatarFile = 'robbie-blushing.png';
+                    else if (mood.includes('loving')) avatarFile = 'robbie-loving-1.png';
+                    else if (mood.includes('thoughtful')) avatarFile = 'robbie-thoughtful-1.png';
+                    else if (mood.includes('content')) avatarFile = 'robbie-content-1.png';
+                    else if (mood.includes('happy')) avatarFile = 'robbie-happy-1.png';
+                    
+                    img.src = `/static/avatars/${avatarFile}`;
                     img.alt = 'Robbie - Your AI Strategic Partner';
                     img.style.transform = 'scale(1.1)'; // Slightly larger for presence
                     img.onerror = () => {
