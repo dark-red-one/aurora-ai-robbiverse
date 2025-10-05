@@ -5,6 +5,7 @@ All features: Streaming + Vector Search + SQL + RAG + Personalities + Mood Persi
 """
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
