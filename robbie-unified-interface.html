@@ -1272,13 +1272,13 @@
 
             initializeBootSequence() {
                 const bootLines = [
-                    '<span style="color: #ff8c5a; font-weight: 600;">ROBBIE TERMINAL SYSTEM v3.0</span>',
-                    '<span style="color: #ff8c5a;">Initializing neural networks...</span>',
-                    '<span style="color: #ff8c5a;">[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)</span>',
-                    '<span style="color: #ff8c5a;">[OK] LLM loaded: qwen2.5:7b (Robbie personality)</span>',
-                    '<span style="color: #ff8c5a;">[OK] WebSocket connection established</span>',
-                    '<span style="color: #ff8c5a;">[OK] VPN tunnel: aurora-town active</span>',
-                    '<span style="color: #ff8c5a; font-weight: 600;">[READY] Robbie personality systems online</span>'
+                    '<span style="color: #ff8c5a !important; font-weight: 600;">ROBBIE TERMINAL SYSTEM v3.0</span>',
+                    '<span style="color: #ff8c5a !important;">Initializing neural networks...</span>',
+                    '<span style="color: #ff8c5a !important;">[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)</span>',
+                    '<span style="color: #ff8c5a !important;">[OK] LLM loaded: qwen2.5:7b (Robbie personality)</span>',
+                    '<span style="color: #ff8c5a !important;">[OK] WebSocket connection established</span>',
+                    '<span style="color: #ff8c5a !important;">[OK] VPN tunnel: aurora-town active</span>',
+                    '<span style="color: #ff8c5a !important; font-weight: 600;">[READY] Robbie personality systems online</span>'
                 ];
 
                 // Robbie Avatar (17 lines of HTML pixel art - 50 blocks wide!)
@@ -1534,7 +1534,7 @@
                 div.className = 'message system';
                 // Force burnt orange inline if not already styled
                 if (!text.includes('style=')) {
-                    div.innerHTML = `<span style="color: #ff8c5a;">${text}</span>`;
+                    div.innerHTML = `<span style="color: #ff8c5a !important;">${text}</span>`;
                 } else {
                     div.innerHTML = text;
                 }
