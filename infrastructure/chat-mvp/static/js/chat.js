@@ -173,12 +173,16 @@ class TestPilotChat {
             const content = streamingText ? streamingText.textContent : '';
             
             let robbieAvatar = '/static/images/robbie-happy-1.png';
-            if (content.toLowerCase().includes('deal') || content.toLowerCase().includes('revenue')) {
+            if (content.toLowerCase().includes('love') || content.toLowerCase().includes('amazing') || content.toLowerCase().includes('brilliant')) {
+                robbieAvatar = '/static/images/robbie-loving-1.png';
+            } else if (content.toLowerCase().includes('deal') || content.toLowerCase().includes('revenue') || content.toLowerCase().includes('close')) {
                 robbieAvatar = '/static/images/robbie-content-1.png';
-            } else if (content.toLowerCase().includes('error') || content.toLowerCase().includes('problem')) {
+            } else if (content.toLowerCase().includes('error') || content.toLowerCase().includes('problem') || content.toLowerCase().includes('down')) {
                 robbieAvatar = '/static/images/robbie-surprised-1.png';
-            } else if (content.toLowerCase().includes('think') || content.toLowerCase().includes('consider')) {
+            } else if (content.toLowerCase().includes('think') || content.toLowerCase().includes('consider') || content.toLowerCase().includes('review')) {
                 robbieAvatar = '/static/images/robbie-thoughtful-1.png';
+            } else if (content.toLowerCase().includes('thank') || content.toLowerCase().includes('appreciate') || content.toLowerCase().includes('nice')) {
+                robbieAvatar = '/static/images/robbie-blushing-1.png';
             }
             
             // Update avatar
@@ -206,12 +210,16 @@ class TestPilotChat {
         
         // Robbie avatar selection based on message content/mood
         let robbieAvatar = '/static/images/robbie-happy-1.png'; // default
-        if (content.toLowerCase().includes('deal') || content.toLowerCase().includes('revenue')) {
+        if (content.toLowerCase().includes('love') || content.toLowerCase().includes('amazing')) {
+            robbieAvatar = '/static/images/robbie-loving-1.png';
+        } else if (content.toLowerCase().includes('deal') || content.toLowerCase().includes('revenue')) {
             robbieAvatar = '/static/images/robbie-content-1.png'; // satisfied
         } else if (content.toLowerCase().includes('error') || content.toLowerCase().includes('problem')) {
             robbieAvatar = '/static/images/robbie-surprised-1.png'; // surprised
         } else if (content.toLowerCase().includes('think') || content.toLowerCase().includes('consider')) {
             robbieAvatar = '/static/images/robbie-thoughtful-1.png'; // thinking
+        } else if (content.toLowerCase().includes('thank') || content.toLowerCase().includes('appreciate')) {
+            robbieAvatar = '/static/images/robbie-blushing-1.png'; // blushing
         }
         
         const avatarContent = sender === 'Robbie' 
