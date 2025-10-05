@@ -3,180 +3,180 @@
     "id": "company_1",
     "name": "Sample Company 1",
     "domain": "company1.com",
-    "industry": "Retail",
-    "created_at": "2025-02-13T21:46:08.071972",
-    "total_deal_value": 260064,
-    "num_deals": 7
+    "industry": "Consulting",
+    "created_at": "2025-09-19T08:51:13.219167",
+    "total_deal_value": 491765,
+    "num_deals": 15
   },
   {
     "id": "company_2",
     "name": "Sample Company 2",
     "domain": "company2.com",
-    "industry": "Education",
-    "created_at": "2025-06-08T21:46:08.071989",
-    "total_deal_value": 231284,
-    "num_deals": 6
+    "industry": "Finance",
+    "created_at": "2024-12-09T08:51:13.219179",
+    "total_deal_value": 192716,
+    "num_deals": 1
   },
   {
     "id": "company_3",
     "name": "Sample Company 3",
     "domain": "company3.com",
-    "industry": "Finance",
-    "created_at": "2025-07-14T21:46:08.071992",
-    "total_deal_value": 439152,
-    "num_deals": 8
+    "industry": "Manufacturing",
+    "created_at": "2025-08-04T08:51:13.219183",
+    "total_deal_value": 230381,
+    "num_deals": 6
   },
   {
     "id": "company_4",
     "name": "Sample Company 4",
     "domain": "company4.com",
-    "industry": "Retail",
-    "created_at": "2025-06-17T21:46:08.071996",
-    "total_deal_value": 47312,
-    "num_deals": 1
+    "industry": "Education",
+    "created_at": "2024-12-30T08:51:13.219186",
+    "total_deal_value": 438092,
+    "num_deals": 2
   },
   {
     "id": "company_5",
     "name": "Sample Company 5",
     "domain": "company5.com",
-    "industry": "Manufacturing",
-    "created_at": "2025-03-17T21:46:08.071999",
-    "total_deal_value": 215810,
-    "num_deals": 12
+    "industry": "Finance",
+    "created_at": "2025-02-10T08:51:13.219188",
+    "total_deal_value": 104885,
+    "num_deals": 15
   },
   {
     "id": "company_6",
     "name": "Sample Company 6",
     "domain": "company6.com",
-    "industry": "Real Estate",
-    "created_at": "2025-04-16T21:46:08.072006",
-    "total_deal_value": 297055,
-    "num_deals": 12
+    "industry": "Retail",
+    "created_at": "2025-01-28T08:51:13.219191",
+    "total_deal_value": 174568,
+    "num_deals": 2
   },
   {
     "id": "company_7",
     "name": "Sample Company 7",
     "domain": "company7.com",
-    "industry": "Real Estate",
-    "created_at": "2025-05-05T21:46:08.072009",
-    "total_deal_value": 177622,
-    "num_deals": 12
+    "industry": "Technology",
+    "created_at": "2024-11-09T08:51:13.219194",
+    "total_deal_value": 17954,
+    "num_deals": 7
   },
   {
     "id": "company_8",
     "name": "Sample Company 8",
     "domain": "company8.com",
-    "industry": "Education",
-    "created_at": "2024-12-28T21:46:08.072012",
-    "total_deal_value": 316542,
-    "num_deals": 14
+    "industry": "Consulting",
+    "created_at": "2025-02-09T08:51:13.219196",
+    "total_deal_value": 135992,
+    "num_deals": 10
   },
   {
     "id": "company_9",
     "name": "Sample Company 9",
     "domain": "company9.com",
-    "industry": "Manufacturing",
-    "created_at": "2024-11-12T21:46:08.072015",
-    "total_deal_value": 73461,
-    "num_deals": 13
+    "industry": "Education",
+    "created_at": "2025-02-17T08:51:13.219198",
+    "total_deal_value": 269177,
+    "num_deals": 4
   },
   {
     "id": "company_10",
     "name": "Sample Company 10",
     "domain": "company10.com",
-    "industry": "Healthcare",
-    "created_at": "2025-05-14T21:46:08.072018",
-    "total_deal_value": 311845,
-    "num_deals": 10
+    "industry": "Manufacturing",
+    "created_at": "2024-10-23T08:51:13.219200",
+    "total_deal_value": 287975,
+    "num_deals": 6
   },
   {
     "id": "company_11",
     "name": "Sample Company 11",
     "domain": "company11.com",
-    "industry": "Education",
-    "created_at": "2024-10-14T21:46:08.072021",
-    "total_deal_value": 38507,
-    "num_deals": 14
+    "industry": "Consulting",
+    "created_at": "2024-12-21T08:51:13.219202",
+    "total_deal_value": 477999,
+    "num_deals": 3
   },
   {
     "id": "company_12",
     "name": "Sample Company 12",
     "domain": "company12.com",
-    "industry": "Finance",
-    "created_at": "2025-01-04T21:46:08.072024",
-    "total_deal_value": 328623,
-    "num_deals": 11
+    "industry": "Manufacturing",
+    "created_at": "2025-01-13T08:51:13.219203",
+    "total_deal_value": 248832,
+    "num_deals": 14
   },
   {
     "id": "company_13",
     "name": "Sample Company 13",
     "domain": "company13.com",
-    "industry": "Manufacturing",
-    "created_at": "2025-03-29T21:46:08.072027",
-    "total_deal_value": 352788,
-    "num_deals": 11
+    "industry": "Consulting",
+    "created_at": "2024-11-14T08:51:13.219205",
+    "total_deal_value": 451351,
+    "num_deals": 7
   },
   {
     "id": "company_14",
     "name": "Sample Company 14",
     "domain": "company14.com",
     "industry": "Retail",
-    "created_at": "2025-09-29T21:46:08.072030",
-    "total_deal_value": 91042,
-    "num_deals": 10
+    "created_at": "2024-10-23T08:51:13.219207",
+    "total_deal_value": 273152,
+    "num_deals": 8
   },
   {
     "id": "company_15",
     "name": "Sample Company 15",
     "domain": "company15.com",
-    "industry": "Technology",
-    "created_at": "2025-02-28T21:46:08.072033",
-    "total_deal_value": 41472,
-    "num_deals": 8
+    "industry": "Retail",
+    "created_at": "2025-10-01T08:51:13.219208",
+    "total_deal_value": 278501,
+    "num_deals": 11
   },
   {
     "id": "company_16",
     "name": "Sample Company 16",
     "domain": "company16.com",
-    "industry": "Consulting",
-    "created_at": "2025-07-26T21:46:08.072036",
-    "total_deal_value": 199037,
-    "num_deals": 9
+    "industry": "Education",
+    "created_at": "2025-10-01T08:51:13.219211",
+    "total_deal_value": 378521,
+    "num_deals": 3
   },
   {
     "id": "company_17",
     "name": "Sample Company 17",
     "domain": "company17.com",
-    "industry": "Real Estate",
-    "created_at": "2025-09-03T21:46:08.072042",
-    "total_deal_value": 258970,
-    "num_deals": 13
+    "industry": "Manufacturing",
+    "created_at": "2025-04-18T08:51:13.219213",
+    "total_deal_value": 96858,
+    "num_deals": 8
   },
   {
     "id": "company_18",
     "name": "Sample Company 18",
     "domain": "company18.com",
-    "industry": "Real Estate",
-    "created_at": "2025-09-16T21:46:08.072046",
-    "total_deal_value": 298761,
-    "num_deals": 9
+    "industry": "Retail",
+    "created_at": "2025-03-30T08:51:13.219215",
+    "total_deal_value": 480667,
+    "num_deals": 14
   },
   {
     "id": "company_19",
     "name": "Sample Company 19",
     "domain": "company19.com",
-    "industry": "Retail",
-    "created_at": "2024-10-16T21:46:08.072049",
-    "total_deal_value": 83361,
-    "num_deals": 1
+    "industry": "Manufacturing",
+    "created_at": "2025-01-29T08:51:13.219216",
+    "total_deal_value": 481533,
+    "num_deals": 9
   },
   {
     "id": "company_20",
     "name": "Sample Company 20",
     "domain": "company20.com",
-    "industry": "Retail",
-    "created_at": "2024-10-16T21:46:08.072052",
-    "total_deal_value": 382389,
-    "num_deals": 8
+    "industry": "Technology",
+    "created_at": "2025-03-05T08:51:13.219218",
+    "total_deal_value": 417993,
+    "num_deals": 5
   }
 ]

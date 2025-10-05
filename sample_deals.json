@@ -2,271 +2,271 @@
   {
     "id": "deal_1",
     "name": "Deal 1",
-    "amount": 133775,
-    "stage": "closedlost",
-    "company_id": "company_4",
-    "contact_id": "contact_2",
-    "created_at": "2025-06-13T21:46:08.072213"
+    "amount": 101321,
+    "stage": "closedwon",
+    "company_id": "company_17",
+    "contact_id": "contact_49",
+    "created_at": "2025-03-14T08:51:13.219321"
   },
   {
     "id": "deal_2",
     "name": "Deal 2",
-    "amount": 115431,
-    "stage": "decisionmakerboughtin",
-    "company_id": "company_8",
-    "contact_id": "contact_23",
-    "created_at": "2025-09-17T21:46:08.072216"
+    "amount": 114911,
+    "stage": "contractsent",
+    "company_id": "company_18",
+    "contact_id": "contact_44",
+    "created_at": "2025-04-05T08:51:13.219324"
   },
   {
     "id": "deal_3",
     "name": "Deal 3",
-    "amount": 193869,
-    "stage": "contractsent",
-    "company_id": "company_1",
-    "contact_id": "contact_23",
-    "created_at": "2025-02-26T21:46:08.072220"
+    "amount": 42563,
+    "stage": "closedwon",
+    "company_id": "company_14",
+    "contact_id": "contact_5",
+    "created_at": "2024-11-20T08:51:13.219327"
   },
   {
     "id": "deal_4",
     "name": "Deal 4",
-    "amount": 115165,
+    "amount": 75729,
     "stage": "presentationscheduled",
-    "company_id": "company_12",
-    "contact_id": "contact_47",
-    "created_at": "2024-11-01T21:46:08.072223"
+    "company_id": "company_19",
+    "contact_id": "contact_33",
+    "created_at": "2025-09-26T08:51:13.219329"
   },
   {
     "id": "deal_5",
     "name": "Deal 5",
-    "amount": 58020,
+    "amount": 33859,
     "stage": "contractsent",
-    "company_id": "company_14",
+    "company_id": "company_4",
     "contact_id": "contact_43",
-    "created_at": "2025-02-27T21:46:08.072226"
+    "created_at": "2025-01-13T08:51:13.219331"
   },
   {
     "id": "deal_6",
     "name": "Deal 6",
-    "amount": 12121,
-    "stage": "closedwon",
-    "company_id": "company_13",
-    "contact_id": "contact_19",
-    "created_at": "2025-03-07T21:46:08.072230"
+    "amount": 75355,
+    "stage": "closedlost",
+    "company_id": "company_7",
+    "contact_id": "contact_6",
+    "created_at": "2024-11-15T08:51:13.219333"
   },
   {
     "id": "deal_7",
     "name": "Deal 7",
-    "amount": 102591,
-    "stage": "decisionmakerboughtin",
-    "company_id": "company_6",
-    "contact_id": "contact_17",
-    "created_at": "2025-05-19T21:46:08.072233"
+    "amount": 148454,
+    "stage": "qualifiedtobuy",
+    "company_id": "company_14",
+    "contact_id": "contact_3",
+    "created_at": "2025-02-10T08:51:13.219335"
   },
   {
     "id": "deal_8",
     "name": "Deal 8",
-    "amount": 24999,
-    "stage": "contractsent",
-    "company_id": "company_5",
-    "contact_id": "contact_18",
-    "created_at": "2025-04-05T21:46:08.072236"
+    "amount": 185748,
+    "stage": "appointmentscheduled",
+    "company_id": "company_20",
+    "contact_id": "contact_28",
+    "created_at": "2025-06-03T08:51:13.219337"
   },
   {
     "id": "deal_9",
     "name": "Deal 9",
-    "amount": 126550,
-    "stage": "closedwon",
-    "company_id": "company_14",
-    "contact_id": "contact_1",
-    "created_at": "2025-09-14T21:46:08.072239"
+    "amount": 17548,
+    "stage": "contractsent",
+    "company_id": "company_18",
+    "contact_id": "contact_18",
+    "created_at": "2025-02-04T08:51:13.219340"
   },
   {
     "id": "deal_10",
     "name": "Deal 10",
-    "amount": 92564,
-    "stage": "appointmentscheduled",
-    "company_id": "company_18",
-    "contact_id": "contact_28",
-    "created_at": "2024-10-17T21:46:08.072243"
+    "amount": 130529,
+    "stage": "contractsent",
+    "company_id": "company_10",
+    "contact_id": "contact_40",
+    "created_at": "2025-05-16T08:51:13.219342"
   },
   {
     "id": "deal_11",
     "name": "Deal 11",
-    "amount": 63365,
-    "stage": "appointmentscheduled",
-    "company_id": "company_19",
-    "contact_id": "contact_39",
-    "created_at": "2024-10-25T21:46:08.072246"
+    "amount": 141472,
+    "stage": "qualifiedtobuy",
+    "company_id": "company_3",
+    "contact_id": "contact_18",
+    "created_at": "2025-03-14T08:51:13.219344"
   },
   {
     "id": "deal_12",
     "name": "Deal 12",
-    "amount": 13582,
-    "stage": "decisionmakerboughtin",
-    "company_id": "company_10",
-    "contact_id": "contact_26",
-    "created_at": "2025-08-03T21:46:08.072249"
+    "amount": 137758,
+    "stage": "qualifiedtobuy",
+    "company_id": "company_7",
+    "contact_id": "contact_28",
+    "created_at": "2025-03-01T08:51:13.219346"
   },
   {
     "id": "deal_13",
     "name": "Deal 13",
-    "amount": 26876,
-    "stage": "closedlost",
-    "company_id": "company_15",
-    "contact_id": "contact_8",
-    "created_at": "2024-11-26T21:46:08.072253"
+    "amount": 151809,
+    "stage": "decisionmakerboughtin",
+    "company_id": "company_18",
+    "contact_id": "contact_33",
+    "created_at": "2024-10-24T08:51:13.219348"
   },
   {
     "id": "deal_14",
     "name": "Deal 14",
-    "amount": 193919,
-    "stage": "decisionmakerboughtin",
-    "company_id": "company_18",
-    "contact_id": "contact_41",
-    "created_at": "2025-05-08T21:46:08.072256"
+    "amount": 35352,
+    "stage": "contractsent",
+    "company_id": "company_15",
+    "contact_id": "contact_40",
+    "created_at": "2024-10-19T08:51:13.219350"
   },
   {
     "id": "deal_15",
     "name": "Deal 15",
-    "amount": 49988,
-    "stage": "closedwon",
-    "company_id": "company_18",
-    "contact_id": "contact_41",
-    "created_at": "2024-12-08T21:46:08.072260"
+    "amount": 30784,
+    "stage": "appointmentscheduled",
+    "company_id": "company_2",
+    "contact_id": "contact_47",
+    "created_at": "2025-03-11T08:51:13.219352"
   },
   {
     "id": "deal_16",
     "name": "Deal 16",
-    "amount": 141410,
-    "stage": "qualifiedtobuy",
-    "company_id": "company_20",
-    "contact_id": "contact_14",
-    "created_at": "2025-05-28T21:46:08.072264"
+    "amount": 53171,
+    "stage": "presentationscheduled",
+    "company_id": "company_13",
+    "contact_id": "contact_28",
+    "created_at": "2025-09-27T08:51:13.219354"
   },
   {
     "id": "deal_17",
     "name": "Deal 17",
-    "amount": 117031,
-    "stage": "closedwon",
-    "company_id": "company_7",
-    "contact_id": "contact_7",
-    "created_at": "2024-10-18T21:46:08.072267"
+    "amount": 166497,
+    "stage": "contractsent",
+    "company_id": "company_1",
+    "contact_id": "contact_15",
+    "created_at": "2025-05-20T08:51:13.219356"
   },
   {
     "id": "deal_18",
     "name": "Deal 18",
-    "amount": 95495,
+    "amount": 165635,
     "stage": "contractsent",
-    "company_id": "company_18",
-    "contact_id": "contact_4",
-    "created_at": "2024-10-30T21:46:08.072270"
+    "company_id": "company_16",
+    "contact_id": "contact_29",
+    "created_at": "2025-03-10T08:51:13.219359"
   },
   {
     "id": "deal_19",
     "name": "Deal 19",
-    "amount": 78872,
-    "stage": "qualifiedtobuy",
-    "company_id": "company_20",
-    "contact_id": "contact_17",
-    "created_at": "2024-11-29T21:46:08.072274"
+    "amount": 169332,
+    "stage": "appointmentscheduled",
+    "company_id": "company_3",
+    "contact_id": "contact_15",
+    "created_at": "2025-06-22T08:51:13.219361"
   },
   {
     "id": "deal_20",
     "name": "Deal 20",
-    "amount": 70612,
-    "stage": "presentationscheduled",
-    "company_id": "company_17",
-    "contact_id": "contact_21",
-    "created_at": "2024-12-08T21:46:08.072277"
+    "amount": 65703,
+    "stage": "qualifiedtobuy",
+    "company_id": "company_2",
+    "contact_id": "contact_27",
+    "created_at": "2025-03-27T08:51:13.219363"
   },
   {
     "id": "deal_21",
     "name": "Deal 21",
-    "amount": 97930,
-    "stage": "appointmentscheduled",
-    "company_id": "company_2",
-    "contact_id": "contact_1",
-    "created_at": "2024-10-28T21:46:08.072280"
+    "amount": 189934,
+    "stage": "contractsent",
+    "company_id": "company_19",
+    "contact_id": "contact_19",
+    "created_at": "2025-01-28T08:51:13.219365"
   },
   {
     "id": "deal_22",
     "name": "Deal 22",
-    "amount": 44531,
+    "amount": 55805,
     "stage": "decisionmakerboughtin",
-    "company_id": "company_18",
-    "contact_id": "contact_11",
-    "created_at": "2025-03-16T21:46:08.072284"
+    "company_id": "company_1",
+    "contact_id": "contact_14",
+    "created_at": "2025-01-15T08:51:13.219367"
   },
   {
     "id": "deal_23",
     "name": "Deal 23",
-    "amount": 57653,
-    "stage": "closedwon",
-    "company_id": "company_14",
-    "contact_id": "contact_9",
-    "created_at": "2025-10-01T21:46:08.072287"
+    "amount": 11459,
+    "stage": "presentationscheduled",
+    "company_id": "company_13",
+    "contact_id": "contact_28",
+    "created_at": "2025-07-28T08:51:13.219369"
   },
   {
     "id": "deal_24",
     "name": "Deal 24",
-    "amount": 16488,
+    "amount": 14682,
     "stage": "presentationscheduled",
-    "company_id": "company_8",
-    "contact_id": "contact_45",
-    "created_at": "2025-09-30T21:46:08.072290"
+    "company_id": "company_9",
+    "contact_id": "contact_22",
+    "created_at": "2025-07-10T08:51:13.219371"
   },
   {
     "id": "deal_25",
     "name": "Deal 25",
-    "amount": 73387,
-    "stage": "decisionmakerboughtin",
-    "company_id": "company_10",
-    "contact_id": "contact_34",
-    "created_at": "2025-05-16T21:46:08.072293"
+    "amount": 129036,
+    "stage": "presentationscheduled",
+    "company_id": "company_6",
+    "contact_id": "contact_21",
+    "created_at": "2025-04-03T08:51:13.219373"
   },
   {
     "id": "deal_26",
     "name": "Deal 26",
-    "amount": 107771,
-    "stage": "closedlost",
-    "company_id": "company_9",
-    "contact_id": "contact_43",
-    "created_at": "2025-04-14T21:46:08.072297"
+    "amount": 129307,
+    "stage": "qualifiedtobuy",
+    "company_id": "company_17",
+    "contact_id": "contact_42",
+    "created_at": "2025-05-26T08:51:13.219375"
   },
   {
     "id": "deal_27",
     "name": "Deal 27",
-    "amount": 48815,
-    "stage": "closedwon",
-    "company_id": "company_18",
-    "contact_id": "contact_40",
-    "created_at": "2025-01-10T21:46:08.072300"
+    "amount": 181017,
+    "stage": "decisionmakerboughtin",
+    "company_id": "company_6",
+    "contact_id": "contact_48",
+    "created_at": "2025-09-21T08:51:13.219377"
   },
   {
     "id": "deal_28",
     "name": "Deal 28",
-    "amount": 142167,
-    "stage": "presentationscheduled",
-    "company_id": "company_7",
-    "contact_id": "contact_39",
-    "created_at": "2025-08-28T21:46:08.072303"
+    "amount": 18883,
+    "stage": "contractsent",
+    "company_id": "company_14",
+    "contact_id": "contact_35",
+    "created_at": "2025-07-24T08:51:13.219379"
   },
   {
     "id": "deal_29",
     "name": "Deal 29",
-    "amount": 10567,
-    "stage": "presentationscheduled",
-    "company_id": "company_10",
-    "contact_id": "contact_46",
-    "created_at": "2025-01-03T21:46:08.072307"
+    "amount": 165062,
+    "stage": "qualifiedtobuy",
+    "company_id": "company_16",
+    "contact_id": "contact_28",
+    "created_at": "2025-02-09T08:51:13.219380"
   },
   {
     "id": "deal_30",
     "name": "Deal 30",
-    "amount": 25652,
+    "amount": 9931,
     "stage": "closedlost",
-    "company_id": "company_16",
-    "contact_id": "contact_13",
-    "created_at": "2024-11-07T21:46:08.072310"
+    "company_id": "company_17",
+    "contact_id": "contact_12",
+    "created_at": "2025-07-31T08:51:13.219382"
   }
 ]

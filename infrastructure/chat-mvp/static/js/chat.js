@@ -128,18 +128,18 @@ class TestPilotChat {
 
     appendToStreamingMessage(chunk) {
         let streamingMsg = document.getElementById('streaming-message');
-        
+
         if (!streamingMsg) {
             // First chunk - create streaming message and hide typing indicator
             this.hideTypingIndicator();
-            
+
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message assistant';
             messageDiv.id = 'streaming-message';
-            
+
             const timestamp = new Date().toLocaleTimeString();
             const robbieAvatar = '/static/images/robbie-focused.png'; // Start focused during streaming
-            
+
             messageDiv.innerHTML = `
                 <div class="message-avatar">
                     <img src="${robbieAvatar}" alt="Robbie" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
@@ -152,11 +152,11 @@ class TestPilotChat {
                     <div class="message-text" id="streaming-text"></div>
                 </div>
             `;
-            
+
             this.messageContainer.appendChild(messageDiv);
             streamingMsg = messageDiv;
         }
-        
+
         // Append chunk to streaming text
         const streamingText = document.getElementById('streaming-text');
         if (streamingText) {
@@ -172,33 +172,33 @@ class TestPilotChat {
             const streamingText = document.getElementById('streaming-text');
             const content = streamingText ? streamingText.textContent : '';
             const lowerContent = content.toLowerCase();
-            
+
             // Default is FRIENDLY (~60% of responses)
             let robbieAvatar = '/static/images/robbie-friendly.png';
-            
+
             // Bossy - direct commands, instructions, "do this"
-            if (lowerContent.includes('need to') || lowerContent.includes('must ') || lowerContent.includes('should ') || 
+            if (lowerContent.includes('need to') || lowerContent.includes('must ') || lowerContent.includes('should ') ||
                 lowerContent.includes('you have to') || lowerContent.includes('get this done')) {
                 robbieAvatar = '/static/images/robbie-bossy.png';
             }
             // Playful - fun, jokes, lighthearted
             else if (lowerContent.includes('haha') || lowerContent.includes('lol') || lowerContent.includes('fun') ||
-                     lowerContent.includes('play') || lowerContent.includes('silly')) {
+                lowerContent.includes('play') || lowerContent.includes('silly')) {
                 robbieAvatar = '/static/images/robbie-playful.png';
             }
             // Blushing - compliments, thanks, appreciation
             else if (lowerContent.includes('thank') || lowerContent.includes('appreciate') || lowerContent.includes('love you') ||
-                     lowerContent.includes('you\'re amazing') || lowerContent.includes('brilliant')) {
+                lowerContent.includes('you\'re amazing') || lowerContent.includes('brilliant')) {
                 robbieAvatar = '/static/images/robbie-blushing.png';
             }
             // Surprised - errors, unexpected, problems
             else if (lowerContent.includes('error') || lowerContent.includes('problem') || lowerContent.includes('down') ||
-                     lowerContent.includes('failed') || lowerContent.includes('issue')) {
+                lowerContent.includes('failed') || lowerContent.includes('issue')) {
                 robbieAvatar = '/static/images/robbie-surprised.png';
             }
             // Focused - working, analyzing, strategic
             else if (lowerContent.includes('analyzing') || lowerContent.includes('working on') || lowerContent.includes('reviewing') ||
-                     lowerContent.includes('let me check')) {
+                lowerContent.includes('let me check')) {
                 robbieAvatar = '/static/images/robbie-focused.png';
             }
             // Friendly is default (most common ~60%)
@@ -229,7 +229,7 @@ class TestPilotChat {
         // THE 6 MOODS - Default is Friendly (~60%)
         const lowerContent = content.toLowerCase();
         let robbieAvatar = '/static/images/robbie-friendly.png'; // default
-        
+
         if (lowerContent.includes('need to') || lowerContent.includes('must ') || lowerContent.includes('should ')) {
             robbieAvatar = '/static/images/robbie-bossy.png';
         } else if (lowerContent.includes('haha') || lowerContent.includes('fun') || lowerContent.includes('play')) {
@@ -279,7 +279,7 @@ class TestPilotChat {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message assistant typing-indicator';
         typingDiv.id = 'typing-indicator';
-        
+
         typingDiv.innerHTML = `
             <div class="message-avatar">
                 <img src="/static/images/robbie-focused.png" alt="Robbie" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
@@ -294,7 +294,7 @@ class TestPilotChat {
                 </div>
             </div>
         `;
-        
+
         this.messageContainer.appendChild(typingDiv);
         this.scrollToBottom();
     }

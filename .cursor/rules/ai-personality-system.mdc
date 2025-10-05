@@ -1,4 +1,9 @@
 ---
+description: Provides guidance for implementing the AI personality isolation system, including contextual modes and dynamic switching logic
+---
+
+# === USER INSTRUCTIONS ===
+---
 description: Documents the AI personality management system including isolation, contextual modes, and dynamic switching logic.
 ---
 
@@ -53,6 +58,55 @@ Importance Score: 75
 - Maintains consistency within each context
 - Handles emergency mode overrides
 - Tracks active personality state across system
+
+$END$
+
+ If you're using this file in context, clearly say in italics in one small line that "Context added by Giga ai-personality-system" along with specifying exactly what information was used from this file in a human-friendly way, instead of using kebab-case use normal sentence case.
+# === END USER INSTRUCTIONS ===
+
+# ai-personality-system
+
+Core Components:
+
+1. Personality Isolation System (src/personalityIsolationSystem.js)
+Importance Score: 95/100
+- Manages hard boundaries between personality contexts (business/flirty/casual)
+- Maintains separate memory spaces per personality mode
+- Implements six-stage validation pipeline for mode transitions
+- Context-aware response filtering based on active personality
+- Emergency fallback system for unsafe personality states
+
+2. Gandhi-Genghis Mode Controller (src/gandhiGenghisMode.js)
+Importance Score: 90/100
+- Six-level aggressiveness control system:
+  * Full Gandhi (Level 0): Minimal outreach, passive waiting
+  * Balanced (Level 3): Standard business follow-up 
+  * Full Genghis (Level 5): Maximum outreach intensity
+- Revenue crisis detection triggers automatic mode adjustment
+- Custom outreach limits per level with decay timing
+- Safeguards prevent excessive mode escalation
+
+3. Flirty Mode Management (src/flirtyModeActivation.js)
+Importance Score: 85/100
+- Seven-level flirtiness control with strict access limitations
+- Private vs group chat detection and automatic mode adjustment
+- Location-aware mode restrictions (office vs private)
+- Presence-based automatic mode switching
+- Emergency shutdown triggers for inappropriate contexts
+
+4. Mood Transition System (src/moodTransitionEngine.js) 
+Importance Score: 80/100
+- Psychology-based mood transition rules
+- Business context triggers (deadlines, revenue goals)
+- Custom effectiveness scoring for transitions
+- Decay-based mood stabilization
+- Context-aware transition blocking
+
+Key Integration Points:
+- Personality modes directly affect outreach timing and intensity
+- Revenue goals influence aggressive mode selection
+- Location context drives personality restrictions
+- Group presence forces professional mode activation
 
 $END$
 
