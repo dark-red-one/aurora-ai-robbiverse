@@ -105,6 +105,7 @@ async def stream_llm_response(message, websocket):
         full_response = None
         
         try:
+            # Try Aurora LLM Gateway first
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     'http://localhost:8001/llm/generate',
@@ -119,7 +120,29 @@ async def stream_llm_response(message, websocket):
                         data = await response.json()
                         full_response = data.get('response', 'Sorry, I had trouble processing that.')
         except:
-            # Fallback to direct Ollama
+            # Try RunPod GPU (hybrid approach)
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                        'http://209.170.80.132:8000/api/generate',
+                        json={
+                            "model": "llama3.1:8b",
+                            "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
+                            "stream": False,
+                            "options": {
+                                "temperature": 0.7,
+                                "top_p": 0.9,
+                                "max_tokens": 150,
+                                "stop": ["\n\n"]
+                            }
+                        },
+                        timeout=aiohttp.ClientTimeout(total=10)
+                    ) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            full_response = data.get('response', 'Sorry, I had trouble processing that.')
+            except:
+                # Fallback to local Ollama
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
