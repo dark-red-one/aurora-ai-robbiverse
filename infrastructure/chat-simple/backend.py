@@ -145,26 +145,26 @@ async def stream_llm_response(message, websocket):
                 # Fallback to local Ollama
                 try:
                     async with aiohttp.ClientSession() as session:
-                    async with session.post(
-                        'http://localhost:11434/api/generate',
-                        json={
-                            "model": "qwen2.5:7b",
-                            "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
-                            "stream": False,
-                            "options": {
-                                "temperature": 0.7,
-                                "top_p": 0.9,
-                                "max_tokens": 150,
-                                "stop": ["\n\n"]
-                            }
-                        },
-                        timeout=aiohttp.ClientTimeout(total=8)
-                    ) as response:
-                        if response.status == 200:
-                            data = await response.json()
-                            full_response = data.get('response', 'Sorry, I had trouble processing that.')
-            except:
-                full_response = "Hi Allan! I'm having trouble connecting to the AI system right now. Let me try to get that sorted out for you! 🤖"
+                        async with session.post(
+                            'http://localhost:11434/api/generate',
+                            json={
+                                "model": "qwen2.5:7b",
+                                "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Keep responses concise. Respond to: {message}",
+                                "stream": False,
+                                "options": {
+                                    "temperature": 0.7,
+                                    "top_p": 0.9,
+                                    "max_tokens": 150,
+                                    "stop": ["\n\n"]
+                                }
+                            },
+                            timeout=aiohttp.ClientTimeout(total=8)
+                        ) as response:
+                            if response.status == 200:
+                                data = await response.json()
+                                full_response = data.get('response', 'Sorry, I had trouble processing that.')
+                except:
+                    full_response = "Hi Allan! I'm having trouble connecting to the AI system right now. Let me try to get that sorted out for you! 🤖"
         
         if not full_response:
             full_response = "Hey Allan! I'm here but having some technical difficulties. Give me a moment to get back up to speed! 💪"
