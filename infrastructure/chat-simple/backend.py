@@ -173,7 +173,7 @@ async def stream_llm_response(message, websocket):
         words = full_response.split()
         for word in words:
             await manager.send_streaming_chunk(word + " ", websocket)
-                await asyncio.sleep(0.005)  # Much faster streaming
+            await asyncio.sleep(0.005)  # Much faster streaming
         
         await manager.send_stream_complete(websocket)
         
