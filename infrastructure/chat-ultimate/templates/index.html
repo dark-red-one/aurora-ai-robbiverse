@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie Ultimate Chat</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="mode-clean">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">🤖 Robbie Ultimate</div>
+            
+            <!-- Mood Control -->
+            <div class="mood-control" id="moodControl" title="Click to cycle mood">
+                <img src="/static/images/robbie-friendly.png" alt="Mood" class="mood-avatar" id="moodAvatar">
+                <span class="mood-text" id="moodText">Friendly</span>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <!-- Personality Selector -->
+            <select class="personality-selector" id="personalitySelector">
+                <option value="robbie">Robbie (Assistant)</option>
+                <option value="allanbot">AllanBot (Twin)</option>
+                <option value="kristina">Kristina (VA Expert)</option>
+            </select>
+            
+            <!-- Model Selector -->
+            <select class="model-selector" id="modelSelector">
+                <option value="llama3.1:8b">Llama 3.1 8B</option>
+                <option value="qwen2.5:7b">Qwen 2.5 7B</option>
+                <option value="mistral:7b">Mistral 7B</option>
+            </select>
+            
+            <!-- Mode Selector -->
+            <select class="mode-selector" id="modeSelector">
+                <option value="clean">Clean Chat</option>
+                <option value="terminal">Terminal Mode</option>
+                <option value="dashboard">Dashboard</option>
+            </select>
+            
+            <span id="connectionStatus" style="font-size:12px;color:var(--text-muted);">connecting...</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages appear here -->
+            </div>
+            
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Message Robbie..." autocomplete="off">
+                    <button id="sendButton" class="send-button">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Widgets (hidden in clean/terminal mode) -->
+        <div class="dashboard-widgets">
+            <!-- System Stats -->
+            <div class="widget">
+                <div class="widget-title">📊 System Performance</div>
+                <div class="stat-card">
+                    <div class="stat-number" id="gpuUtil">--</div>
+                    <div class="stat-label">GPU Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="memUtil">--</div>
+                    <div class="stat-label">Memory</div>
+                </div>
+            </div>
+
+            <!-- Priorities -->
+            <div class="widget">
+                <div class="widget-title">🎯 Priorities</div>
+                <div id="prioritiesList">
+                    <div class="priority-item critical">
+                        <span>Build Robbie's body</span>
+                        <span class="status-badge">Active</span>
+                    </div>
+                    <div class="priority-item">
+                        <span>Expert-trained AI</span>
+                        <span class="status-badge">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hot Topics -->
+            <div class="widget">
+                <div class="widget-title">🔥 Hot Topics</div>
+                <div id="hotTopicsList">
+                    <div class="hot-topic-item">
+                        <span>Revenue urgency</span>
+                        <span class="topic-badge">15</span>
+                    </div>
+                    <div class="hot-topic-item">
+                        <span>AI consolidation</span>
+                        <span class="topic-badge">8</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commitments -->
+            <div class="widget">
+                <div class="widget-title">📌 Commitments</div>
+                <div id="commitmentsList">
+                    <div class="priority-item">
+                        <span>Ship ultimate chat</span>
+                        <span class="status-badge">Today</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>
+
