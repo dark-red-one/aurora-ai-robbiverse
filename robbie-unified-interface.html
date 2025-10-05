@@ -1267,12 +1267,7 @@
             }
 
             updateClock() {
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-                const currentTimeEl = document.getElementById('currentTime');
-                const statusRightEl = document.getElementById('statusRight');
-                if (currentTimeEl) currentTimeEl.textContent = timeStr;
-                if (statusRightEl) statusRightEl.textContent = `${timeStr.split(':')[0]}:${timeStr.split(':')[1]} | Latency: ~100ms`;
+                // Legacy - kept for compatibility but not used
             }
 
             initializeBootSequence() {
@@ -1537,7 +1532,12 @@
             addSystemMessage(text) {
                 const div = document.createElement('div');
                 div.className = 'message system';
-                div.innerHTML = `${text}`;
+                // Force burnt orange inline if not already styled
+                if (!text.includes('style=')) {
+                    div.innerHTML = `<span style="color: #ff8c5a;">${text}</span>`;
+                } else {
+                    div.innerHTML = text;
+                }
                 this.messagesArea.appendChild(div);
                 this.scrollToBottom();
             }
