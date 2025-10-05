@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,9 +58,17 @@
             cursor: pointer;
         }
 
-        .close { background: #ff5f57; }
-        .minimize { background: #ffbd2e; }
-        .maximize { background: #28ca42; }
+        .close {
+            background: #ff5f57;
+        }
+
+        .minimize {
+            background: #ffbd2e;
+        }
+
+        .maximize {
+            background: #28ca42;
+        }
 
         .terminal-body {
             flex: 1;
@@ -136,8 +145,16 @@
         }
 
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
         }
 
         .typing-indicator {
@@ -179,12 +196,12 @@
             .terminal-container {
                 padding: 10px;
             }
-            
+
             .terminal-header {
                 padding: 8px 12px;
                 font-size: 12px;
             }
-            
+
             .terminal-body {
                 padding: 10px;
                 font-size: 12px;
@@ -192,6 +209,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="terminal-container">
         <div class="terminal-header">
@@ -202,14 +220,15 @@
                 <div class="control-btn maximize"></div>
             </div>
         </div>
-        
+
         <div class="terminal-body" id="terminal-body">
             <!-- Terminal content will be populated here -->
         </div>
-        
+
         <div class="terminal-input-area">
             <span class="terminal-prompt" id="terminal-prompt">allan@aurora-town:~/robbie$ </span>
-            <input type="text" class="terminal-input" id="terminal-input" placeholder="Type 'robbie' to start chat, 'help' for commands" autocomplete="off" spellcheck="false">
+            <input type="text" class="terminal-input" id="terminal-input"
+                placeholder="Type 'robbie' to start chat, 'help' for commands" autocomplete="off" spellcheck="false">
             <span class="cursor"></span>
         </div>
     </div>
@@ -223,44 +242,44 @@
                 this.terminalPrompt = document.getElementById('terminal-prompt');
                 this.isConnected = false;
                 this.isTyping = false;
-                
+
                 this.init();
             }
-            
+
             init() {
                 this.connectWebSocket();
                 this.setupEventListeners();
                 this.focusInput();
             }
-            
+
             connectWebSocket() {
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 const wsUrl = `${protocol}//${window.location.host}/ws`;
-                
+
                 this.websocket = new WebSocket(wsUrl);
-                
+
                 this.websocket.onopen = () => {
                     this.isConnected = true;
                     console.log('Connected to Robbie Terminal');
                 };
-                
+
                 this.websocket.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     this.handleMessage(data);
                 };
-                
+
                 this.websocket.onclose = () => {
                     this.isConnected = false;
                     this.addLine('Connection lost. Attempting to reconnect...', 'error');
                     setTimeout(() => this.connectWebSocket(), 3000);
                 };
-                
+
                 this.websocket.onerror = (error) => {
                     console.error('WebSocket error:', error);
                     this.addLine('Connection error. Please refresh the page.', 'error');
                 };
             }
-            
+
             setupEventListeners() {
                 this.terminalInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
@@ -274,12 +293,12 @@
                         // TODO: Tab completion
                     }
                 });
-                
+
                 // Keep input focused
                 document.addEventListener('click', () => {
                     this.terminalInput.focus();
                 });
-                
+
                 // Handle paste
                 this.terminalInput.addEventListener('paste', (e) => {
                     e.preventDefault();
@@ -287,11 +306,11 @@
                     this.terminalInput.value += text;
                 });
             }
-            
+
             sendCommand() {
                 const command = this.terminalInput.value.trim();
                 if (!command) return;
-                
+
                 if (this.isConnected) {
                     this.websocket.send(JSON.stringify({
                         type: 'command',
@@ -300,42 +319,42 @@
                 } else {
                     this.addLine('Not connected to server.', 'error');
                 }
-                
+
                 this.terminalInput.value = '';
             }
-            
+
             handleMessage(data) {
                 switch (data.type) {
                     case 'terminal_line':
                         this.addLine(data.content, data.line_type);
                         break;
-                        
+
                     case 'prompt':
                         this.updatePrompt(data);
                         break;
-                        
+
                     case 'chunk':
                         this.appendToCurrentLine(data.content);
                         break;
-                        
+
                     case 'stream_complete':
                         this.finalizeCurrentLine();
                         break;
-                        
+
                     default:
                         console.log('Unknown message type:', data.type);
                 }
             }
-            
+
             addLine(content, type = 'normal') {
                 const line = document.createElement('div');
                 line.className = `terminal-line ${type}`;
                 line.textContent = content;
-                
+
                 this.terminalBody.appendChild(line);
                 this.scrollToBottom();
             }
-            
+
             appendToCurrentLine(content) {
                 let currentLine = this.terminalBody.lastElementChild;
                 if (!currentLine || currentLine.classList.contains('terminal-line')) {
@@ -344,37 +363,38 @@
                     currentLine.textContent = '';
                     this.terminalBody.appendChild(currentLine);
                 }
-                
+
                 currentLine.textContent += content;
                 this.scrollToBottom();
             }
-            
+
             finalizeCurrentLine() {
                 // Finalize the current streaming line
                 this.scrollToBottom();
             }
-            
+
             updatePrompt(data) {
                 this.terminalPrompt.textContent = `${data.user}@aurora-town:~/robbie$ `;
             }
-            
+
             scrollToBottom() {
                 this.terminalBody.scrollTop = this.terminalBody.scrollHeight;
             }
-            
+
             focusInput() {
                 this.terminalInput.focus();
             }
-            
+
             clear() {
                 this.terminalBody.innerHTML = '';
             }
         }
-        
+
         // Initialize terminal when page loads
         document.addEventListener('DOMContentLoaded', () => {
             new RobbieTerminal();
         });
     </script>
 </body>
+
 </html>

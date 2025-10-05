@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,9 +141,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: rotate(-2deg) scale(1); }
-            50% { transform: rotate(-2deg) scale(1.05); }
-            100% { transform: rotate(-2deg) scale(1); }
+            0% {
+                transform: rotate(-2deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(-2deg) scale(1.05);
+            }
+
+            100% {
+                transform: rotate(-2deg) scale(1);
+            }
         }
 
         .note-header {
@@ -257,8 +266,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Scrollbar styling */
@@ -281,6 +297,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="pin-overlay" id="pin-overlay">
         <div class="pin-input">
@@ -308,9 +325,9 @@
 
         function init() {
             connectWebSocket();
-            
+
             // Allow Enter key to submit PIN
-            document.getElementById('pin-input').addEventListener('keypress', function(e) {
+            document.getElementById('pin-input').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     checkPin();
                 }
@@ -320,18 +337,18 @@
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
-            
+
             websocket = new WebSocket(wsUrl);
-            
+
             websocket.onopen = () => {
                 console.log('Connected to Sticky Notes');
             };
-            
+
             websocket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 handleMessage(data);
             };
-            
+
             websocket.onclose = () => {
                 console.log('Disconnected from Sticky Notes');
                 setTimeout(() => connectWebSocket(), 3000);
@@ -347,7 +364,7 @@
                         alert('Invalid PIN');
                     }
                     break;
-                    
+
                 case 'notes_update':
                     updateNotes(data.notes);
                     break;
@@ -356,7 +373,7 @@
 
         function checkPin() {
             const pin = document.getElementById('pin-input').value;
-            
+
             if (websocket) {
                 websocket.send(JSON.stringify({
                     type: 'verify_pin',
@@ -371,7 +388,7 @@
             document.getElementById('notes-container').classList.remove('hidden');
             document.getElementById('controls').classList.remove('hidden');
             document.getElementById('add-note-btn').classList.remove('hidden');
-            
+
             // Request current notes
             if (websocket) {
                 websocket.send(JSON.stringify({
@@ -392,17 +409,17 @@
         function updateNotes(notes) {
             const container = document.getElementById('notes-container');
             container.innerHTML = '';
-            
+
             // Combine all notes
             const allNotes = [
                 ...notes.allan_notes,
                 ...notes.robbie_notes,
                 ...notes.pin_codes
             ];
-            
+
             // Sort by timestamp (newest first)
             allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
+
             allNotes.forEach(note => {
                 const noteElement = createNoteElement(note);
                 container.appendChild(noteElement);
@@ -412,12 +429,12 @@
         function createNoteElement(note) {
             const noteDiv = document.createElement('div');
             noteDiv.className = `sticky-note ${note.type} ${note.priority || ''}`;
-            
-            const typeLabel = note.type === 'allan' ? 'Allan' : 
-                            note.type === 'robbie' ? 'Robbie' : 
-                            note.type === '2fa' ? '2FA' : 
-                            note.type.toUpperCase();
-            
+
+            const typeLabel = note.type === 'allan' ? 'Allan' :
+                note.type === 'robbie' ? 'Robbie' :
+                    note.type === '2fa' ? '2FA' :
+                        note.type.toUpperCase();
+
             noteDiv.innerHTML = `
                 <div class="note-header">
                     <div class="note-type">${typeLabel}</div>
@@ -430,7 +447,7 @@
                     <button class="note-action" onclick="deleteNote('${note.id}')">Delete</button>
                 </div>
             `;
-            
+
             return noteDiv;
         }
 
@@ -441,7 +458,7 @@
                 const originalText = originalBtn.textContent;
                 originalBtn.textContent = 'Copied!';
                 originalBtn.style.background = '#4CAF50';
-                
+
                 setTimeout(() => {
                     originalBtn.textContent = originalText;
                     originalBtn.style.background = '';
@@ -463,7 +480,7 @@
         function showAddNoteDialog() {
             const content = prompt('Enter note content:');
             const type = prompt('Note type (allan/robbie/pin/2fa):', 'robbie');
-            
+
             if (content && websocket) {
                 websocket.send(JSON.stringify({
                     type: 'add_note',
@@ -486,4 +503,5 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>

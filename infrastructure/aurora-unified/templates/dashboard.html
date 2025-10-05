@@ -1001,20 +1001,20 @@
             loadUserData() {
                 const sessionId = localStorage.getItem('aurora_session');
                 const userData = localStorage.getItem('aurora_user');
-                
+
                 if (!sessionId || !userData) {
                     this.redirectToLogin();
                     return;
                 }
-                
+
                 this.sessionId = sessionId;
                 this.user = JSON.parse(userData);
-                
+
                 // Initialize weather and connection status
                 this.updateWeatherStatus();
                 this.startWeatherUpdates();
             }
-            
+
             updateWeatherStatus() {
                 // Simulate weather data - in production, this would call a weather API
                 const weatherData = [
@@ -1023,25 +1023,25 @@
                     { icon: '🌧️', temp: '65°F', condition: 'Light Rain' },
                     { icon: '❄️', temp: '32°F', condition: 'Snow' }
                 ];
-                
+
                 const currentWeather = weatherData[Math.floor(Math.random() * weatherData.length)];
                 document.getElementById('weather-temp').textContent = currentWeather.temp;
                 document.querySelector('.weather-icon').textContent = currentWeather.icon;
             }
-            
+
             startWeatherUpdates() {
                 // Update weather every 30 seconds
                 setInterval(() => {
                     this.updateWeatherStatus();
                 }, 30000);
             }
-            
+
             updateConnectionStatus(status, connected) {
                 const statusElement = document.getElementById('connection-status');
                 const statusDot = document.querySelector('.status-dot');
-                
+
                 statusElement.textContent = status;
-                
+
                 if (connected) {
                     statusDot.style.background = '#4CAF50';
                     statusDot.style.animation = 'pulse 2s infinite';
@@ -1090,19 +1090,19 @@
                 this.websocket.onopen = () => {
                     console.log('Connected to Aurora Dashboard');
                     this.updateConnectionStatus('Connected', true);
-                    
+
                     // Authenticate
                     this.websocket.send(JSON.stringify({
                         type: 'authenticate',
                         session_id: this.sessionId
                     }));
                 };
-                
+
                 this.websocket.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     this.handleMessage(data);
                 };
-                
+
                 this.websocket.onclose = () => {
                     console.log('Disconnected from Aurora Dashboard');
                     this.updateConnectionStatus('Disconnected', false);

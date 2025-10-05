@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -164,9 +165,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: translateX(5px); }
-            50% { transform: translateX(8px); }
-            100% { transform: translateX(5px); }
+            0% {
+                transform: translateX(5px);
+            }
+
+            50% {
+                transform: translateX(8px);
+            }
+
+            100% {
+                transform: translateX(5px);
+            }
         }
 
         .message-header {
@@ -271,8 +280,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Scrollbar styling */
@@ -299,24 +315,24 @@
             .container {
                 padding: 10px;
             }
-            
+
             .header h1 {
                 font-size: 2em;
             }
-            
+
             .stats-bar {
                 gap: 10px;
             }
-            
+
             .stat-card {
                 min-width: 100px;
                 padding: 10px 15px;
             }
-            
+
             .inbox-controls {
                 gap: 10px;
             }
-            
+
             .filter-btn {
                 padding: 8px 16px;
                 font-size: 0.9em;
@@ -324,6 +340,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header fade-in">
@@ -383,9 +400,9 @@
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
-            
+
             websocket = new WebSocket(wsUrl);
-            
+
             websocket.onopen = () => {
                 console.log('Connected to Comms Dashboard');
                 // Request initial messages
@@ -393,12 +410,12 @@
                     type: 'get_messages'
                 }));
             };
-            
+
             websocket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 handleMessage(data);
             };
-            
+
             websocket.onclose = () => {
                 console.log('Disconnected from Comms Dashboard');
                 setTimeout(() => connectWebSocket(), 3000);
@@ -422,12 +439,12 @@
                 ...allMessages.slack || [],
                 ...allMessages.notes || []
             ];
-            
+
             const unread = allMsgs.filter(msg => !msg.read).length;
             const critical = allMsgs.filter(msg => msg.priority === 'critical').length;
             const emails = (allMessages.email || []).length;
             const sms = (allMessages.sms || []).length;
-            
+
             document.getElementById('total-messages').textContent = allMsgs.length;
             document.getElementById('unread-messages').textContent = unread;
             document.getElementById('critical-messages').textContent = critical;
@@ -438,14 +455,14 @@
         function displayMessages(filter = 'all') {
             const container = document.getElementById('message-list');
             container.innerHTML = '';
-            
+
             let messages = [
                 ...allMessages.email || [],
                 ...allMessages.sms || [],
                 ...allMessages.slack || [],
                 ...allMessages.notes || []
             ];
-            
+
             // Apply filter
             if (filter !== 'all') {
                 messages = messages.filter(msg => {
@@ -454,10 +471,10 @@
                     return msg.type === filter;
                 });
             }
-            
+
             // Sort by timestamp (newest first)
             messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
+
             messages.forEach(message => {
                 const messageElement = createMessageElement(message);
                 container.appendChild(messageElement);
@@ -467,21 +484,21 @@
         function createMessageElement(message) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message-item ${message.type} ${message.priority || ''} ${message.read ? '' : 'unread'}`;
-            
+
             const iconMap = {
                 'email': '📧',
                 'sms': '📱',
                 'slack': '💬',
                 'note': '📝'
             };
-            
+
             const priorityMap = {
                 'critical': '🔴',
                 'high': '🟡',
                 'medium': '🟢',
                 'low': '⚪'
             };
-            
+
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <div class="message-subject">
@@ -511,17 +528,17 @@
                     <button class="action-btn delete" onclick="deleteMessage('${message.id}')">Delete</button>
                 </div>
             `;
-            
+
             return messageDiv;
         }
 
         function filterMessages(filter) {
             currentFilter = filter;
-            
+
             // Update active filter button
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
+
             displayMessages(filter);
         }
 
@@ -558,4 +575,5 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>

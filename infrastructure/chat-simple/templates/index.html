@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robbie Simple Chat</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-left">
             <div class="logo">🤖 Robbie Simple</div>
-            
+
             <!-- Mood Control -->
             <div class="mood-control" id="moodControl" title="Click to cycle mood">
                 <img src="/static/images/robbie-friendly.png" alt="Mood" class="mood-avatar" id="moodAvatar">
                 <span class="mood-text" id="moodText">Friendly</span>
             </div>
         </div>
-        
+
         <div class="header-right">
             <span id="connectionStatus" style="font-size:12px;color:var(--text-muted);">connecting...</span>
         </div>
@@ -39,7 +41,7 @@
                 <div class="messages-container" id="messagesContainer">
                     <!-- Messages appear here -->
                 </div>
-                
+
                 <div class="input-container">
                     <div class="input-wrapper">
                         <input type="text" id="messageInput" placeholder="Message Robbie..." autocomplete="off">
@@ -56,7 +58,7 @@
                     <h3>📝 Robbie Notes</h3>
                     <button class="add-note-btn" onclick="addNote()">+ Add Note</button>
                 </div>
-                
+
                 <div class="notes-list" id="notesList">
                     <div class="note-item">
                         <div class="note-content">Welcome to your notes! Click "Add Note" to get started.</div>
@@ -80,7 +82,7 @@
                         <button class="filter-btn" onclick="filterComms('important')">Important</button>
                     </div>
                 </div>
-                
+
                 <div class="comms-list" id="commsList">
                     <div class="comm-item unread">
                         <div class="comm-subject">Welcome to Robbie Comms</div>
@@ -94,4 +96,5 @@
 
     <script src="/static/js/chat.js"></script>
 </body>
+
 </html>
