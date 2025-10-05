@@ -101,35 +101,57 @@ def detect_robbie_mood(content):
 async def stream_llm_response(message, websocket):
     """Stream LLM response word by word"""
     try:
-        # Call Aurora LLM Gateway
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                'http://localhost:8001/llm/generate',
-                json={
-                    "message": message,
-                    "personality": "robbie",
-                    "stream": False
-                },
-                timeout=aiohttp.ClientTimeout(total=30)
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    full_response = data.get('response', 'Sorry, I had trouble processing that.')
-                else:
-                    full_response = "Sorry, I'm having trouble connecting to the AI system right now."
+        # Try Aurora LLM Gateway first, fallback to direct Ollama
+        full_response = None
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    'http://localhost:8001/llm/generate',
+                    json={
+                        "message": message,
+                        "personality": "robbie",
+                        "stream": False
+                    },
+                    timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        full_response = data.get('response', 'Sorry, I had trouble processing that.')
+        except:
+            # Fallback to direct Ollama
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                        'http://localhost:11434/api/generate',
+                        json={
+                            "model": "llama3.1:8b",
+                            "prompt": f"You are Robbie, Allan's AI assistant. Be helpful, direct, and occasionally flirty. Respond to: {message}",
+                            "stream": False
+                        },
+                        timeout=aiohttp.ClientTimeout(total=15)
+                    ) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            full_response = data.get('response', 'Sorry, I had trouble processing that.')
+            except:
+                full_response = "Hi Allan! I'm having trouble connecting to the AI system right now. Let me try to get that sorted out for you! 🤖"
+        
+        if not full_response:
+            full_response = "Hey Allan! I'm here but having some technical difficulties. Give me a moment to get back up to speed! 💪"
         
         # Split into words and stream
         words = full_response.split()
         for word in words:
             await manager.send_streaming_chunk(word + " ", websocket)
-            await asyncio.sleep(0.05)  # Small delay for streaming effect
+            await asyncio.sleep(0.03)  # Faster streaming
         
         await manager.send_stream_complete(websocket)
         
     except Exception as e:
         await manager.send_personal_message(json.dumps({
             "type": "error",
-            "content": f"Error: {str(e)}"
+            "content": f"Hey Allan, I hit a snag: {str(e)}. Let me try again!"
         }), websocket)
 
 @app.get("/", response_class=HTMLResponse)
