@@ -132,8 +132,8 @@ async def stream_llm_response(message, websocket):
                             "options": {
                                 "temperature": 0.9,
                                 "top_p": 0.9,
-                                "max_tokens": 25,
-                                "stop": ["\n\n", ".", "!", "?"]
+                                "max_tokens": 100,
+                                "stop": ["\n\n"]
                             }
                         },
                         timeout=aiohttp.ClientTimeout(total=5)
@@ -154,8 +154,8 @@ async def stream_llm_response(message, websocket):
                                 "options": {
                                     "temperature": 0.9,
                                     "top_p": 0.9,
-                                    "max_tokens": 25,
-                                    "stop": ["\n\n", ".", "!", "?"]
+                                    "max_tokens": 100,
+                                    "stop": ["\n\n"]
                                 }
                             },
                             timeout=aiohttp.ClientTimeout(total=3)
