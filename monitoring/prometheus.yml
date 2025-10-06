@@ -1,0 +1,73 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # Aurora (current node)
+  - job_name: 'aurora-node'
+    static_configs:
+      - targets: ['localhost:9100']
+    scrape_interval: 5s
+
+  # Aurora containers
+  - job_name: 'aurora-cadvisor'
+    static_configs:
+      - targets: ['localhost:8080']
+    scrape_interval: 5s
+
+  # Vengeance (if accessible)
+  - job_name: 'vengeance-node'
+    static_configs:
+      - targets: ['vengeance:9100']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # RobbieBook1 (if accessible)
+  - job_name: 'robbiebook1-node'
+    static_configs:
+      - targets: ['192.199.240.226:9100']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # RunPod Aurora
+  - job_name: 'runpod-aurora'
+    static_configs:
+      - targets: ['82.221.170.242:9100']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # RunPod Collaboration
+  - job_name: 'runpod-collaboration'
+    static_configs:
+      - targets: ['213.181.111.2:9100']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # RunPod Fluenti
+  - job_name: 'runpod-fluenti'
+    static_configs:
+      - targets: ['103.196.86.56:9100']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Aurora AI Backend
+  - job_name: 'aurora-backend'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Aurora Auth Backend
+  - job_name: 'aurora-auth'
+    static_configs:
+      - targets: ['localhost:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
