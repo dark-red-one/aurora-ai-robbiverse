@@ -1870,7 +1870,10 @@
             }
 
             connectWebSocket() {
-                this.ws = new WebSocket('ws://10.0.0.1:8007/ws');
+                // Use secure WebSocket for HTTPS pages, fallback to ws for HTTP
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.hostname}:8007/ws`;
+                this.ws = new WebSocket(wsUrl);
 
                 this.ws.onopen = () => {
                     console.log('WebSocket connected');
