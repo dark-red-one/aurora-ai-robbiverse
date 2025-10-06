@@ -1,0 +1,116 @@
+.prompt-console-widget {
+  padding: 2rem;
+  border-radius: 12px;
+  background: #1a1a1a;
+  color: #f9fafb;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.console-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  color: #10b981;
+}
+
+.console-settings {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setting-group label {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.setting-group select,
+.setting-group input {
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  color: #f9fafb;
+}
+
+.console-input {
+  margin-bottom: 1.5rem;
+}
+
+.prompt-input {
+  width: 100%;
+  padding: 1rem;
+  background: #2a2a2a;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #f9fafb;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #059669;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.console-output {
+  padding: 1.5rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+}
+
+.console-output h3 {
+  margin: 0 0 1rem 0;
+  color: #10b981;
+  font-size: 1rem;
+}
+
+.response-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #f9fafb;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.prompt-console-widget.theme-light {
+  background: #f9fafb;
+  color: #1a1a1a;
+}
+
+.prompt-console-widget.theme-light .console-settings,
+.prompt-console-widget.theme-light .prompt-input,
+.prompt-console-widget.theme-light .console-output {
+  background: white;
+  border-color: #e5e7eb;
+}
+

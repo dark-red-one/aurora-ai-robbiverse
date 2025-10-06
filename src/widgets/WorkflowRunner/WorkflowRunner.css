@@ -1,0 +1,93 @@
+.workflow-runner-widget {
+  padding: 2rem;
+  border-radius: 12px;
+  background: white;
+}
+
+.workflow-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+}
+
+.workflow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f9fafb;
+  border-left: 4px solid #e5e7eb;
+}
+
+.workflow-step.status-running {
+  border-left-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.workflow-step.status-completed {
+  border-left-color: #10b981;
+  background: #d1fae5;
+}
+
+.workflow-step.status-failed {
+  border-left-color: #ef4444;
+  background: #fee2e2;
+}
+
+.step-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.step-status {
+  font-size: 0.875rem;
+  color: #666;
+  text-transform: capitalize;
+}
+
+.workflow-button {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.workflow-button:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.workflow-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

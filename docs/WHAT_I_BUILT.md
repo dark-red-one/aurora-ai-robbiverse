@@ -159,7 +159,7 @@ To use this system:
 
 1. **Run SQL migration:**
 ```bash
-sqlite3 data/vengeance.db < database/unified-schema/08-universal-ai-state.sql
+sqlite3 data/robbiebook.db < database/unified-schema/08-universal-ai-state.sql
 ```
 
 2. **Initialize bridge in your chat app:**

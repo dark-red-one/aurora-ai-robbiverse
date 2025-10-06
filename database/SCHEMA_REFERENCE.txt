@@ -1,0 +1,93 @@
+📊 INTERACTIONS:
+   id                             integer               NOT NULL
+   interaction_id                 text                  NOT NULL
+   interaction_type               text                  NOT NULL
+   source_system                  text                  NOT NULL
+   from_user                      text                 
+   to_users                       ARRAY                
+   cc_users                       ARRAY                
+   subject                        text                 
+   body                           text                 
+   snippet                        text                 
+   interaction_date               timestamp without time zone 
+   thread_id                      text                 
+   labels                         ARRAY                
+   is_unread                      boolean              
+   is_starred                     boolean              
+   importance_score               numeric              
+   urgency_score                  numeric              
+   ai_tags                        ARRAY                
+   ai_reasoning                   text                 
+   sentiment                      text                 
+   requires_action                boolean              
+   action_type                    text                 
+   action_deadline                timestamp without time zone 
+   action_completed               boolean              
+   contact_id                     integer              
+   company_id                     integer              
+   deal_id                        integer              
+   created_at                     timestamp without time zone 
+   updated_at                     timestamp without time zone 
+   analyzed_at                    timestamp without time zone 
+   raw_data                       jsonb                
+
+📊 ALLAN_ATTENTION:
+   id                             integer               NOT NULL
+   attention_id                   text                  NOT NULL
+   attention_type                 text                  NOT NULL
+   source_system                  text                  NOT NULL
+   title                          text                  NOT NULL
+   summary                        text                 
+   from_who                       text                 
+   importance_score               numeric              
+   urgency_score                  numeric              
+   is_surfaced                    boolean              
+   surfaced_at                    timestamp without time zone 
+   submerged_at                   timestamp without time zone 
+   interaction_id                 integer              
+   created_at                     timestamp without time zone 
+
+📊 PRIORITIES_QUEUE:
+   id                             integer               NOT NULL
+   task_id                        character varying     NOT NULL
+   task_type                      character varying     NOT NULL
+   task_category                  character varying     NOT NULL
+   task_description               text                  NOT NULL
+   urgency_score                  numeric              
+   impact_score                   numeric              
+   effort_score                   numeric              
+   context_score                  numeric              
+   dependency_score               numeric              
+   personality_score              numeric              
+   total_score                    numeric              
+   source                         character varying     NOT NULL
+   source_id                      character varying    
+   deadline                       timestamp without time zone 
+   created_at                     timestamp without time zone 
+   updated_at                     timestamp without time zone 
+   status                         character varying    
+   executed_at                    timestamp without time zone 
+   completed_at                   timestamp without time zone 
+   eliminated_at                  timestamp without time zone 
+   elimination_reason             text                 
+   blocks_tasks                   ARRAY                
+   blocked_by_tasks               ARRAY                
+   success_rating                 integer              
+   execution_time                 integer              
+   estimated_time                 integer              
+   user_id                        character varying    
+
+📊 GOOGLE_EMAILS_MASSIVE:
+   id                             integer               NOT NULL
+   gmail_id                       character varying     NOT NULL
+   thread_id                      character varying    
+   subject                        text                 
+   from_email                     character varying    
+   to_email                       text                 
+   email_date                     timestamp without time zone 
+   snippet                        text                 
+   labels                         ARRAY                
+   is_unread                      boolean              
+   ai_analysis                    jsonb                
+   synced_at                      timestamp without time zone 
+

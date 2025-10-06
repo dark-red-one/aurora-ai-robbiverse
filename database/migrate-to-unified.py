@@ -492,7 +492,7 @@ def main():
     
     # SQLite databases to migrate
     sqlite_paths = [
-        '/workspace/aurora/vengeance.db',
+        '/workspace/aurora/robbiebook.db',
         '/workspace/aurora/data/local.db',
         '/workspace/aurora/src/robbie.db'
     ]

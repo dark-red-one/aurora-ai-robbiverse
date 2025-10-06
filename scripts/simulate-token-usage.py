@@ -8,7 +8,7 @@ import time
 import random
 from datetime import datetime
 
-DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db'
+DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/robbiebook.db'
 
 def simulate_token_usage():
     """Simulate realistic token usage patterns"""

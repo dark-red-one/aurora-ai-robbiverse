@@ -1,0 +1,192 @@
+.comparison-table-widget {
+  width: 100%;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.widget-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.widget-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.widget-subtitle {
+  font-size: 1.125rem;
+  color: #666;
+  margin: 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.comparison-table.sticky-header thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feature-column {
+  text-align: left;
+  font-weight: 600;
+  background: #f9fafb;
+  min-width: 200px;
+}
+
+.product-column {
+  background: white;
+  position: relative;
+  min-width: 150px;
+}
+
+.product-column.highlighted {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+}
+
+.product-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.product-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.category-row {
+  background: #f3f4f6;
+}
+
+.category-name {
+  font-weight: 700;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+}
+
+.feature-row:hover {
+  background: #f9fafb;
+}
+
+.feature-cell {
+  text-align: left;
+  background: #f9fafb;
+}
+
+.feature-name {
+  font-weight: 600;
+  display: block;
+}
+
+.feature-desc {
+  font-size: 0.875rem;
+  color: #666;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.value-cell {
+  background: white;
+}
+
+.value-cell.highlighted {
+  background: #eff6ff;
+}
+
+.feature-check {
+  color: #10b981;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.feature-cross {
+  color: #ef4444;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.feature-text {
+  font-weight: 500;
+}
+
+.cta-cell {
+  padding: 1.5rem 1rem;
+  background: white;
+}
+
+.cta-cell.highlighted {
+  background: #eff6ff;
+}
+
+.cta-button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cta-button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.comparison-table-widget.theme-dark {
+  color: #f9fafb;
+}
+
+.comparison-table-widget.theme-dark .feature-column,
+.comparison-table-widget.theme-dark .feature-cell {
+  background: #374151;
+}
+
+.comparison-table-widget.theme-dark .product-column,
+.comparison-table-widget.theme-dark .value-cell {
+  background: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .comparison-table th,
+  .comparison-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+

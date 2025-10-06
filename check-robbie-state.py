@@ -5,7 +5,7 @@ Quick check of Robbie's current state in the database
 import sqlite3
 import json
 
-DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db'
+DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/robbiebook.db'
 
 def check_robbie_state():
     try:

@@ -3,7 +3,7 @@ import path from "path";
 import Database from "better-sqlite3";
 
 const dataDir = path.resolve("/home/allan/vengeance/data");
-const dbPath = path.join(dataDir, "vengeance.db");
+const dbPath = path.join(dataDir, "robbiebook.db");
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });

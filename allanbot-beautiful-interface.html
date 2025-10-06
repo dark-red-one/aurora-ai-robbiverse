@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllanBot Beautiful Sticky Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+            color: #cccccc;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .sticky-notes-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 350px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            z-index: 999;
+            padding: 10px;
+        }
+
+        .sticky-note {
+            background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+            color: #333;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            font-size: 0.9em;
+        }
+
+        .sticky-note:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 1001;
+        }
+
+        .sticky-note.intel {
+            background: linear-gradient(135deg, #FFEB3B 0%, #FBC02D 100%); /* Yellow */
+            color: #333;
+        }
+
+        .sticky-note.reference {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); /* Green */
+            color: white;
+        }
+
+        .sticky-note.drafts {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); /* Blue */
+            color: white;
+        }
+
+        .sticky-note.connections {
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%); /* Red */
+            color: white;
+        }
+
+        .sticky-note.shower-thoughts {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); /* Purple */
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: rotate(-2deg) scale(1); }
+            50% { transform: rotate(-2deg) scale(1.05); }
+            100% { transform: rotate(-2deg) scale(1); }
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .note-type {
+            font-weight: bold;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .note-time {
+            font-size: 0.7em;
+            opacity: 0.8;
+        }
+
+        .note-content {
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .note-priority {
+            font-size: 0.7em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .note-action {
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7em;
+            color: inherit;
+            transition: background 0.3s ease;
+        }
+
+        .note-action:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AllanBot Beautiful Sticky Notes</h1>
+        <p>Learning from Allan's collaborative memory system</p>
+    </div>
+
+    <div class="sticky-notes-container">
+
+        <div class="sticky-note shower-thoughts fade-in">
+            <div class="note-header">
+                <div class="note-type">SHOWER-THOUGHTS</div>
+                <div class="note-time">2025-10-06 10:21:36.397669+00:00</div>
+            </div>
+            <div class="note-content">AI-Powered CPG Testing: What if we could predict product success before launch using AI analysis of consumer sentiment and market trends?</div>
+            <div class="note-priority">MEDIUM</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('AI-Powered CPG Testing: What if we could predict product success before launch using AI analysis of consumer sentiment and market trends?')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('shower-thoughts')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note drafts fade-in">
+            <div class="note-header">
+                <div class="note-type">DRAFTS</div>
+                <div class="note-time">2025-10-06 10:21:35.661702+00:00</div>
+            </div>
+            <div class="note-content">Blog: The Hidden Cost of Playing It Safe - Opening: "Every safe choice in CPG is a future regret waiting to happen. Here's why the biggest risk is not taking one..."</div>
+            <div class="note-priority">MEDIUM</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Blog: The Hidden Cost of Playing It Safe - Opening: "Every safe choice in CPG is a future regret waiting to happen. Here's why the biggest risk is not taking one..."')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('drafts')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note reference fade-in">
+            <div class="note-header">
+                <div class="note-type">REFERENCE</div>
+                <div class="note-time">2025-10-06 10:21:35.449526+00:00</div>
+            </div>
+            <div class="note-content">Zoom Backgrounds: Professional: Bookshelf, Creative clients: Innovation lab, Casual: Home office, Never use: Beach scenes</div>
+            <div class="note-priority">MEDIUM</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Zoom Backgrounds: Professional: Bookshelf, Creative clients: Innovation lab, Casual: Home office, Never use: Beach scenes')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('reference')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note robbie_technical fade-in">
+            <div class="note-header">
+                <div class="note-type">ROBBIE TECHNICAL</div>
+                <div class="note-time">2025-10-06 10:08:24.154889+00:00</div>
+            </div>
+            <div class="note-content">RunPod GPU integration via SSH tunnel working perfectly</div>
+            <div class="note-priority">MEDIUM</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('RunPod GPU integration via SSH tunnel working perfectly')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('robbie_technical')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note allan_interface fade-in">
+            <div class="note-header">
+                <div class="note-type">ALLAN INTERFACE</div>
+                <div class="note-time">2025-10-06 10:08:22.761679+00:00</div>
+            </div>
+            <div class="note-content">I can also edit notes add notes and delete notes in the web interface</div>
+            <div class="note-priority">MEDIUM</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('I can also edit notes add notes and delete notes in the web interface')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('allan_interface')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note allan_collaboration fade-in">
+            <div class="note-header">
+                <div class="note-type">ALLAN COLLABORATION</div>
+                <div class="note-time">2025-10-06 10:08:22.499165+00:00</div>
+            </div>
+            <div class="note-content">And anything I say (please note) should be an Allan note</div>
+            <div class="note-priority">MEDIUM</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('And anything I say (please note) should be an Allan note')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('allan_collaboration')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note connections fade-in">
+            <div class="note-header">
+                <div class="note-type">CONNECTIONS</div>
+                <div class="note-time">2025-10-06 10:21:36.165484+00:00</div>
+            </div>
+            <div class="note-content">Sarah Johnson - PepsiCo: VP of Innovation at PepsiCo. Interested in Clean Label Initiative. Mentioned budget constraints and timeline pressure.</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Sarah Johnson - PepsiCo: VP of Innovation at PepsiCo. Interested in Clean Label Initiative. Mentioned budget constraints and timeline pressure.')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('connections')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note intel fade-in">
+            <div class="note-header">
+                <div class="note-type">INTEL</div>
+                <div class="note-time">2025-10-06 10:21:35.905408+00:00</div>
+            </div>
+            <div class="note-content">Competitor Analysis - FreshBrand: They just landed Target. Using similar test methodology but 2x our pricing. Clients complaining about their slow turnaround...</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Competitor Analysis - FreshBrand: They just landed Target. Using similar test methodology but 2x our pricing. Clients complaining about their slow turnaround...')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('intel')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note intel fade-in">
+            <div class="note-header">
+                <div class="note-type">INTEL</div>
+                <div class="note-time">2025-10-06 10:21:35.229860+00:00</div>
+            </div>
+            <div class="note-content">Jennifer Martinez - TechStartup Inc: Former P&G innovation lead, now heading product at TechStartup. Connected via LinkedIn. Interested in TestPilot methodology...</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Jennifer Martinez - TechStartup Inc: Former P&G innovation lead, now heading product at TechStartup. Connected via LinkedIn. Interested in TestPilot methodology...')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('intel')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note robbie_automation fade-in">
+            <div class="note-header">
+                <div class="note-type">ROBBIE AUTOMATION</div>
+                <div class="note-time">2025-10-06 10:08:23.628091+00:00</div>
+            </div>
+            <div class="note-content">Automatically convert 'Make sure' statements into Robbie notes</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Automatically convert 'Make sure' statements into Robbie notes')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('robbie_automation')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note robbie_technical fade-in">
+            <div class="note-header">
+                <div class="note-type">ROBBIE TECHNICAL</div>
+                <div class="note-time">2025-10-06 10:08:23.254913+00:00</div>
+            </div>
+            <div class="note-content">Implement web browser and notes tabs in the interface</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Implement web browser and notes tabs in the interface')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('robbie_technical')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note allan_system fade-in">
+            <div class="note-header">
+                <div class="note-type">ALLAN SYSTEM</div>
+                <div class="note-time">2025-10-06 10:08:23.008410+00:00</div>
+            </div>
+            <div class="note-content">Also start the inbox (Universal inbox) even if it's only email for now</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Also start the inbox (Universal inbox) even if it's only email for now')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('allan_system')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note allan_direct fade-in">
+            <div class="note-header">
+                <div class="note-type">ALLAN DIRECT</div>
+                <div class="note-time">2025-10-06 10:08:22.235268+00:00</div>
+            </div>
+            <div class="note-content">All of the 'Make sure' things should become robbie notes</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('All of the 'Make sure' things should become robbie notes')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('allan_direct')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note allan_direct fade-in">
+            <div class="note-header">
+                <div class="note-type">ALLAN DIRECT</div>
+                <div class="note-time">2025-10-06 10:08:21.958075+00:00</div>
+            </div>
+            <div class="note-content">Make sure we have the web browser tab and notes tab too even if UI is basic</div>
+            <div class="note-priority">HIGH</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('Make sure we have the web browser tab and notes tab too even if UI is basic')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('allan_direct')">Analyze</button>
+            </div>
+        </div>
+
+        <div class="sticky-note robbie_business fade-in">
+            <div class="note-header">
+                <div class="note-type">ROBBIE BUSINESS</div>
+                <div class="note-time">2025-10-06 10:08:23.888708+00:00</div>
+            </div>
+            <div class="note-content">PepsiCo deal crisis - pricing 40% higher, timeline 3 months slow. Need strategic response.</div>
+            <div class="note-priority">CRITICAL</div>
+            <div class="note-actions">
+                <button class="note-action" onclick="copyNote('PepsiCo deal crisis - pricing 40% higher, timeline 3 months slow. Need strategic response.')">Copy</button>
+                <button class="note-action" onclick="analyzeNote('robbie_business')">Analyze</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="refreshNotes()">🔄 Refresh</button>
+        <button class="control-btn" onclick="trainAllanBot()">🧠 Train</button>
+        <button class="control-btn" onclick="exportData()">📊 Export</button>
+    </div>
+
+    <script>
+        function copyNote(content) {
+            navigator.clipboard.writeText(content).then(() => {
+                alert('Note copied to clipboard!');
+            });
+        }
+
+        function analyzeNote(type) {
+            alert(`Analyzing ${type} pattern for AllanBot training...`);
+        }
+
+        function refreshNotes() {
+            location.reload();
+        }
+
+        function trainAllanBot() {
+            alert('Training AllanBot from beautiful sticky notes...');
+        }
+
+        function exportData() {
+            alert('Exporting AllanBot training data...');
+        }
+    </script>
+</body>
+</html>

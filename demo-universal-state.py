@@ -8,7 +8,7 @@ from datetime import datetime
 
 def query_robbie_state():
     """Query Robbie's current state from network database"""
-    conn = sqlite3.connect('data/vengeance.db')
+    conn = sqlite3.connect('data/robbiebook.db')
     cursor = conn.cursor()
     
     print("=" * 80)

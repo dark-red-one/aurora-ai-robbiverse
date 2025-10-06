@@ -1,0 +1,321 @@
+/* Beacon Tiles Widget - Analytics Dashboard KPI Tiles */
+
+.beacon-tiles-widget {
+  width: 100%;
+  padding: 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.widget-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.last-updated {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+}
+
+/* Tiles Container */
+.tiles-container {
+  display: grid;
+  width: 100%;
+}
+
+.tiles-container.layout-grid {
+  display: grid;
+}
+
+.tiles-container.layout-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tiles-container.layout-masonry {
+  column-count: 3;
+  column-gap: 1rem;
+}
+
+.tiles-container.gap-small {
+  gap: 0.5rem;
+}
+
+.tiles-container.gap-medium {
+  gap: 1rem;
+}
+
+.tiles-container.gap-large {
+  gap: 1.5rem;
+}
+
+/* Individual Tile */
+.beacon-tile {
+  background: var(--tile-bg, #ffffff);
+  border: 2px solid var(--tile-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.beacon-tile.clickable {
+  cursor: pointer;
+}
+
+.beacon-tile.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color, #3b82f6);
+}
+
+.beacon-tile.compact {
+  padding: 1rem;
+}
+
+.beacon-tile.animate-in {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tile Header */
+.tile-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tile-icon {
+  font-size: 1.5rem;
+}
+
+.tile-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tile Body */
+.tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tile-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+  line-height: 1;
+}
+
+.beacon-tile.compact .tile-value {
+  font-size: 1.5rem;
+}
+
+/* Change Indicator */
+.tile-change {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.change-icon {
+  font-size: 1rem;
+}
+
+.tile-change.change-positive {
+  color: var(--success-color, #10b981);
+}
+
+.tile-change.change-negative {
+  color: var(--danger-color, #ef4444);
+}
+
+.tile-change.change-neutral {
+  color: var(--text-secondary, #666);
+}
+
+/* Sparkline */
+.tile-trend {
+  height: 40px;
+  margin-top: 0.5rem;
+}
+
+.sparkline {
+  width: 100%;
+  height: 100%;
+  color: var(--primary-color, #3b82f6);
+  opacity: 0.7;
+}
+
+/* Target Progress */
+.tile-target {
+  margin-top: 0.5rem;
+}
+
+.target-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666);
+  margin-bottom: 0.25rem;
+}
+
+.target-progress {
+  height: 4px;
+  background: var(--bg-secondary, #f3f4f6);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.target-bar {
+  height: 100%;
+  background: var(--primary-color, #3b82f6);
+  transition: width 0.5s ease;
+}
+
+/* Status Variants */
+.beacon-tile.status-success {
+  border-color: var(--success-color, #10b981);
+}
+
+.beacon-tile.status-warning {
+  border-color: var(--warning-color, #f59e0b);
+}
+
+.beacon-tile.status-danger {
+  border-color: var(--danger-color, #ef4444);
+}
+
+.beacon-tile.status-info {
+  border-color: var(--info-color, #3b82f6);
+}
+
+/* Loading State */
+.tile-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--bg-secondary, #f3f4f6);
+  border-top-color: var(--primary-color, #3b82f6);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner.large {
+  width: 40px;
+  height: 40px;
+  border-width: 4px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.widget-loading {
+  position: relative;
+  min-height: 100px;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Dark Theme */
+.beacon-tiles-widget.theme-dark {
+  --tile-bg: #1f2937;
+  --tile-border: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --bg-secondary: #374151;
+}
+
+.beacon-tiles-widget.theme-dark .beacon-tile {
+  background: var(--tile-bg);
+}
+
+.beacon-tiles-widget.theme-dark .tile-loading {
+  background: rgba(31, 41, 55, 0.8);
+}
+
+.beacon-tiles-widget.theme-dark .loading-overlay {
+  background: rgba(31, 41, 55, 0.9);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tiles-container.layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tiles-container.layout-masonry {
+    column-count: 1;
+  }
+
+  .tile-value {
+    font-size: 1.75rem;
+  }
+
+  .beacon-tile {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .widget-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .tile-value {
+    font-size: 1.5rem;
+  }
+}
+

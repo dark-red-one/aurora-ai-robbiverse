@@ -9,7 +9,7 @@ import random
 
 class MoodSwitchingModel:
     def __init__(self):
-        self.db_path = "data/vengeance.db"
+        self.db_path = "data/robbiebook.db"
         self.moods = {
             1: {"name": "Sleepy", "emoji": "😴", "energy": "low", "mode": "resting"},
             2: {"name": "Calm", "emoji": "😌", "energy": "low", "mode": "peaceful"},

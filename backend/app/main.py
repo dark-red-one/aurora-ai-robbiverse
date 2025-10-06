@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+from datetime import datetime
 import structlog
 import uvicorn
 
@@ -108,23 +109,75 @@ async def health_check():
 
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    """WebSocket endpoint for real-time communication"""
+    """WebSocket endpoint for real-time streaming chat"""
     await manager.connect(websocket, client_id)
     logger.info("WebSocket client connected", client_id=client_id)
+    
+    # Initialize Robbie AI
+    from app.services.ai.robbie_ai import RobbieAI
+    from app.services.ai.dual_llm_coordinator import DualLLMCoordinator
+    
+    robbie = RobbieAI()
+    dual_llm = DualLLMCoordinator()
     
     try:
         while True:
             # Receive message from client
             data = await websocket.receive_text()
-            logger.info("Received WebSocket message", client_id=client_id, data=data)
+            logger.info("Received WebSocket message", client_id=client_id, data=data[:100])
             
-            # Echo message back (replace with actual AI processing)
-            response = f"Echo: {data}"
-            await manager.send_personal_message(response, client_id)
+            try:
+                import json
+                message_data = json.loads(data)
+                
+                if message_data.get("type") == "message":
+                    user_message = message_data.get("content", "")
+                    personality = message_data.get("personality", {})
+                    
+                    logger.info("Processing chat message", user_id=client_id, message=user_message[:50])
+                    
+                    # Send acknowledgment
+                    await websocket.send_json({
+                        "type": "acknowledgment",
+                        "message": "Message received",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+                    # Stream thinking process + response (Claude-style!)
+                    async for chunk in robbie.stream_response(user_message, client_id, {"personality": personality}):
+                        try:
+                            chunk_data = json.loads(chunk)
+                            await websocket.send_json(chunk_data)
+                        except json.JSONDecodeError:
+                            continue
+                    
+                    logger.info("Streaming complete", user_id=client_id)
+                    
+                elif message_data.get("type") == "personality_update":
+                    # Handle personality slider updates
+                    await websocket.send_json({
+                        "type": "acknowledgment",
+                        "message": "Personality updated",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                else:
+                    # Echo for other message types
+                    await websocket.send_json({
+                        "type": "echo",
+                        "content": data,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+            except json.JSONDecodeError:
+                # Handle non-JSON messages
+                await websocket.send_text(f"Echo: {data}")
             
     except WebSocketDisconnect:
         manager.disconnect(client_id)
         logger.info("WebSocket client disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("WebSocket error", error=str(e), client_id=client_id)
+        manager.disconnect(client_id)
 
 if __name__ == "__main__":
     settings = get_settings()

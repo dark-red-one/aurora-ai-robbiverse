@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from directive_capture_engine import DirectiveCaptureEngine
 
-DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db'
+DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/robbiebook.db'
 
 class ConversationMonitor:
     def __init__(self):

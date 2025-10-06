@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 from typing import List, Dict, Optional
 
-DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db'
+DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/robbiebook.db'
 
 class DirectiveCaptureEngine:
     def __init__(self):

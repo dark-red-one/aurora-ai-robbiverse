@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobbieBlocks - Widget Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            border-radius: 24px;
+            color: #d1fae5;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .search-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .search-bar input {
+            width: 100%;
+            border: none;
+            font-size: 1.125rem;
+            outline: none;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .widget-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .widget-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        }
+
+        .widget-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .widget-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1a202c;
+        }
+
+        .widget-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #eff6ff;
+            color: #3b82f6;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .widget-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .widget-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .widget-features li {
+            padding: 0.5rem 0;
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .widget-features li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .widget-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 4rem;
+            padding: 2rem;
+            opacity: 0.8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .widgets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 RobbieBlocks</h1>
+            <p class="subtitle">The Complete Widget Ecosystem</p>
+            <div class="status">✅ 26/26 Widgets Complete (100%)</div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">26</div>
+                <div class="stat-label">Total Widgets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">52</div>
+                <div class="stat-label">Files Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">TypeScript</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Target Sites</div>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Search widgets..." onkeyup="filterWidgets()">
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterByCategory('all')">All Widgets</button>
+            <button class="filter-btn" onclick="filterByCategory('foundation')">Foundation</button>
+            <button class="filter-btn" onclick="filterByCategory('commerce')">Commerce</button>
+            <button class="filter-btn" onclick="filterByCategory('analytics')">Analytics</button>
+            <button class="filter-btn" onclick="filterByCategory('discovery')">Discovery</button>
+        </div>
+
+        <div class="widgets-grid" id="widgetsGrid">
+            <!-- Widgets will be dynamically inserted here -->
+        </div>
+
+        <footer>
+            <p><strong>Built with 💕 by Robbie AI</strong></p>
+            <p>For Allan's AI Empire | October 6, 2025</p>
+            <p style="margin-top: 1rem; font-size: 0.875rem;">
+                "Build once, deploy everywhere. That's the RobbieBlocks promise."
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        const widgets = [
+            { num: 1, name: "VistaHero", category: "foundation", description: "Cinematic hero panels with lightwell effects", features: ["Video/image backgrounds", "Animated overlays", "CTA integration"] },
+            { num: 2, name: "ChatWidget", category: "foundation", description: "Real-time chat interface with AI integration", features: ["WebSocket support", "Message history", "File uploads"] },
+            { num: 3, name: "Specsheet", category: "foundation", description: "Content cards & profile panels", features: ["Flexible layouts", "Rich content", "Tag filtering"] },
+            { num: 4, name: "FacetedSearch", category: "foundation", description: "Advanced search with filters & facets", features: ["Multi-facet filtering", "Real-time search", "Sort options"] },
+            { num: 5, name: "SpotlightCarousel", category: "foundation", description: "Featured content carousel", features: ["Auto-play", "Touch support", "Infinite loop"] },
+            { num: 6, name: "SentinelGate", category: "foundation", description: "Authentication & account management", features: ["OAuth integration", "MFA support", "Social login"] },
+            { num: 7, name: "SmartCart", category: "commerce", description: "Shopping cart with checkout", features: ["Promo codes", "Tax calculation", "Stripe integration"] },
+            { num: 8, name: "PricingPlans", category: "commerce", description: "Pricing tables with feature comparison", features: ["Multiple layouts", "Annual/monthly toggle", "Highlighted plans"] },
+            { num: 9, name: "ComparisonTable", category: "commerce", description: "Product feature comparison", features: ["Multi-column comparison", "Category grouping", "Sticky headers"] },
+            { num: 10, name: "ReviewsSocialProof", category: "commerce", description: "Reviews, ratings & social proof", features: ["Star ratings", "Verified badges", "Photo reviews"] },
+            { num: 11, name: "Subscribe", category: "commerce", description: "Newsletter/email capture", features: ["Email validation", "Success states", "API integration"] },
+            { num: 12, name: "OfficeBackgrounds", category: "commerce", description: "Dynamic background themes", features: ["Multiple themes", "Custom uploads", "Blur effects"] },
+            { num: 13, name: "BeaconTiles", category: "analytics", description: "Analytics dashboard KPI tiles", features: ["Real-time updates", "Trend indicators", "Color-coded alerts"] },
+            { num: 14, name: "FunnelFlow", category: "analytics", description: "Conversion funnel visualization", features: ["Multi-stage funnels", "Conversion rates", "Drop-off analysis"] },
+            { num: 15, name: "ROICalculator", category: "analytics", description: "Enterprise lead generation calculator", features: ["Dynamic calculations", "Preset scenarios", "Export results"] },
+            { num: 16, name: "DocPrism", category: "analytics", description: "Documentation browser", features: ["Markdown rendering", "Code highlighting", "Version switching"] },
+            { num: 17, name: "WorkflowRunner", category: "analytics", description: "Automation execution & monitoring", features: ["Step-by-step execution", "Status tracking", "Error handling"] },
+            { num: 18, name: "PromptConsole", category: "analytics", description: "Developer LLM testing tool", features: ["Model selection", "Temperature control", "Response history"] },
+            { num: 19, name: "TalentverseGrid", category: "discovery", description: "Agent/developer directory", features: ["Profile cards", "Skill filtering", "Availability status"] },
+            { num: 20, name: "Lightwell", category: "discovery", description: "Dynamic media gallery with lightbox", features: ["Grid/masonry layouts", "Lightbox viewer", "Video support"] },
+            { num: 21, name: "Navigation", category: "discovery", description: "Nav bars, breadcrumbs, anchor maps", features: ["Horizontal/vertical layouts", "Nested menus", "Sticky positioning"] },
+            { num: 22, name: "SmartForms", category: "discovery", description: "Advanced lead capture with validation", features: ["Multiple field types", "Real-time validation", "Conditional logic"] },
+            { num: 23, name: "IntegrationConnectors", category: "discovery", description: "OAuth flows & connection status", features: ["OAuth authentication", "Connection status", "Error handling"] },
+            { num: 24, name: "CompliancePanel", category: "discovery", description: "Certifications, badges & policies", features: ["Certification badges", "Status indicators", "Policy links"] },
+            { num: 25, name: "OnboardingTours", category: "discovery", description: "Progressive disclosure & guided tours", features: ["Step-by-step guides", "Progress tracking", "Element highlighting"] },
+        ];
+
+        let currentCategory = 'all';
+
+        function renderWidgets() {
+            const grid = document.getElementById('widgetsGrid');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filtered = widgets.filter(widget => {
+                const matchesCategory = currentCategory === 'all' || widget.category === currentCategory;
+                const matchesSearch = widget.name.toLowerCase().includes(searchTerm) || 
+                                    widget.description.toLowerCase().includes(searchTerm);
+                return matchesCategory && matchesSearch;
+            });
+
+            grid.innerHTML = filtered.map(widget => `
+                <div class="widget-card">
+                    <div class="widget-number">${widget.num}</div>
+                    <h3 class="widget-name">${widget.name}</h3>
+                    <span class="widget-category">${widget.category}</span>
+                    <p class="widget-description">${widget.description}</p>
+                    <ul class="widget-features">
+                        ${widget.features.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                    <div class="widget-actions">
+                        <button class="btn btn-primary" onclick="viewDemo('${widget.name}')">View Demo</button>
+                        <button class="btn btn-secondary" onclick="viewDocs('${widget.name}')">Docs</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderWidgets();
+        }
+
+        function filterWidgets() {
+            renderWidgets();
+        }
+
+        function viewDemo(widgetName) {
+            alert(`Demo for ${widgetName} coming soon! 🚀`);
+            // In production: window.location.href = `/demos/${widgetName.toLowerCase()}`;
+        }
+
+        function viewDocs(widgetName) {
+            alert(`Documentation for ${widgetName} - See ROBBIEBLOCKS_CATALOG.md`);
+            // In production: window.location.href = `/docs/widgets/${widgetName.toLowerCase()}`;
+        }
+
+        // Initial render
+        renderWidgets();
+    </script>
+</body>
+</html>

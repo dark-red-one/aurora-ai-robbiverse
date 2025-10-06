@@ -9,7 +9,7 @@ echo "======================================================"
 echo ""
 
 # Check if we're in the right directory
-if [ ! -f "data/vengeance.db" ]; then
+if [ ! -f "data/robbiebook.db" ]; then
     echo "❌ Not in robbieverse directory. Please run from /Users/allanperetz/aurora-ai-robbiverse"
     exit 1
 fi
@@ -44,8 +44,8 @@ fi
 # 2. Check Robbie's state in SQL
 echo ""
 echo "🗄️ Step 2: Checking Robbie's state in SQL..."
-ROBBIE_MOOD=$(sqlite3 data/vengeance.db "SELECT current_mood FROM ai_personality_state WHERE personality_id = 'robbie';")
-ROBBIE_MODE=$(sqlite3 data/vengeance.db "SELECT current_mode FROM ai_personality_state WHERE personality_id = 'robbie';")
+ROBBIE_MOOD=$(sqlite3 data/robbiebook.db "SELECT current_mood FROM ai_personality_state WHERE personality_id = 'robbie';")
+ROBBIE_MODE=$(sqlite3 data/robbiebook.db "SELECT current_mode FROM ai_personality_state WHERE personality_id = 'robbie';")
 
 echo "📊 Robbie's Current State:"
 echo "   Mood: $ROBBIE_MOOD"
@@ -89,7 +89,7 @@ echo "================================"
 echo "✅ Ollama: $(pgrep -f 'ollama serve' > /dev/null && echo 'RUNNING' || echo 'STOPPED')"
 echo "✅ Robbie Mood: $ROBBIE_MOOD"
 echo "✅ Robbie Mode: $ROBBIE_MODE"
-echo "✅ SQL Database: $(test -f data/vengeance.db && echo 'READY' || echo 'MISSING')"
+echo "✅ SQL Database: $(test -f data/robbiebook.db && echo 'READY' || echo 'MISSING')"
 echo "✅ Robbie Extension: $(cursor --list-extensions | grep -q 'testpilot.robbie-avatar' && echo 'INSTALLED' || echo 'MISSING')"
 echo "✅ GPU Cores: $GPU_CORES"
 echo "✅ Memory: $MEMORY_GB"
@@ -114,7 +114,7 @@ echo "Commands:"
 echo "  ollama ps                    - Check running models"
 echo "  ollama list                  - List available models"
 echo "  tail -f /tmp/ollama-m3max.log - Watch Ollama logs"
-echo "  sqlite3 data/vengeance.db    - Access SQL database"
+echo "  sqlite3 data/robbiebook.db    - Access SQL database"
 echo ""
 echo "🚀 LET'S GET THIS SHIT MOVING! 🚀"
 

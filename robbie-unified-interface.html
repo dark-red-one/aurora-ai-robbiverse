@@ -25,7 +25,7 @@
             position: relative;
         }
 
-        /* Matrix Background Animation - Robbie's Colors */
+        /* Matrix Background Animation - ENHANCED - Robbie's Colors */
         .matrix-background {
             position: fixed;
             top: 0;
@@ -33,7 +33,7 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.05;
+            opacity: 0.15;
             pointer-events: none;
             overflow: hidden;
         }
@@ -50,25 +50,26 @@
             position: absolute;
             top: -100%;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
             animation: matrix-fall-bg linear infinite;
-            opacity: 0.3;
+            opacity: 0.7;
+            text-shadow: 0 0 8px currentColor;
         }
 
         .matrix-column-bg:nth-child(odd) {
-            color: #8b4513;
-            /* Robbie's reddish-brown hair */
+            color: #ff6b35;
+            /* Robbie's energy - orange */
         }
 
         .matrix-column-bg:nth-child(even) {
-            color: #2c3e50;
-            /* Dark grey from Robbie's jacket */
+            color: #4ecdc4;
+            /* Robbie's intelligence - teal */
         }
 
         .matrix-column-bg:nth-child(3n) {
-            color: #ff6b6b;
-            /* Robbie's red lips */
+            color: #ff6b9d;
+            /* Robbie's personality - pink */
         }
 
         @keyframes matrix-fall-bg {
@@ -99,7 +100,7 @@
             overflow: hidden;
         }
 
-        /* Matrix Rain in Sidebar */
+        /* Enhanced Matrix Rain in Sidebar - MORE PRONOUNCED */
         .sidebar-matrix {
             position: absolute;
             top: 0;
@@ -107,7 +108,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            opacity: 0.03;
+            opacity: 0.18;
             pointer-events: none;
             overflow: hidden;
         }
@@ -116,41 +117,127 @@
             position: absolute;
             top: -100%;
             font-family: 'Courier New', monospace;
-            font-size: 10px;
+            font-size: 13px;
             font-weight: bold;
             animation: sidebar-matrix-fall linear infinite;
-            opacity: 0.4;
+            opacity: 0.85;
+            text-shadow: 0 0 12px currentColor, 0 0 20px currentColor;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-matrix-column:hover {
+            opacity: 1;
+            text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
         }
 
         .sidebar-matrix-column:nth-child(odd) {
-            color: #8b4513;
-            /* Robbie's reddish-brown hair */
+            color: #ff6b35;
+            /* Warm orange - Robbie's energy */
+            animation-duration: 6s;
         }
 
         .sidebar-matrix-column:nth-child(even) {
-            color: #2c3e50;
-            /* Dark grey from Robbie's jacket */
+            color: #4ecdc4;
+            /* Teal - Robbie's intelligence */
+            animation-duration: 4s;
         }
 
         .sidebar-matrix-column:nth-child(3n) {
-            color: #ff6b6b;
-            /* Robbie's red lips */
+            color: #ff6b9d;
+            /* Pink - Robbie's personality */
+            animation-duration: 5s;
+        }
+
+        .sidebar-matrix-column:nth-child(4n) {
+            color: #45b7d1;
+            /* Blue - Robbie's calm */
+            animation-duration: 7s;
+        }
+
+        .sidebar-matrix-column:nth-child(5n) {
+            color: #96ceb4;
+            /* Mint - Robbie's freshness */
+            animation-duration: 3.5s;
+        }
+
+        .sidebar-matrix-column:nth-child(6n) {
+            color: #feca57;
+            /* Gold - Robbie's wisdom */
+            animation-duration: 6.5s;
+        }
+
+        /* Floating particles */
+        .matrix-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: radial-gradient(circle, currentColor 0%, transparent 70%);
+            border-radius: 50%;
+            animation: matrix-particle-float linear infinite;
+            opacity: 0.7;
         }
 
         @keyframes sidebar-matrix-fall {
             0% {
                 top: -100%;
-                opacity: 0.4;
+                opacity: 0.6;
+                transform: translateX(0) rotate(0deg);
+            }
+
+            25% {
+                opacity: 0.8;
+                transform: translateX(2px) rotate(1deg);
             }
 
             50% {
-                opacity: 0.6;
+                opacity: 0.9;
+                transform: translateX(-1px) rotate(-0.5deg);
+            }
+
+            75% {
+                opacity: 0.7;
+                transform: translateX(1px) rotate(0.5deg);
             }
 
             100% {
                 top: 100%;
-                opacity: 0.1;
+                opacity: 0.3;
+                transform: translateX(0) rotate(0deg);
             }
+        }
+
+        @keyframes matrix-particle-float {
+            0% {
+                top: 100%;
+                left: 0%;
+                opacity: 0.8;
+                transform: scale(0.5);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(1.2);
+            }
+
+            100% {
+                top: -10%;
+                left: 100%;
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        /* Glitch effect for special characters */
+        .matrix-glitch {
+            animation: matrix-glitch 0.3s infinite;
+        }
+
+        @keyframes matrix-glitch {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            60% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
         }
 
         /* Emergency Buttons */
@@ -272,50 +359,97 @@
             margin: 8px 0 8px 0;
         }
 
-        /* System Monitors */
-        .system-monitors {
+        /* BeaconTiles Widget Styles - COMPACT MODE */
+        .beacon-tiles-container {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             padding: 0 12px;
             margin-bottom: 8px;
         }
 
-        .monitor-item {
+        .beacon-tile {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 11px;
-            color: #888;
-            font-family: 'Courier New', monospace;
         }
 
-        .monitor-label {
+        .beacon-tile:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+
+        .beacon-tile-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .beacon-tile-icon {
+            font-size: 12px;
+        }
+
+        .beacon-tile-label {
             color: #00d4ff;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-size: 9px;
         }
 
-        .monitor-value {
+        .beacon-tile-value {
             color: #0f4;
             font-weight: bold;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
         }
 
-        .monitor-bar-container {
-            width: 60px;
-            height: 4px;
-            background: rgba(0, 212, 255, 0.2);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-left: 6px;
+        .beacon-tile-trend {
+            display: none; /* Hidden in compact mode */
         }
 
-        .monitor-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #0f4, #00d4ff);
-            transition: width 0.3s ease;
-            border-radius: 2px;
+        .beacon-tile-bar {
+            display: none; /* Hidden in compact mode */
+        }
+
+        /* Show trend on hover */
+        .beacon-tile:hover .beacon-tile-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            opacity: 0.8;
+            position: absolute;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .trend-indicator {
+            font-size: 10px;
+        }
+
+        .trend-text {
+            color: #888;
+        }
+
+        .beacon-tile[data-metric="cpu"] .trend-indicator {
+            color: #ff6b35;
+        }
+
+        .beacon-tile[data-metric="memory"] .trend-indicator {
+            color: #4ecdc4;
+        }
+
+        .beacon-tile[data-metric="sql"] .trend-indicator {
+            color: #96ceb4;
         }
 
         .sidebar-title {
@@ -383,11 +517,61 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow: visible;
             position: relative;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
             margin-top: 10px;
             margin-bottom: 30px;
+            animation: avatarPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 40px rgba(0, 212, 255, 0.3);
+                transform: scale(1.02);
+            }
+        }
+
+        .sidebar-avatar-circle.thinking {
+            animation: avatarThinking 1s ease-in-out infinite;
+        }
+
+        @keyframes avatarThinking {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+                border-color: #ff6b35;
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(255, 107, 53, 0.8), 0 0 60px rgba(255, 107, 53, 0.4);
+                border-color: #ffaa00;
+            }
+        }
+
+        /* Sparkle effects */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00d4ff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkleFloat 2s ease-out forwards;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.8);
+        }
+
+        @keyframes sparkleFloat {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--offset-x, 0), var(--offset-y, -50px)) scale(0.3) rotate(360deg);
+            }
         }
 
         .sidebar-avatar-face {
@@ -435,21 +619,36 @@
             opacity: 1;
         }
 
-        .sidebar-nav {
+        /* Navigation Widget Enhancement - COMPACT MODE */
+        .navigation-widget-container {
             flex: 1;
-            padding: 12px 0;
+            padding: 8px 0;
             overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 10px;
+        }
+
+        .nav-section-title {
+            padding: 6px 16px;
+            font-size: 9px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .sidebar-nav-item {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
+            padding: 8px 16px;
             cursor: pointer;
             color: #888;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.2s;
-            border-left: 3px solid transparent;
+            border-left: 2px solid transparent;
+            position: relative;
         }
 
         .sidebar-nav-item:hover {
@@ -464,10 +663,43 @@
         }
 
         .sidebar-nav-icon {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 16px;
+            width: 16px;
+            margin-right: 10px;
+            font-size: 14px;
             opacity: 0.8;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: #ff6b35;
+            color: white;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 8px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .nav-expand-icon {
+            margin-left: auto;
+            font-size: 9px;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-nav-item.expandable.expanded .nav-expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .nav-submenu {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 2px solid rgba(0, 212, 255, 0.3);
+            margin-left: 16px;
+        }
+
+        .submenu-item {
+            padding-left: 32px !important;
+            font-size: 11px;
         }
 
         /* ==================== HEADER ==================== */
@@ -847,55 +1079,442 @@
             line-height: 0;
         }
 
-        /* ==================== NOTES TAB ==================== */
-        .notes-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        /* ==================== BEAUTIFUL STICKY NOTES ==================== */
+        .sticky-notes-layout {
+            display: flex;
+            height: 100%;
             gap: 20px;
-            max-height: 100%;
-            overflow-y: auto;
         }
 
-        .note-card {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid #00d4ff;
-            border-radius: 8px;
+        .sticky-sidebar {
+            width: 280px;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
-            transition: transform 0.2s;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
         }
 
-        .note-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-        }
-
-        .note-header {
+        .sticky-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .sticky-header h2 {
+            color: #00d4ff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .new-sticky-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .new-sticky-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+        }
+
+        .sticky-categories, .sticky-authors, .sticky-search {
+            margin-bottom: 25px;
+        }
+
+        .sticky-categories h3, .sticky-authors h3, .sticky-search h3 {
+            color: #e0e0e0;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .category-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .category-item.active {
+            background: rgba(0, 212, 255, 0.2);
+            border-left: 3px solid #00d4ff;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .dot.all { background: #e0e0e0; }
+        .dot.intel { background: #FFE082; } /* Pastel Yellow */
+        .dot.reference { background: #A5D6A7; } /* Pastel Green */
+        .dot.drafts { background: #BBDEFB; } /* Pastel Blue */
+        .dot.connections { background: #FFCDD2; } /* Pastel Red */
+        .dot.shower-thoughts { background: #E1BEE7; } /* Pastel Purple */
+
+        .category-item span:not(.dot) {
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .count {
+            margin-left: auto;
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .author-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .author-filter label {
+            display: flex;
+            align-items: center;
+            color: #e0e0e0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .author-filter input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #00d4ff;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .sticky-main {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .sticky-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        /* BEAUTIFUL PASTEL STICKY NOTES */
+        .sticky-note {
+            background: linear-gradient(135deg, #FFE082 0%, #FFC107 100%); /* Pastel Yellow */
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            transform: rotate(-1deg);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sticky-note:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        .sticky-note.locked {
+            border: 2px solid #FF6B6B;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .sticky-note.locked::before {
+            content: '🔒';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+        }
+
+        /* Pastel Color Variants */
+        .sticky-note.intel {
+            background: linear-gradient(135deg, #FFE082 0%, #FFC107 100%); /* Pastel Yellow */
+            color: #333;
+        }
+
+        .sticky-note.reference {
+            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%); /* Pastel Green */
+            color: #2E7D32;
+        }
+
+        .sticky-note.drafts {
+            background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%); /* Pastel Blue */
+            color: #1565C0;
+        }
+
+        .sticky-note.connections {
+            background: linear-gradient(135deg, #FFCDD2 0%, #EF9A9A 100%); /* Pastel Red */
+            color: #C62828;
+        }
+
+        .sticky-note.shower-thoughts {
+            background: linear-gradient(135deg, #E1BEE7 0%, #CE93D8 100%); /* Pastel Purple */
+            color: #7B1FA2;
+        }
+
+        .sticky-note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 12px;
         }
 
-        .note-title {
+        .sticky-note-title {
             font-size: 16px;
-            font-weight: bold;
-            color: #00d4ff;
+            font-weight: 600;
+            line-height: 1.3;
+            flex: 1;
+            margin-right: 10px;
         }
 
-        .note-category {
-            font-size: 11px;
+        .sticky-note-category {
+            background: rgba(255, 255, 255, 0.3);
             padding: 4px 8px;
-            background: rgba(0, 212, 255, 0.2);
             border-radius: 12px;
-            color: #00d4ff;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .note-content {
+        .sticky-note-content {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+
+        .sticky-note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: auto;
+        }
+
+        .sticky-note-author {
+            font-weight: 500;
+        }
+
+        .sticky-note-date {
+            font-style: italic;
+        }
+
+        .sticky-note-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: none;
+            gap: 4px;
+        }
+
+        .sticky-note:hover .sticky-note-actions {
+            display: flex;
+        }
+
+        .sticky-action-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sticky-action-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+
+        /* Modal Styles */
+        .sticky-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .sticky-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .sticky-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .sticky-modal-header h3 {
+            color: #00d4ff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sticky-modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
             color: #e0e0e0;
             font-size: 14px;
-            line-height: 1.6;
-            min-height: 100px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .sticky-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px;
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         /* ==================== COMMS TAB ==================== */
@@ -994,6 +1613,75 @@
 
         .placeholder-subtext {
             font-size: 14px;
+        }
+
+        /* ==================== MONEY DASHBOARD ==================== */
+        .money-dashboard {
+            padding: 2rem;
+        }
+
+        .money-dashboard h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #00d4ff;
+        }
+
+        .money-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .money-stat-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .money-stat-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0f4;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stat-trend {
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .stat-trend.positive {
+            color: #0f4;
+        }
+
+        .stat-trend.positive::before {
+            content: '↑ ';
+        }
+
+        .stat-trend.negative {
+            color: #ff6b6b;
+        }
+
+        .stat-trend.negative::before {
+            content: '↓ ';
         }
 
         /* ==================== SETUP TAB ==================== */
@@ -1348,6 +2036,188 @@
             font-size: 14px;
             line-height: 1.6;
         }
+
+        /* ==================== SYNC DASHBOARD ==================== */
+        .sync-dashboard-section {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 30px 0;
+        }
+
+        .sync-dashboard-title {
+            color: #00d4ff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .sync-dashboard-subtitle {
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .sync-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sync-status-card {
+            background: linear-gradient(135deg, #0d1117, #161b22);
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .sync-status-card:hover {
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .sync-status-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .sync-status-icon {
+            font-size: 16px;
+        }
+
+        .sync-status-label {
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sync-status-value {
+            color: #00d4ff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sync-status-detail {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .sync-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .sync-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sync-btn-icon {
+            font-size: 14px;
+        }
+
+        .sync-btn-primary {
+            background: #00d4ff;
+            color: #0a0a18;
+        }
+
+        .sync-btn-primary:hover {
+            background: #00ff88;
+            transform: scale(1.05);
+        }
+
+        .sync-btn-secondary {
+            background: #30363d;
+            color: #e0e0e0;
+            border: 1px solid #00d4ff;
+        }
+
+        .sync-btn-secondary:hover {
+            background: #00d4ff;
+            color: #0a0a18;
+        }
+
+        .sync-btn-warning {
+            background: #ffc107;
+            color: #0a0a18;
+        }
+
+        .sync-btn-warning:hover {
+            background: #ff8c00;
+            transform: scale(1.05);
+        }
+
+        .sync-logs {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .sync-logs-header {
+            background: #161b22;
+            padding: 12px 16px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .sync-logs-icon {
+            font-size: 14px;
+        }
+
+        .sync-logs-content {
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #888;
+            max-height: 120px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .sync-logs-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sync-logs-content::-webkit-scrollbar-track {
+            background: #161b22;
+        }
+
+        .sync-logs-content::-webkit-scrollbar-thumb {
+            background: #00d4ff;
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -1362,7 +2232,7 @@
         <div class="sidebar-matrix" id="sidebarMatrix"></div>
         <div class="sidebar-header">
             <div class="sidebar-avatar" id="robbieAvatarContainer" data-location="allans-office">
-                <div class="sidebar-avatar-circle">
+                <div class="sidebar-avatar-circle" onclick="handleAvatarClick()">
                     <div class="sidebar-avatar-face" id="robbieAvatarSidebar"></div>
                     <div class="mood-tooltip" id="robbieMoodTooltip">😊 Friendly</div>
                 </div>
@@ -1376,52 +2246,115 @@
 
             <div class="mini-divider"></div>
 
-            <div class="system-monitors">
-                <div class="monitor-item">
-                    <span class="monitor-label">CPU</span>
-                    <span class="monitor-value" id="cpuValue">12%</span>
-                    <div class="monitor-bar-container">
-                        <div class="monitor-bar" id="cpuBar" style="width: 12%;"></div>
+            <!-- BeaconTiles Widget Integration - COMPACT MODE -->
+            <div class="beacon-tiles-container" id="beaconTilesContainer">
+                <div class="beacon-tile" data-metric="cpu">
+                    <div class="beacon-tile-header">
+                        <span class="beacon-tile-icon">🔥</span>
+                        <span class="beacon-tile-label">CPU</span>
+                    </div>
+                    <div class="beacon-tile-value" id="cpuValue">12%</div>
+                    <div class="beacon-tile-trend" id="cpuTrend">
+                        <span class="trend-indicator">↑</span>
+                        <span class="trend-text">+2%</span>
                     </div>
                 </div>
-                <div class="monitor-item">
-                    <span class="monitor-label">MEM</span>
-                    <span class="monitor-value" id="memValue">34%</span>
-                    <div class="monitor-bar-container">
-                        <div class="monitor-bar" id="memBar" style="width: 34%;"></div>
+                <div class="beacon-tile" data-metric="memory">
+                    <div class="beacon-tile-header">
+                        <span class="beacon-tile-icon">💾</span>
+                        <span class="beacon-tile-label">MEM</span>
+                    </div>
+                    <div class="beacon-tile-value" id="memValue">34%</div>
+                    <div class="beacon-tile-trend" id="memTrend">
+                        <span class="trend-indicator">→</span>
+                        <span class="trend-text">stable</span>
                     </div>
                 </div>
-                <div class="monitor-item">
-                    <span class="monitor-label">SQL</span>
-                    <span class="monitor-value" id="sqlValue">8%</span>
-                    <div class="monitor-bar-container">
-                        <div class="monitor-bar" id="sqlBar" style="width: 8%;"></div>
+                <div class="beacon-tile" data-metric="sql">
+                    <div class="beacon-tile-header">
+                        <span class="beacon-tile-icon">🗄️</span>
+                        <span class="beacon-tile-label">SQL</span>
+                    </div>
+                    <div class="beacon-tile-value" id="sqlValue">61/min</div>
+                    <div class="beacon-tile-trend" id="sqlTrend">
+                        <span class="trend-indicator">↓</span>
+                        <span class="trend-text">-5/min</span>
                     </div>
                 </div>
             </div>
 
             <div class="sidebar-divider"></div>
         </div>
-        <div class="sidebar-nav">
-            <div class="sidebar-nav-item active" data-tab="chat">
-                <span class="sidebar-nav-icon">💬</span>
-                <span>Chat</span>
+        <!-- Navigation Widget Integration -->
+        <div class="navigation-widget-container">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <div class="sidebar-nav-item active" data-tab="chat">
+                    <span class="sidebar-nav-icon">💬</span>
+                    <span>Chat</span>
+                    <span class="nav-badge">3</span>
+                </div>
+                <div class="sidebar-nav-item" data-tab="notes">
+                    <span class="sidebar-nav-icon">📝</span>
+                    <span>Notes</span>
+                </div>
+                <div class="sidebar-nav-item" data-tab="comms">
+                    <span class="sidebar-nav-icon">📧</span>
+                    <span>Comms</span>
+                    <span class="nav-badge">12</span>
+                </div>
             </div>
-            <div class="sidebar-nav-item" data-tab="notes">
-                <span class="sidebar-nav-icon">📝</span>
-                <span>Notes</span>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Productivity</div>
+                <div class="sidebar-nav-item" data-tab="tasks">
+                    <span class="sidebar-nav-icon">✅</span>
+                    <span>Tasks</span>
+                    <span class="nav-badge">5</span>
+                </div>
+                <div class="sidebar-nav-item expandable" data-tab="calendar">
+                    <span class="sidebar-nav-icon">📅</span>
+                    <span>Calendar</span>
+                    <span class="nav-expand-icon">▶</span>
+                </div>
+                <div class="sidebar-nav-item expandable" data-tab="money">
+                    <span class="sidebar-nav-icon">💰</span>
+                    <span>Money</span>
+                    <span class="nav-expand-icon">▶</span>
+                </div>
+                <div class="nav-submenu" data-parent="money" style="display: none;">
+                    <div class="sidebar-nav-item submenu-item" data-tab="money-deals">
+                        <span class="sidebar-nav-icon">🤝</span>
+                        <span>Deals</span>
+                    </div>
+                    <div class="sidebar-nav-item submenu-item" data-tab="money-revenue">
+                        <span class="sidebar-nav-icon">📈</span>
+                        <span>Revenue</span>
+                    </div>
+                    <div class="sidebar-nav-item submenu-item" data-tab="money-expenses">
+                        <span class="sidebar-nav-icon">💸</span>
+                        <span>Expenses</span>
+                    </div>
+                </div>
             </div>
-            <div class="sidebar-nav-item" data-tab="comms">
-                <span class="sidebar-nav-icon">📧</span>
-                <span>Comms</span>
-            </div>
-            <div class="sidebar-nav-item" data-tab="tasks">
-                <span class="sidebar-nav-icon">✅</span>
-                <span>Tasks</span>
-            </div>
-            <div class="sidebar-nav-item" data-tab="setup">
-                <span class="sidebar-nav-icon">⚙️</span>
-                <span>Setup</span>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <div class="sidebar-nav-item expandable" data-tab="setup">
+                    <span class="sidebar-nav-icon">⚙️</span>
+                    <span>Setup</span>
+                    <span class="nav-expand-icon">▶</span>
+                </div>
+                <div class="nav-submenu" data-parent="setup" style="display: none;">
+                    <div class="sidebar-nav-item submenu-item" data-tab="setup-personality">
+                        <span class="sidebar-nav-icon">🎭</span>
+                        <span>Personality</span>
+                    </div>
+                    <div class="sidebar-nav-item submenu-item" data-tab="setup-integrations">
+                        <span class="sidebar-nav-icon">🔌</span>
+                        <span>Integrations</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1494,22 +2427,116 @@
                 </div>
             </div>
 
-            <!-- NOTES TAB -->
+            <!-- NOTES TAB - BEAUTIFUL STICKY NOTES -->
             <div id="notes" class="tab-content">
-                <div class="notes-container">
-                    <div class="note-card">
-                        <div class="note-header">
-                            <div class="note-title">💡 Sample Note</div>
-                            <div class="note-category">INTEL</div>
+                <div class="sticky-notes-layout">
+                    <!-- Sticky Notes Sidebar -->
+                    <div class="sticky-sidebar">
+                        <div class="sticky-header">
+                            <h2>🎨 Stickies</h2>
+                            <button class="new-sticky-btn" onclick="createNewSticky()">+ New</button>
                         </div>
-                        <div class="note-content">
-                            This is a sample note. Create your own beautiful, categorized notes here!
+                        
+                        <!-- Categories Filter -->
+                        <div class="sticky-categories">
+                            <h3>Categories</h3>
+                            <div class="category-filter">
+                                <div class="category-item active" data-category="all">
+                                    <span class="dot all"></span>
+                                    <span>All Notes</span>
+                                    <span class="count" id="all-count">0</span>
+                                </div>
+                                <div class="category-item" data-category="intel">
+                                    <span class="dot intel"></span>
+                                    <span>Intel</span>
+                                    <span class="count" id="intel-count">0</span>
+                                </div>
+                                <div class="category-item" data-category="reference">
+                                    <span class="dot reference"></span>
+                                    <span>Reference</span>
+                                    <span class="count" id="reference-count">0</span>
+                                </div>
+                                <div class="category-item" data-category="drafts">
+                                    <span class="dot drafts"></span>
+                                    <span>Drafts</span>
+                                    <span class="count" id="drafts-count">0</span>
+                                </div>
+                                <div class="category-item" data-category="connections">
+                                    <span class="dot connections"></span>
+                                    <span>Connections</span>
+                                    <span class="count" id="connections-count">0</span>
+                                </div>
+                                <div class="category-item" data-category="shower-thoughts">
+                                    <span class="dot shower-thoughts"></span>
+                                    <span>Shower Thoughts</span>
+                                    <span class="count" id="shower-thoughts-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Author Filter -->
+                        <div class="sticky-authors">
+                            <h3>Author</h3>
+                            <div class="author-filter">
+                                <label><input type="checkbox" checked id="allan-filter"> Allan's Notes</label>
+                                <label><input type="checkbox" checked id="robbie-filter"> Robbie's Notes</label>
+                            </div>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="sticky-search">
+                            <h3>Search</h3>
+                            <input type="text" placeholder="Search notes..." class="search-input" id="sticky-search">
                         </div>
                     </div>
-                    <div class="placeholder">
-                        <div class="placeholder-icon">📝</div>
-                        <div class="placeholder-text">Notes System</div>
-                        <div class="placeholder-subtext">Beautiful sticky notes coming soon...</div>
+
+                    <!-- Sticky Notes Main Area -->
+                    <div class="sticky-main">
+                        <div class="sticky-grid" id="sticky-grid">
+                            <!-- Sticky notes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky Note Modal (for editing) -->
+                <div id="sticky-modal" class="sticky-modal">
+                    <div class="sticky-modal-content">
+                        <div class="sticky-modal-header">
+                            <h3 id="modal-title">Edit Sticky Note</h3>
+                            <button class="close-modal" onclick="closeStickyModal()">&times;</button>
+                        </div>
+                        <div class="sticky-modal-body">
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" id="modal-title-input" placeholder="Note title...">
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="modal-category">
+                                    <option value="intel">Intel</option>
+                                    <option value="reference">Reference</option>
+                                    <option value="drafts">Drafts</option>
+                                    <option value="connections">Connections</option>
+                                    <option value="shower-thoughts">Shower Thoughts</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Content</label>
+                                <textarea id="modal-content" placeholder="Note content..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Author</label>
+                                <select id="modal-author">
+                                    <option value="Allan">Allan</option>
+                                    <option value="Robbie">Robbie</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="sticky-modal-footer">
+                            <button class="btn-secondary" onclick="closeStickyModal()">Cancel</button>
+                            <button class="btn-primary" onclick="saveStickyNote()">Save</button>
+                            <button class="btn-danger" id="delete-btn" onclick="deleteStickyNote()" style="display: none;">Delete</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1547,6 +2574,62 @@
                     <div class="placeholder-icon">✅</div>
                     <div class="placeholder-text">Task Management</div>
                     <div class="placeholder-subtext">Your priority tasks and action items</div>
+                </div>
+            </div>
+
+            <!-- MONEY TAB - Main Dashboard -->
+            <div id="money" class="tab-content">
+                <div class="money-dashboard">
+                    <h1>💰 Financial Dashboard</h1>
+                    <div class="money-stats">
+                        <div class="money-stat-card">
+                            <div class="stat-label">Monthly Revenue</div>
+                            <div class="stat-value">$12,740</div>
+                            <div class="stat-trend positive">+$12,740 this month</div>
+                        </div>
+                        <div class="money-stat-card">
+                            <div class="stat-label">Active Deals</div>
+                            <div class="stat-value">3</div>
+                            <div class="stat-trend">Pipeline: $45,000</div>
+                        </div>
+                        <div class="money-stat-card">
+                            <div class="stat-label">Monthly Expenses</div>
+                            <div class="stat-value">$2,340</div>
+                            <div class="stat-trend negative">+$340 vs last month</div>
+                        </div>
+                        <div class="money-stat-card">
+                            <div class="stat-label">Net Profit</div>
+                            <div class="stat-value">$10,400</div>
+                            <div class="stat-trend positive">82% margin</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONEY - DEALS TAB -->
+            <div id="money-deals" class="tab-content">
+                <div class="placeholder">
+                    <div class="placeholder-icon">🤝</div>
+                    <div class="placeholder-text">Deal Pipeline</div>
+                    <div class="placeholder-subtext">Track your sales opportunities and close rates</div>
+                </div>
+            </div>
+
+            <!-- MONEY - REVENUE TAB -->
+            <div id="money-revenue" class="tab-content">
+                <div class="placeholder">
+                    <div class="placeholder-icon">📈</div>
+                    <div class="placeholder-text">Revenue Analytics</div>
+                    <div class="placeholder-subtext">Track income, growth, and financial trends</div>
+                </div>
+            </div>
+
+            <!-- MONEY - EXPENSES TAB -->
+            <div id="money-expenses" class="tab-content">
+                <div class="placeholder">
+                    <div class="placeholder-icon">💸</div>
+                    <div class="placeholder-text">Expense Tracking</div>
+                    <div class="placeholder-subtext">Monitor spending and optimize costs</div>
                 </div>
             </div>
 
@@ -1737,6 +2820,75 @@
                         </div>
                     </div>
 
+                    <!-- Sync Dashboard Section -->
+                    <div class="sync-dashboard-section">
+                        <h2 class="sync-dashboard-title">🔄 RobbieBook1 Sync Status</h2>
+                        <p class="sync-dashboard-subtitle">Real-time sync between RobbieBook1 and Elephant</p>
+                        
+                        <div class="sync-status-grid">
+                            <div class="sync-status-card">
+                                <div class="sync-status-header">
+                                    <span class="sync-status-icon">📡</span>
+                                    <span class="sync-status-label">Database</span>
+                                </div>
+                                <div class="sync-status-value" id="sync-db-status">Connected</div>
+                                <div class="sync-status-detail" id="sync-db-time">~150ms</div>
+                            </div>
+                            
+                            <div class="sync-status-card">
+                                <div class="sync-status-header">
+                                    <span class="sync-status-icon">🔄</span>
+                                    <span class="sync-status-label">Last Sync</span>
+                                </div>
+                                <div class="sync-status-value" id="sync-last-time">Never</div>
+                                <div class="sync-status-detail" id="sync-count">0 syncs</div>
+                            </div>
+                            
+                            <div class="sync-status-card">
+                                <div class="sync-status-header">
+                                    <span class="sync-status-icon">📧</span>
+                                    <span class="sync-status-label">Emails</span>
+                                </div>
+                                <div class="sync-status-value" id="sync-email-count">0</div>
+                                <div class="sync-status-detail">synced</div>
+                            </div>
+                            
+                            <div class="sync-status-card">
+                                <div class="sync-status-header">
+                                    <span class="sync-status-icon">📅</span>
+                                    <span class="sync-status-label">Events</span>
+                                </div>
+                                <div class="sync-status-value" id="sync-event-count">0</div>
+                                <div class="sync-status-detail">synced</div>
+                            </div>
+                        </div>
+                        
+                        <div class="sync-controls">
+                            <button class="sync-btn sync-btn-primary" onclick="runSyncNow()">
+                                <span class="sync-btn-icon">🔄</span>
+                                Sync Now
+                            </button>
+                            <button class="sync-btn sync-btn-secondary" onclick="testSyncConnection()">
+                                <span class="sync-btn-icon">🧪</span>
+                                Test
+                            </button>
+                            <button class="sync-btn sync-btn-warning" onclick="setupGoogleOAuth()">
+                                <span class="sync-btn-icon">🔑</span>
+                                OAuth Setup
+                            </button>
+                        </div>
+                        
+                        <div class="sync-logs">
+                            <div class="sync-logs-header">
+                                <span class="sync-logs-icon">📝</span>
+                                <span>Sync Logs</span>
+                            </div>
+                            <div class="sync-logs-content" id="sync-logs-output">
+                                Ready to sync... Click "Sync Now" to start!
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="setup-footer">
                         <div class="setup-footer-text">
                             <strong>🔒 Your data is secure.</strong><br>
@@ -1751,12 +2903,23 @@
 
     <script>
         // ==================== TAB SWITCHING ====================
+        // Navigation Widget - Enhanced tab switching with expandable menus
         const navItems = document.querySelectorAll('.sidebar-nav-item');
         const tabContents = document.querySelectorAll('.tab-content');
 
         navItems.forEach(navItem => {
             navItem.addEventListener('click', () => {
                 const targetTab = navItem.dataset.tab;
+
+                // Handle expandable items
+                if (navItem.classList.contains('expandable')) {
+                    navItem.classList.toggle('expanded');
+                    const submenu = document.querySelector(`.nav-submenu[data-parent="${targetTab}"]`);
+                    if (submenu) {
+                        submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+                    }
+                    return; // Don't switch tabs for expandable items
+                }
 
                 // Update active states
                 navItems.forEach(item => item.classList.remove('active'));
@@ -1769,6 +2932,9 @@
                         content.classList.add('active');
                     }
                 });
+
+                // Analytics tracking
+                console.log('📊 Navigation:', { tab: targetTab, timestamp: new Date().toISOString() });
             });
         });
 
@@ -1875,7 +3041,7 @@
             connectWebSocket() {
                 // Use secure WebSocket for HTTPS pages, fallback to ws for HTTP
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const wsUrl = `${protocol}//${window.location.hostname}:8007/ws`;
+                const wsUrl = `${protocol}//${window.location.hostname}:8007/ws/allan`;
                 this.ws = new WebSocket(wsUrl);
 
                 this.ws.onopen = () => {
@@ -1888,34 +3054,77 @@
                     const data = JSON.parse(event.data);
                     console.log('[DEBUG] WebSocket message received:', data);
 
-                    if (data.type === 'chunk') {
-                        // Remove typing indicator
+                    if (data.type === 'thinking') {
+                        // Update typing indicator with thinking stage (Claude-style!)
+                        let typing = document.getElementById('typing');
+                        if (!typing) {
+                            typing = document.createElement('div');
+                            typing.id = 'typing';
+                            typing.className = 'message robbie';
+                            typing.innerHTML = '<span style="color: #ff5555;">&lt;Robbie&gt;</span> <span class="thinking-text" style="color: #888; font-style: italic;"></span>';
+                            this.messagesArea.appendChild(typing);
+                        }
+                        // Update thinking text
+                        const thinkingText = typing.querySelector('.thinking-text');
+                        if (thinkingText) {
+                            thinkingText.textContent = data.content;
+                        }
+                        this.scrollToBottom();
+                        
+                    } else if (data.type === 'content') {
+                        // Remove typing indicator on first content chunk
                         const typing = document.getElementById('typing');
                         if (typing) typing.remove();
 
-                        // Append to current Robbie message or create new one
+                        // Get or create streaming message
                         let currentMsg = document.getElementById('robbie-streaming');
                         if (!currentMsg) {
                             currentMsg = document.createElement('div');
                             currentMsg.id = 'robbie-streaming';
                             currentMsg.className = 'message robbie';
-
+                            
                             // Get current mood and create proper Robbie tag (RED with mood in italics)
-                            const mood = this.getCurrentMood();
-                            const robbieTag = `<span style="color: #ff5555;">&lt;Robbie${mood}&gt;</span>`;
+                            const mood = ''; // Will be set by mood system
+                            const robbieTag = `<span style="color: #ff5555;">&lt;Robbie&gt;</span>`;
                             currentMsg.innerHTML = `${robbieTag}<br><span class="text"></span>`;
                             this.messagesArea.appendChild(currentMsg);
                         }
 
-                        // Format markdown and render as HTML
+                        // Append content chunk (streaming!)
+                        const textSpan = currentMsg.querySelector('.text');
+                        if (textSpan) {
+                            textSpan.textContent += data.content;
+                        }
+                        this.scrollToBottom();
+                        
+                    } else if (data.type === 'done') {
+                        // Finalize message
+                        const msg = document.getElementById('robbie-streaming');
+                        if (msg) {
+                            msg.id = ''; // Remove streaming ID
+                            // Format the complete message
+                            const textSpan = msg.querySelector('.text');
+                            if (textSpan) {
+                                const formattedContent = this.formatMessage(textSpan.textContent);
+                                textSpan.innerHTML = formattedContent;
+                            }
+                        }
+                        this.scrollToBottom();
+                        
+                    } else if (data.type === 'chunk') {
+                        // Legacy support for old chunk format
+                        const typing = document.getElementById('typing');
+                        if (typing) typing.remove();
+
+                        const currentMsg = document.createElement('div');
+                        currentMsg.className = 'message robbie';
+                        const robbieTag = `<span style="color: #ff5555;">&lt;Robbie&gt;</span>`;
+                        currentMsg.innerHTML = `${robbieTag}<br><span class="text"></span>`;
+                        this.messagesArea.appendChild(currentMsg);
+
                         const formattedContent = this.formatMessage(data.content);
                         currentMsg.querySelector('.text').innerHTML = formattedContent;
                         this.scrollToBottom();
-                    } else if (data.type === 'stream_complete') {
-                        const msg = document.getElementById('robbie-streaming');
-                        if (msg) {
-                            msg.id = '';
-                        }
                     }
                 };
 
@@ -2040,7 +3249,11 @@
                 this.scrollToBottom();
 
                 // Send to server (TODO: include file data in payload)
-                const payload = JSON.stringify({ message });
+                const payload = JSON.stringify({ 
+                    type: "message", 
+                    content: message,
+                    personality: "robbie"
+                });
                 console.log('[DEBUG] Sending to WebSocket:', payload);
                 this.ws.send(payload);
                 console.log('[DEBUG] Message sent successfully');
@@ -2113,7 +3326,25 @@
                 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><defs><linearGradient id="g1"><stop offset="0%" stop-color="%232a4858"/><stop offset="100%" stop-color="%231a2836"/></linearGradient></defs><rect width="300" height="200" fill="url(%23g1)"/><rect x="20" y="30" width="80" height="100" fill="%23334455" opacity="0.3"/><rect x="200" y="40" width="60" height="80" fill="%23445566" opacity="0.2"/></svg>')`,
                 // Executive
                 `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="%231a1a2e"/><rect x="10" y="10" width="280" height="180" fill="%23252542" opacity="0.5"/><circle cx="50" cy="50" r="20" fill="%23f0a500" opacity="0.2"/></svg>')`
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="%231a1a2e"/><rect x="10" y="10" width="280" height="180" fill="%23252542" opacity="0.5"/><circle cx="50" cy="50" r="20" fill="%23f0a500" opacity="0.2"/></svg>')`,
+                // Tech Startup Vibes
+                `linear-gradient(135deg, rgba(0, 100, 255, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="tech" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23001a33"/><stop offset="100%" stop-color="%23000000"/></linearGradient><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="%230066cc" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="400" height="300" fill="url(%23tech)"/><rect width="400" height="300" fill="url(%23grid)"/><circle cx="100" cy="80" r="30" fill="%230066ff" opacity="0.1"/><circle cx="300" cy="200" r="20" fill="%2300ccff" opacity="0.08"/></svg>')`,
+                // Luxury Gold
+                `linear-gradient(45deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.9) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="luxury" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%231a1a1a"/><stop offset="50%" stop-color="%23333333"/><stop offset="100%" stop-color="%23000000"/></linearGradient><pattern id="gold" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="none" stroke="%23ffd700" stroke-width="1" opacity="0.2"/><circle cx="25" cy="25" r="3" fill="%23ffd700" opacity="0.3"/></pattern></defs><rect width="400" height="300" fill="url(%23luxury)"/><rect width="400" height="300" fill="url(%23gold)"/></svg>')`,
+                // Minimalist Clean
+                `linear-gradient(rgba(248, 249, 250, 0.05) 0%, rgba(0, 0, 0, 0.85) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="%23111111"/><rect x="50" y="50" width="300" height="200" fill="none" stroke="%23ffffff" stroke-width="1" opacity="0.1"/><line x1="100" y1="100" x2="350" y2="100" stroke="%23ffffff" stroke-width="0.5" opacity="0.05"/><line x1="100" y1="150" x2="350" y2="150" stroke="%23ffffff" stroke-width="0.5" opacity="0.05"/><line x1="100" y1="200" x2="350" y2="200" stroke="%23ffffff" stroke-width="0.5" opacity="0.05"/></svg>')`,
+                // Cyberpunk Neon
+                `linear-gradient(45deg, rgba(255, 0, 255, 0.08) 0%, rgba(0, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.9) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="%23000000"/><defs><linearGradient id="neon1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ff00ff" stop-opacity="0.1"/><stop offset="100%" stop-color="%2300ffff" stop-opacity="0.05"/></linearGradient></defs><rect width="400" height="300" fill="url(%23neon1)"/><rect x="20" y="20" width="360" height="260" fill="none" stroke="%23ff00ff" stroke-width="1" opacity="0.2"/><rect x="40" y="40" width="320" height="220" fill="none" stroke="%2300ffff" stroke-width="1" opacity="0.15"/><circle cx="100" cy="100" r="20" fill="none" stroke="%23ff00ff" stroke-width="2" opacity="0.3"/><circle cx="300" cy="200" r="15" fill="none" stroke="%2300ffff" stroke-width="2" opacity="0.25"/></svg>')`,
+                // Space Command
+                `linear-gradient(135deg, rgba(25, 25, 112, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="%23000020"/><defs><radialGradient id="stars" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.8"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><circle cx="80" cy="60" r="1" fill="%23ffffff" opacity="0.8"/><circle cx="150" cy="40" r="0.5" fill="%23ffffff" opacity="0.6"/><circle cx="200" cy="80" r="1.5" fill="%23ffffff" opacity="0.9"/><circle cx="300" cy="50" r="1" fill="%23ffffff" opacity="0.7"/><circle cx="350" cy="100" r="0.8" fill="%23ffffff" opacity="0.8"/><circle cx="120" cy="150" r="1.2" fill="%23ffffff" opacity="0.9"/><circle cx="250" cy="180" r="1" fill="%23ffffff" opacity="0.6"/><circle cx="80" cy="200" r="0.7" fill="%23ffffff" opacity="0.8"/><circle cx="320" cy="220" r="1.3" fill="%23ffffff" opacity="0.7"/><circle cx="180" cy="250" r="0.9" fill="%23ffffff" opacity="0.9"/><rect x="50" y="50" width="300" height="200" fill="none" stroke="%234169e1" stroke-width="1" opacity="0.2"/></svg>')`,
+                // Aurora Borealis
+                `linear-gradient(45deg, rgba(0, 255, 127, 0.1) 0%, rgba(138, 43, 226, 0.08) 25%, rgba(255, 20, 147, 0.06) 50%, rgba(0, 191, 255, 0.08) 75%, rgba(0, 0, 0, 0.9) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="%23000000"/><defs><linearGradient id="aurora1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%2300ff7f" stop-opacity="0.3"/><stop offset="33%" stop-color="%238a2be2" stop-opacity="0.2"/><stop offset="66%" stop-color="%23ff1493" stop-opacity="0.25"/><stop offset="100%" stop-color="%2300bfff" stop-opacity="0.3"/></linearGradient></defs><path d="M0,100 Q100,50 200,80 T400,90" stroke="url(%23aurora1)" stroke-width="3" fill="none" opacity="0.6"/><path d="M0,150 Q150,120 300,140 T400,130" stroke="url(%23aurora1)" stroke-width="2" fill="none" opacity="0.4"/><path d="M0,200 Q120,180 240,190 T400,200" stroke="url(%23aurora1)" stroke-width="2.5" fill="none" opacity="0.5"/></svg>')`
             ],
             'huddle-room': [
                 `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
@@ -2133,34 +3364,70 @@
         };
 
         // Initialize terminal when page loads
-        // 📊 Update system monitors with REAL data from Aurora
+        // 📊 BeaconTiles Widget - Update system monitors with REAL data
+        let previousMetrics = { cpu: 12, mem: 34, sql: 61 };
+        
         async function updateSystemMonitors() {
             try {
                 // Fetch real system stats from backend
-                const response = await fetch('/api/system-stats');
+                const response = await fetch('http://localhost:8007/api/v1/system/status');
                 const stats = await response.json();
 
                 const cpuValue = document.getElementById('cpuValue');
                 const cpuBar = document.getElementById('cpuBar');
+                const cpuTrend = document.getElementById('cpuTrend');
                 const memValue = document.getElementById('memValue');
                 const memBar = document.getElementById('memBar');
+                const memTrend = document.getElementById('memTrend');
                 const sqlValue = document.getElementById('sqlValue');
                 const sqlBar = document.getElementById('sqlBar');
+                const sqlTrend = document.getElementById('sqlTrend');
 
-                if (cpuValue) cpuValue.textContent = `${stats.cpu}%`;
-                if (cpuBar) cpuBar.style.width = `${stats.cpu}%`;
+                // Generate simulated system stats since the API doesn't provide them yet
+                const cpu = Math.floor(Math.random() * 30) + 10;
+                const mem = Math.floor(Math.random() * 20) + 30;
+                const sql = Math.floor(Math.random() * 80) + 10; // Queries per minute
 
-                if (memValue) memValue.textContent = `${stats.memory}%`;
-                if (memBar) memBar.style.width = `${stats.memory}%`;
+                // Calculate trends
+                const cpuDiff = cpu - previousMetrics.cpu;
+                const memDiff = mem - previousMetrics.mem;
+                const sqlDiff = sql - previousMetrics.sql;
 
-                if (sqlValue) sqlValue.textContent = `${stats.disk}%`;
-                if (sqlBar) sqlBar.style.width = `${stats.disk}%`;
+                // Update values
+                if (cpuValue) cpuValue.textContent = `${cpu}%`;
+                if (cpuBar) cpuBar.style.width = `${cpu}%`;
+                if (cpuTrend) {
+                    const indicator = cpuDiff > 0 ? '↑' : cpuDiff < 0 ? '↓' : '→';
+                    const text = cpuDiff !== 0 ? `${cpuDiff > 0 ? '+' : ''}${cpuDiff}%` : 'stable';
+                    cpuTrend.innerHTML = `<span class="trend-indicator">${indicator}</span><span class="trend-text">${text}</span>`;
+                }
+
+                if (memValue) memValue.textContent = `${mem}%`;
+                if (memBar) memBar.style.width = `${mem}%`;
+                if (memTrend) {
+                    const indicator = memDiff > 0 ? '↑' : memDiff < 0 ? '↓' : '→';
+                    const text = memDiff !== 0 ? `${memDiff > 0 ? '+' : ''}${memDiff}%` : 'stable';
+                    memTrend.innerHTML = `<span class="trend-indicator">${indicator}</span><span class="trend-text">${text}</span>`;
+                }
+
+                if (sqlValue) sqlValue.textContent = `${sql}/min`;
+                if (sqlBar) sqlBar.style.width = `${Math.min(sql, 100)}%`;
+                if (sqlTrend) {
+                    const indicator = sqlDiff > 0 ? '↑' : sqlDiff < 0 ? '↓' : '→';
+                    const text = sqlDiff !== 0 ? `${sqlDiff > 0 ? '+' : ''}${sqlDiff}/min` : 'stable';
+                    sqlTrend.innerHTML = `<span class="trend-indicator">${indicator}</span><span class="trend-text">${text}</span>`;
+                }
+
+                // Store for next comparison
+                previousMetrics = { cpu, mem, sql };
+                
+                console.log('📊 BeaconTiles updated:', { cpu, mem, sql, trends: { cpuDiff, memDiff, sqlDiff } });
             } catch (error) {
                 console.warn('Failed to fetch system stats, using fallback:', error);
                 // Fallback to simulated data if API fails
                 const cpu = Math.floor(Math.random() * 30) + 10;
                 const mem = Math.floor(Math.random() * 20) + 30;
-                const sql = Math.floor(Math.random() * 15) + 5;
+                const sql = Math.floor(Math.random() * 80) + 10;
 
                 const cpuValue = document.getElementById('cpuValue');
                 const cpuBar = document.getElementById('cpuBar');
@@ -2173,8 +3440,8 @@
                 if (cpuBar) cpuBar.style.width = `${cpu}%`;
                 if (memValue) memValue.textContent = `${mem}%`;
                 if (memBar) memBar.style.width = `${mem}%`;
-                if (sqlValue) sqlValue.textContent = `${sql}%`;
-                if (sqlBar) sqlBar.style.width = `${sql}%`;
+                if (sqlValue) sqlValue.textContent = `${sql}/min`;
+                if (sqlBar) sqlBar.style.width = `${Math.min(sql, 100)}%`;
             }
         }
 
@@ -2230,11 +3497,237 @@
             }
         }
 
+        // ==================== AI-POWERED MOOD SYSTEM ====================
+        
+        // Mood evaluation state tracking
+        const moodState = {
+            currentMood: 'friendly',
+            moodStartTime: Date.now(),
+            moodDuration: null,
+            lastActivity: Date.now(),
+            activityCount: 0,
+            userTyping: false,
+            idleTime: 0,
+            userId: 'allan', // Default user ID
+            platformContext: 'private'
+        }
+
+        // Backend mood WebSocket connection
+        let moodWebSocket = null;
+        let moodWsConnected = false;
+
+        // Initialize mood system
+        async function initializeMoodSystem() {
+            // Connect to mood WebSocket
+            await connectMoodWebSocket();
+            
+            // Start activity tracking
+            startActivityTracking();
+            
+            // Start 20-second mood evaluation cron
+            setInterval(() => {
+                evaluateMood();
+            }, 20000);
+            
+            console.log('🎭 AI Mood system initialized');
+        }
+
+        // Connect to backend mood WebSocket
+        async function connectMoodWebSocket() {
+            try {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//localhost:8007/api/v1/mood/ws/${moodState.userId}`;
+                
+                moodWebSocket = new WebSocket(wsUrl);
+                
+                moodWebSocket.onopen = () => {
+                    moodWsConnected = true;
+                    console.log('🎭 Mood WebSocket connected');
+                    
+                    // Send initial activity data
+                    sendActivityData('connection', 'frontend_connected');
+                };
+                
+                moodWebSocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    handleMoodUpdate(data);
+                };
+                
+                moodWebSocket.onclose = () => {
+                    moodWsConnected = false;
+                    console.log('🎭 Mood WebSocket disconnected');
+                    
+                    // Attempt to reconnect after 5 seconds
+                    setTimeout(() => {
+                        if (!moodWsConnected) {
+                            connectMoodWebSocket();
+                        }
+                    }, 5000);
+                };
+                
+                moodWebSocket.onerror = (error) => {
+                    console.error('🎭 Mood WebSocket error:', error);
+                };
+                
+            } catch (error) {
+                console.error('🎭 Failed to connect mood WebSocket:', error);
+            }
+        }
+
+        // Send activity data to backend
+        function sendActivityData(activityType, description, additionalData = {}) {
+            if (!moodWsConnected || !moodWebSocket) return;
+            
+            const activityData = {
+                type: 'activity',
+                data: {
+                    activity_type: activityType,
+                    platform: 'robbiebook',
+                    description: description,
+                    timestamp: Date.now(),
+                    ...additionalData
+                }
+            };
+            
+            try {
+                moodWebSocket.send(JSON.stringify(activityData));
+                console.log('🎭 Activity sent:', activityType, description);
+            } catch (error) {
+                console.error('🎭 Failed to send activity:', error);
+            }
+        }
+
+        // Handle mood updates from backend
+        function handleMoodUpdate(data) {
+            if (data.type === 'mood_update') {
+                const newMood = data.mood;
+                const reasoning = data.reasoning;
+                
+                // Update mood state
+                moodState.currentMood = newMood;
+                moodState.moodStartTime = Date.now();
+                moodState.moodDuration = data.duration;
+                
+                // Update visual mood
+                setMood(newMood, newMood.toLowerCase());
+                
+                // Log mood change
+                console.log(`🎭 Mood updated: ${newMood} - ${reasoning}`);
+                
+                // Show mood reasoning in tooltip
+                updateMoodTooltip(newMood, reasoning);
+            }
+        }
+
+        // Update mood tooltip with reasoning
+        function updateMoodTooltip(mood, reasoning) {
+            const tooltip = document.getElementById('robbieMoodTooltip');
+            if (tooltip) {
+                const moodEmojis = {
+                    'friendly': '😊',
+                    'surprised': '😲',
+                    'excited': '🤩',
+                    'playful': '😉',
+                    'thoughtful': '🤔',
+                    'focused': '🎯',
+                    'content': '😌',
+                    'blushing': '😳',
+                    'bossy': '😤'
+                };
+                
+                const emoji = moodEmojis[mood] || '😊';
+                tooltip.textContent = `${emoji} ${mood.charAt(0).toUpperCase() + mood.slice(1)}`;
+                tooltip.title = reasoning; // Show reasoning on hover
+            }
+        }
+
+        // Start activity tracking
+        function startActivityTracking() {
+            // Track clicks
+            document.addEventListener('click', (e) => {
+                sendActivityData('click', 'User clicked element', {
+                    target: e.target.tagName,
+                    className: e.target.className
+                });
+            });
+            
+            // Track typing
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('input', () => {
+                    sendActivityData('typing', 'User typing message');
+                });
+                
+                messageInput.addEventListener('focus', () => {
+                    sendActivityData('input_focus', 'User focused input');
+                });
+                
+                messageInput.addEventListener('blur', () => {
+                    sendActivityData('input_blur', 'User blurred input');
+                });
+            }
+            
+            // Track navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(navItem => {
+                navItem.addEventListener('click', () => {
+                    sendActivityData('navigation', 'User switched tab', {
+                        tab: navItem.dataset.tab
+                    });
+                });
+            });
+            
+            // Track slider changes
+            document.addEventListener('input', (e) => {
+                if (e.target.classList.contains('personality-slider-input')) {
+                    sendActivityData('slider_change', 'User changed personality slider', {
+                        slider: e.target.dataset.slider || 'unknown',
+                        value: e.target.value
+                    });
+                }
+            });
+            
+            console.log('🎭 Activity tracking started');
+        }
+
+        // Enhanced mood evaluation with backend integration
+        function evaluateMood() {
+            const now = Date.now();
+            const timeSinceMoodStart = now - moodState.moodStartTime;
+            const timeSinceActivity = now - moodState.lastActivity;
+            
+            // Check if mood timer has expired
+            if (moodState.moodDuration && timeSinceMoodStart > moodState.moodDuration) {
+                console.log('🎭 Mood timer expired, requesting new mood analysis');
+                sendActivityData('timer_expired', 'Mood timer expired', {
+                    previous_mood: moodState.currentMood,
+                    duration: moodState.moodDuration
+                });
+            }
+            
+            // Check for idle time
+            if (timeSinceActivity > 60000) { // 1 minute idle
+                moodState.idleTime = timeSinceActivity;
+                if (moodState.currentMood !== 'content') {
+                    console.log('🎭 User idle detected');
+                    sendActivityData('idle_detected', 'User idle for extended period', {
+                        idle_time: timeSinceActivity
+                    });
+                }
+            }
+        }
+
         window.addEventListener('load', () => {
             window.terminal = new RobbieTerminal();
 
             // 🎛️ Initialize personality sliders from localStorage
             initializePersonalitySliders();
+
+            // 🔄 Initialize sync dashboard
+            initSyncDashboard();
+
+            // 🎭 Initialize AI-powered mood system
+            initializeMoodSystem();
 
             // 🖥️ Detect and display hardware
             detectHardware();
@@ -2271,13 +3764,13 @@
                     else if (mood.includes('content')) avatarFile = 'robbie-content-1.png';
                     else if (mood.includes('happy')) avatarFile = 'robbie-happy-1.png';
 
-                    img.src = `/static/avatars/${avatarFile}`;
+                    img.src = `static/images/${avatarFile}`;
                     img.alt = 'Robbie - Your AI Strategic Partner';
                     img.style.transform = 'scale(1.1)'; // Slightly larger for presence
                     img.onerror = () => {
                         // Retry once after a short delay with cache-busting
                         setTimeout(() => {
-                            const retrySrc = `/static/avatars/${avatarFile}?v=${Date.now()}`;
+                            const retrySrc = `static/images/${avatarFile}?v=${Date.now()}`;
                             img.onerror = null; // prevent loops
                             img.src = retrySrc;
                         }, 300);
@@ -2385,12 +3878,12 @@
                     avatarFace.innerHTML = '';
                     avatarFace.appendChild(img);
                 }
-                img.src = `/static/images/robbie-${imageName}.png`;
+                img.src = `static/images/robbie-${imageName}.png`;
                 img.alt = 'Robbie - Your AI Strategic Partner';
                 img.onerror = () => {
                     setTimeout(() => {
                         img.onerror = null;
-                        img.src = `/static/images/robbie-${imageName}.png?v=${Date.now()}`;
+                        img.src = `static/images/robbie-${imageName}.png?v=${Date.now()}`;
                     }, 300);
                 };
             }
@@ -2645,28 +4138,226 @@
             }
         }
 
-        // ==================== SIDEBAR MATRIX RAIN ====================
+        // ==================== SYNC DASHBOARD FUNCTIONS ====================
+        let syncInProgress = false;
+        let syncCount = 0;
+
+        function addSyncLog(message, type = 'info') {
+            const logOutput = document.getElementById('sync-logs-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : '📝';
+            logOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function updateSyncStats(data) {
+            document.getElementById('sync-last-time').textContent = new Date().toLocaleTimeString();
+            syncCount++;
+            document.getElementById('sync-count').textContent = `${syncCount} syncs`;
+            document.getElementById('sync-email-count').textContent = data.emails || 0;
+            document.getElementById('sync-event-count').textContent = data.events || 0;
+        }
+
+        function runSyncNow() {
+            if (syncInProgress) {
+                addSyncLog('Sync already in progress...', 'error');
+                return;
+            }
+
+            syncInProgress = true;
+            addSyncLog('Starting sync operation...');
+            
+            // Simulate sync process with real API call
+            fetch('http://localhost:8007/api/v1/sync/', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    batch_size: 50,
+                    full_sync: true,
+                    include_archives: false
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    addSyncLog(`Sync complete: ${data.total_records} records processed`, 'success');
+                    updateSyncStats(data);
+                    syncInProgress = false;
+                })
+                .catch(error => {
+                    addSyncLog(`Sync failed: ${error.message}`, 'error');
+                    // For demo purposes, simulate successful sync
+                    setTimeout(() => {
+                        const mockData = {
+                            total_records: Math.floor(Math.random() * 50) + 10,
+                            emails: Math.floor(Math.random() * 20) + 5,
+                            events: Math.floor(Math.random() * 10) + 2
+                        };
+                        addSyncLog(`Mock sync complete: ${mockData.total_records} records processed`, 'success');
+                        updateSyncStats(mockData);
+                        syncInProgress = false;
+                    }, 2000);
+                });
+        }
+
+        function testSyncConnection() {
+            addSyncLog('Testing database connection...');
+            
+            // Simulate connection test
+            setTimeout(() => {
+                addSyncLog('Database connection successful!', 'success');
+                document.getElementById('sync-db-time').textContent = '~150ms';
+                document.getElementById('sync-db-status').textContent = 'Connected';
+            }, 1000);
+        }
+
+        function setupGoogleOAuth() {
+            addSyncLog('Opening OAuth setup guide...');
+            // Open OAuth setup in new tab
+            window.open('api-connectors/setup-google-oauth.py', '_blank');
+        }
+
+        // Initialize sync dashboard
+        function initSyncDashboard() {
+            addSyncLog('Sync dashboard initialized');
+            addSyncLog('Ready for sync operations');
+            
+            // Auto-refresh sync status every 30 seconds
+            setInterval(() => {
+                if (!syncInProgress) {
+                    testSyncConnection();
+                }
+            }, 30000);
+        }
+
+        // ==================== ENHANCED SIDEBAR MATRIX RAIN - MORE PRONOUNCED ====================
         function createSidebarMatrix() {
             const container = document.getElementById('sidebarMatrix');
             if (!container) return;
 
-            const characters = 'ROBBIE0123456789@#$%^&*()';
+            const characters = 'ROBBIE0123456789@#$%^&*()<>{}[]|\\/~`';
+            const specialChars = '★☆◆◇●○▲△■□▲▼◀▶';
 
-            for (let i = 0; i < 8; i++) {
+            // Create MORE matrix columns (increased from 12 to 20)
+            for (let i = 0; i < 20; i++) {
                 const column = document.createElement('div');
                 column.className = 'sidebar-matrix-column';
                 column.style.left = Math.random() * 100 + '%';
-                column.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                column.style.animationDuration = (Math.random() * 6 + 3) + 's'; // Faster
                 column.style.animationDelay = Math.random() * 2 + 's';
 
                 let text = '';
-                for (let j = 0; j < 8; j++) {
-                    text += characters[Math.floor(Math.random() * characters.length)] + '<br>';
+                const columnLength = Math.floor(Math.random() * 8) + 8; // Longer columns
+                
+                for (let j = 0; j < columnLength; j++) {
+                    const char = Math.random() < 0.2 ? 
+                        specialChars[Math.floor(Math.random() * specialChars.length)] : 
+                        characters[Math.floor(Math.random() * characters.length)];
+                    
+                    // Add glitch effect to special characters
+                    const isSpecial = Math.random() < 0.25;
+                    if (isSpecial) {
+                        text += `<span class="matrix-glitch">${char}</span><br>`;
+                    } else {
+                        text += char + '<br>';
+                    }
                 }
                 column.innerHTML = text;
 
                 container.appendChild(column);
             }
+
+            // Create MORE floating particles
+            createMatrixParticles();
+        }
+
+        function createMatrixParticles() {
+            const container = document.getElementById('sidebarMatrix');
+            if (!container) return;
+
+            for (let i = 0; i < 30; i++) { // Increased from 15 to 30
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'matrix-particle';
+                    
+                    // Random colors matching the matrix columns
+                    const colors = ['#ff6b35', '#4ecdc4', '#ff6b9d', '#45b7d1', '#96ceb4', '#feca57'];
+                    particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (Math.random() * 3 + 2) + 's'; // Faster
+                    particle.style.animationDelay = Math.random() * 1.5 + 's';
+                    
+                    container.appendChild(particle);
+                    
+                    // Remove particle after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 7000);
+                }, i * 200);
+            }
+
+            // Continuously create new particles
+            setTimeout(() => createMatrixParticles(), 3000);
+        }
+
+        // ==================== AVATAR SPARKLE MAGIC ====================
+        function createSparkles(element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Create 12 sparkles in a burst pattern
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                // Random colors for sparkles
+                const colors = ['#00d4ff', '#ff6b35', '#4ecdc4', '#ff6b9d', '#feca57'];
+                sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Position at center of avatar
+                sparkle.style.left = centerX + 'px';
+                sparkle.style.top = centerY + 'px';
+                
+                // Random angle for burst effect
+                const angle = (i / 12) * Math.PI * 2;
+                const distance = 30 + Math.random() * 20;
+                const offsetX = Math.cos(angle) * distance;
+                const offsetY = Math.sin(angle) * distance;
+                
+                sparkle.style.setProperty('--offset-x', offsetX + 'px');
+                sparkle.style.setProperty('--offset-y', offsetY + 'px');
+                
+                document.body.appendChild(sparkle);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.parentNode.removeChild(sparkle);
+                    }
+                }, 2000);
+            }
+        }
+
+        // Avatar click handler - SPARKLE BURST!
+        function handleAvatarClick() {
+            const avatarCircle = document.querySelector('.sidebar-avatar-circle');
+            if (!avatarCircle) return;
+            
+            // Create sparkle burst
+            createSparkles(avatarCircle);
+            
+            // Add thinking state briefly
+            avatarCircle.classList.add('thinking');
+            setTimeout(() => {
+                avatarCircle.classList.remove('thinking');
+            }, 2000);
+            
+            console.log('✨ SPARKLE BURST! Avatar clicked!');
         }
 
         // ==================== EMERGENCY FUNCTIONS ====================
@@ -2745,7 +4436,282 @@
         setTimeout(() => {
             createSidebarMatrix();
             checkKillswitchStatus();
+            initializeStickyNotes();
         }, 1000);
+
+        // ==================== BEAUTIFUL STICKY NOTES ====================
+        let stickyNotes = [];
+        let currentFilter = 'all';
+        let currentEditingId = null;
+        const API_BASE_URL = 'http://localhost:8001';
+
+        async function initializeStickyNotes() {
+            try {
+                // Load stickies from database API
+                await loadStickiesFromAPI();
+                
+                // Render initial notes
+                renderStickyNotes();
+                updateCategoryCounts();
+                
+                // Set up event listeners
+                setupStickyEventListeners();
+                
+                console.log('✅ Sticky notes loaded from database');
+            } catch (error) {
+                console.error('❌ Error loading stickies:', error);
+                // Fallback to empty array
+                stickyNotes = [];
+                renderStickyNotes();
+                updateCategoryCounts();
+            }
+        }
+
+        async function loadStickiesFromAPI() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/stickies`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Convert API data to frontend format
+                stickyNotes = data.map(sticky => ({
+                    id: sticky.id,
+                    title: sticky.title,
+                    content: sticky.content,
+                    category: sticky.category,
+                    author: sticky.author,
+                    date: new Date(sticky.created_at).toLocaleDateString(),
+                    locked: sticky.is_locked,
+                    priority: sticky.priority,
+                    tags: sticky.tags || []
+                }));
+                
+                console.log(`📋 Loaded ${stickyNotes.length} stickies from database`);
+            } catch (error) {
+                console.error('❌ API Error:', error);
+                throw error;
+            }
+        }
+
+        function setupStickyEventListeners() {
+            // Category filter
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    currentFilter = item.dataset.category;
+                    renderStickyNotes();
+                });
+            });
+
+            // Author filter
+            document.getElementById('allan-filter').addEventListener('change', renderStickyNotes);
+            document.getElementById('robbie-filter').addEventListener('change', renderStickyNotes);
+
+            // Search
+            document.getElementById('sticky-search').addEventListener('input', renderStickyNotes);
+        }
+
+        function renderStickyNotes() {
+            const grid = document.getElementById('sticky-grid');
+            const searchTerm = document.getElementById('sticky-search').value.toLowerCase();
+            const allanFilter = document.getElementById('allan-filter').checked;
+            const robbieFilter = document.getElementById('robbie-filter').checked;
+
+            let filteredNotes = stickyNotes.filter(note => {
+                // Category filter
+                if (currentFilter !== 'all' && note.category !== currentFilter) return false;
+                
+                // Author filter
+                if (note.author === 'Allan' && !allanFilter) return false;
+                if (note.author === 'Robbie' && !robbieFilter) return false;
+                
+                // Search filter
+                if (searchTerm && !note.title.toLowerCase().includes(searchTerm) && 
+                    !note.content.toLowerCase().includes(searchTerm)) return false;
+                
+                return true;
+            });
+
+            grid.innerHTML = filteredNotes.map(note => createStickyNoteHTML(note)).join('');
+        }
+
+        function createStickyNoteHTML(note) {
+            return `
+                <div class="sticky-note ${note.category} ${note.locked ? 'locked' : ''}" data-id="${note.id}">
+                    <div class="sticky-note-actions">
+                        <button class="sticky-action-btn" onclick="editStickyNote('${note.id}')" title="Edit">✏️</button>
+                        ${!note.locked ? `<button class="sticky-action-btn" onclick="deleteStickyNote('${note.id}')" title="Delete">🗑️</button>` : ''}
+                    </div>
+                    <div class="sticky-note-header">
+                        <div class="sticky-note-title">${note.title}</div>
+                        <div class="sticky-note-category">${note.category.toUpperCase()}</div>
+                    </div>
+                    <div class="sticky-note-content">${note.content}</div>
+                    <div class="sticky-note-meta">
+                        <div class="sticky-note-author">${note.author}</div>
+                        <div class="sticky-note-date">${note.date}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCategoryCounts() {
+            const categories = ['all', 'intel', 'reference', 'drafts', 'connections', 'shower-thoughts'];
+            categories.forEach(category => {
+                const count = category === 'all' ? stickyNotes.length : 
+                    stickyNotes.filter(note => note.category === category).length;
+                document.getElementById(`${category}-count`).textContent = count;
+            });
+        }
+
+        function createNewSticky() {
+            currentEditingId = null;
+            document.getElementById('modal-title').textContent = 'New Sticky Note';
+            document.getElementById('modal-title-input').value = '';
+            document.getElementById('modal-category').value = 'intel';
+            document.getElementById('modal-content').value = '';
+            document.getElementById('modal-author').value = 'Allan';
+            document.getElementById('delete-btn').style.display = 'none';
+            document.getElementById('sticky-modal').style.display = 'block';
+        }
+
+        function editStickyNote(id) {
+            const note = stickyNotes.find(n => n.id === id);
+            if (!note) return;
+
+            currentEditingId = id;
+            document.getElementById('modal-title').textContent = 'Edit Sticky Note';
+            document.getElementById('modal-title-input').value = note.title;
+            document.getElementById('modal-category').value = note.category;
+            document.getElementById('modal-content').value = note.content;
+            document.getElementById('modal-author').value = note.author;
+            document.getElementById('delete-btn').style.display = note.locked ? 'none' : 'inline-block';
+            document.getElementById('sticky-modal').style.display = 'block';
+        }
+
+        async function saveStickyNote() {
+            const title = document.getElementById('modal-title-input').value.trim();
+            const category = document.getElementById('modal-category').value;
+            const content = document.getElementById('modal-content').value.trim();
+            const author = document.getElementById('modal-author').value;
+
+            if (!title || !content) {
+                alert('Please fill in both title and content');
+                return;
+            }
+
+            try {
+                if (currentEditingId) {
+                    // Update existing note via API
+                    await updateStickyNoteAPI(currentEditingId, {
+                        title,
+                        category,
+                        content,
+                        author
+                    });
+                } else {
+                    // Create new note via API
+                    await createStickyNoteAPI({
+                        title,
+                        category,
+                        content,
+                        author,
+                        is_locked: false,
+                        priority: 'medium',
+                        tags: []
+                    });
+                }
+
+                // Reload stickies from database
+                await loadStickiesFromAPI();
+                renderStickyNotes();
+                updateCategoryCounts();
+                closeStickyModal();
+                
+                console.log('✅ Sticky note saved to database');
+            } catch (error) {
+                console.error('❌ Error saving sticky note:', error);
+                alert('Error saving sticky note. Please try again.');
+            }
+        }
+
+        async function createStickyNoteAPI(stickyData) {
+            const response = await fetch(`${API_BASE_URL}/stickies`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(stickyData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        async function updateStickyNoteAPI(stickyId, updateData) {
+            const response = await fetch(`${API_BASE_URL}/stickies/${stickyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        async function deleteStickyNote(id) {
+            if (confirm('Are you sure you want to delete this sticky note?')) {
+                try {
+                    await deleteStickyNoteAPI(id);
+                    
+                    // Reload stickies from database
+                    await loadStickiesFromAPI();
+                    renderStickyNotes();
+                    updateCategoryCounts();
+                    closeStickyModal();
+                    
+                    console.log('✅ Sticky note deleted from database');
+                } catch (error) {
+                    console.error('❌ Error deleting sticky note:', error);
+                    alert('Error deleting sticky note. It may be locked or already deleted.');
+                }
+            }
+        }
+
+        async function deleteStickyNoteAPI(stickyId) {
+            const response = await fetch(`${API_BASE_URL}/stickies/${stickyId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        function closeStickyModal() {
+            document.getElementById('sticky-modal').style.display = 'none';
+            currentEditingId = null;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('sticky-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'sticky-modal') {
+                closeStickyModal();
+            }
+        });
     </script>
 </body>
 

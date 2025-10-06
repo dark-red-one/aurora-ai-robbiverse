@@ -1,0 +1,149 @@
+.talentverse-grid-widget {
+  padding: 2rem;
+}
+
+.widget-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filters button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filters button:hover {
+  border-color: #3b82f6;
+}
+
+.filters button.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.profiles-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profiles-grid.columns-2 { grid-template-columns: repeat(2, 1fr); }
+.profiles-grid.columns-3 { grid-template-columns: repeat(3, 1fr); }
+.profiles-grid.columns-4 { grid-template-columns: repeat(4, 1fr); }
+
+.profiles-grid.layout-list {
+  grid-template-columns: 1fr;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.profile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.profile-header {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto;
+}
+
+.availability-badge {
+  position: absolute;
+  top: 0;
+  right: calc(50% - 50px);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid white;
+}
+
+.availability-badge.available { background: #10b981; }
+.availability-badge.busy { background: #f59e0b; }
+.availability-badge.offline { background: #6b7280; }
+
+.profile-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+}
+
+.profile-role {
+  color: #666;
+  margin: 0 0 0.75rem 0;
+}
+
+.profile-rating {
+  color: #f59e0b;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.profile-skills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.skill-tag {
+  padding: 0.25rem 0.75rem;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.profile-rate {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.talentverse-grid-widget.theme-dark {
+  color: #f9fafb;
+}
+
+.talentverse-grid-widget.theme-dark .profile-card {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+@media (max-width: 768px) {
+  .profiles-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
