@@ -3,9 +3,15 @@ from pydantic import BaseModel
 import uvicorn
 import json
 import os
+import aiohttp
+import asyncio
 from datetime import datetime
 
 app = FastAPI(title="Aurora AI Empire", version="2.0.0")
+
+# Ollama configuration
+OLLAMA_URL = "http://localhost:11434"
+DEFAULT_MODEL = "qwen2.5:7b"  # Fast and capable model
 
 # AI Personalities
 PERSONALITIES = {
@@ -97,13 +103,31 @@ async def chat_with_personality(personality_id: str, request: PersonalityRequest
     
     personality = PERSONALITIES[personality_id]
     
-    # Simulate AI response (in real implementation, this would call actual AI)
-    response = f"Hello! I'm {personality['name']}, your {personality['role']}. I received your message: '{request.message}'. How can I help you with my {', '.join(personality['capabilities'])} expertise?"
+    # Call local Ollama for real AI response
+    try:
+        async with aiohttp.ClientSession() as session:
+            ollama_payload = {
+                "model": DEFAULT_MODEL,
+                "prompt": f"You are {personality['name']}, Allan's {personality['role']}. You're helpful, intelligent, and have access to the Aurora AI Empire. Your capabilities: {', '.join(personality['capabilities'])}. Respond as {personality['name']} to this message: {request.message}",
+                "stream": False
+            }
+            
+            async with session.post(f"{OLLAMA_URL}/api/generate", 
+                                  json=ollama_payload, 
+                                  timeout=30) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    ai_response = result.get('response', 'No response from AI')
+                else:
+                    ai_response = f"Error: Ollama returned status {response.status}"
+    except Exception as e:
+        ai_response = f"Error calling local AI: {str(e)}"
     
     return {
         "personality": personality['name'],
         "role": personality['role'],
-        "response": response,
+        "response": ai_response,
+        "model": DEFAULT_MODEL,
         "timestamp": datetime.now().isoformat()
     }
 

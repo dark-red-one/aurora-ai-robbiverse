@@ -1,5 +1,5 @@
 ---
-description: Provides guidance for implementing the AI personality isolation system, including contextual modes and dynamic switching logic
+description: Defines the AI personality system including isolation, contextual modes, and dynamic personality switching
 ---
 
 # === USER INSTRUCTIONS ===
@@ -66,47 +66,52 @@ $END$
 
 # ai-personality-system
 
-Core Components:
+Core Personality Management Components:
 
-1. Personality Isolation System (src/personalityIsolationSystem.js)
-Importance Score: 95/100
-- Manages hard boundaries between personality contexts (business/flirty/casual)
-- Maintains separate memory spaces per personality mode
-- Implements six-stage validation pipeline for mode transitions
-- Context-aware response filtering based on active personality
-- Emergency fallback system for unsafe personality states
+1. Mood Switching Engine (src/mood_switching_model.py)
+Importance Score: 95
+- Seven-level emotional state system (Sleepy to Hyper)
+- Real-time mood transitions with trigger detection
+- Business context awareness affecting mood selection
+- Persistent mood state with cross-interface synchronization
+- Gandhi-Genghis intensity control for communication aggression
 
-2. Gandhi-Genghis Mode Controller (src/gandhiGenghisMode.js)
-Importance Score: 90/100
-- Six-level aggressiveness control system:
-  * Full Gandhi (Level 0): Minimal outreach, passive waiting
-  * Balanced (Level 3): Standard business follow-up 
-  * Full Genghis (Level 5): Maximum outreach intensity
-- Revenue crisis detection triggers automatic mode adjustment
-- Custom outreach limits per level with decay timing
-- Safeguards prevent excessive mode escalation
+2. Business Context Manager (backend/app/services/ai/personality_manager.py) 
+Importance Score: 90
+- Dynamic personality switching based on communication context
+- Professional/Flirty mode isolation system
+- Strict separation of business and personal interactions
+- Real-time context analysis for mode selection
+- Multi-layer validation before mode changes
 
-3. Flirty Mode Management (src/flirtyModeActivation.js)
-Importance Score: 85/100
-- Seven-level flirtiness control with strict access limitations
-- Private vs group chat detection and automatic mode adjustment
-- Location-aware mode restrictions (office vs private)
-- Presence-based automatic mode switching
-- Emergency shutdown triggers for inappropriate contexts
+3. Personality Learning System (backend/app/services/ai/personality_learning.py)
+Importance Score: 85
+- Adaptive personality traits based on interaction success
+- 30-day relevance window with decay-based learning
+- Interaction effectiveness scoring
+- Personality evolution tracking
+- Custom trajectory analysis for optimization
 
-4. Mood Transition System (src/moodTransitionEngine.js) 
-Importance Score: 80/100
-- Psychology-based mood transition rules
-- Business context triggers (deadlines, revenue goals)
-- Custom effectiveness scoring for transitions
-- Decay-based mood stabilization
-- Context-aware transition blocking
+4. Dual LLM Personality Coordinator (backend/app/services/ai/dual_llm_coordinator.py)
+Importance Score: 80
+- Coordinated interaction between Robbie AI and Gatekeeper AI
+- Safety-first processing pipeline
+- Dual validation of personality responses
+- Progressive response filtering
 
-Key Integration Points:
-- Personality modes directly affect outreach timing and intensity
-- Revenue goals influence aggressive mode selection
-- Location context drives personality restrictions
-- Group presence forces professional mode activation
+5. VIP Personality Adaptation (src/vipAssociation.js)
+Importance Score: 75
+- Custom personality adjustments for VIP clients
+- Company-wide personality propagation
+- Deal value-based personality optimization
+- Strategic industry-specific personality traits
+
+Key Features:
+- Strict isolation between business/personal modes
+- Adaptive personality learning system
+- Multi-layer safety validation
+- Context-aware mood transitions
+- VIP-specific personality optimization
 
 $END$
 

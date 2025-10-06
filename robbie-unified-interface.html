@@ -1854,6 +1854,16 @@
                     this.messageInput.disabled = false;
                     this.messageInput.placeholder = 'Type message or /help for commands...';
                     this.messageInput.focus();
+                    
+                    // Debug: Log input state
+                    console.log('🎯 Chat input enabled:', {
+                        disabled: this.messageInput.disabled,
+                        placeholder: this.messageInput.placeholder,
+                        value: this.messageInput.value
+                    });
+                    
+                    // Force re-initialize input handlers if needed
+                    this.initializeInput();
 
                     this.connectWebSocket();
                 }, delay);
@@ -1933,10 +1943,21 @@
             initializeInput() {
                 // Handle Enter to send, Shift+Enter for new line
                 this.messageInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                    console.log('🎯 Key pressed:', e.key, 'Shift:', e.shiftKey, 'Disabled:', this.messageInput.disabled);
+                    if (e.key === 'Enter' && !e.shiftKey && !this.messageInput.disabled) {
                         e.preventDefault();
+                        console.log('🚀 Sending message via Enter key');
                         this.sendMessage();
                     }
+                });
+                
+                // Ensure input is enabled and focusable
+                this.messageInput.addEventListener('focus', () => {
+                    console.log('🎯 Chat input focused');
+                });
+                
+                this.messageInput.addEventListener('blur', () => {
+                    console.log('🎯 Chat input blurred');
                 });
             }
 

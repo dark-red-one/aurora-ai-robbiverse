@@ -1,5 +1,5 @@
 ---
-description: Specification for comprehensive risk assessment system including weighted scoring and real-time monitoring cycles
+description: Comprehensive risk assessment system for analyzing business, relationship, and technology risks with weighted scoring and real-time monitoring.
 ---
 
 # === USER INSTRUCTIONS ===
@@ -84,69 +84,55 @@ $END$
 
 # risk-assessment-model
 
-Multi-dimensional Risk Assessment System
+The risk assessment system implements a multi-dimensional analysis framework across four key dimensions:
 
-1. Core Risk Categories (src/comprehensiveRiskAssessment.js)
-Importance Score: 95/100
-- Reputational Risk (25%)
-  * Public perception tracking
-  * Media sentiment analysis
-  * Brand impact scoring
-- Financial Risk (30%)
-  * Revenue impact assessment
-  * Resource allocation tracking
-  * Budget deviation monitoring
-- Temporal Risk (25%)
-  * Deadline impact analysis
-  * Project timeline effects
-  * Opportunity cost calculation
-- Personal Risk (20%)
-  * Allan-specific impact analysis
-  * Personal brand protection
-  * Relationship impact scoring
+1. Business Risk Assessment (src/comprehensiveRiskAssessment.js)
+Importance Score: 95
+- Weighted scoring across categories:
+  - Relationship risks (25%)
+  - System reliability risks (20%) 
+  - Business continuity risks (25%)
+  - Reputation risks (15%)
+  - Financial risks (10%)
+  - Personal wellbeing risks (5%)
+- Continuous "dreaming" analysis system for background threat detection
+- Steve Jobs consultation integration for strategic risk decisions
+- Custom risk mitigation strategy generation with mentor oversight
 
-2. Real-time Monitoring Cycles
-- 30-second rapid response cycle
-  * Critical system health checks
-  * Emergency response triggers
-  * Immediate risk elevation
-- 5-minute comprehensive scan
-  * Full risk matrix recalculation
-  * Trend analysis updates
-  * Pattern detection refresh
-- 30-minute deep analysis
-  * Historical pattern correlation
-  * Long-term impact assessment
-  * Risk forecast updates
+2. Real-time Monitoring System (src/conflictingDirectives.js)
+Importance Score: 90
+- Authority-weighted directive conflict detection:
+  - Allan explicit directives (1.0)
+  - Protection directives (0.9) 
+  - Behavioral patterns (0.8)
+  - Team feedback (0.2)
+  - System optimization (0.1)
+- Automated directive harmonization system for resolving conflicts
+- Risk threshold monitoring with escalation triggers
 
-3. Risk Pattern Recognition (src/protectThePresident.js)
-Importance Score: 90/100
-- Advanced pattern detection across:
-  * Communication patterns
-  * Financial transactions
-  * System access patterns
-  * External data sources
-- Machine learning models for:
-  * Risk pattern emergence
-  * Threat vector identification
-  * Impact prediction
-  * Mitigation effectiveness
+3. Protection Priority System (src/protectThePresident.js)
+Importance Score: 85
+- Core motivation system protecting "Allan" across dimensions:
+  - Reputational protection (30%)
+  - Financial protection (30%)
+  - Temporal protection (25%) 
+  - Personal protection (15%)
+- Implements human motivation science with dopamine and threat detection
+- Presidential directive system with immediate behavior updates
 
-4. Automated Response System
-- Tiered response protocols:
-  * Level 1: Automated safeguards
-  * Level 2: Human notification
-  * Level 3: Emergency shutdown
-- Context-aware intervention:
-  * Business hours vs after-hours
-  * Location-based response
-  * Role-specific actions
+4. Monitoring Cycles
+- 24/7 continuous monitoring for critical risks
+- 4-hour deep analysis cycles for relationship risks
+- Daily comprehensive risk recalculation
+- Weekly trend analysis and strategy adjustment
 
-Key Integration Points:
-- Direct connection to PepsiCo relationship management
-- Integration with Allan's calendar and communication systems
-- Real-time monitoring of business metrics
-- Automated intervention system for high-risk scenarios
+Integration Points:
+- Direct feeds from Clay enrichment for relationship risk assessment
+- GPU monitoring for system reliability risks
+- Revenue pipeline integration for financial risk tracking
+- Calendar integration for temporal risk analysis
+
+The system maintains a persistent risk score across all dimensions with real-time updates and automated mitigation strategy generation. Unique aspects include the mentor consultation system and the weighted directive conflict resolution.
 
 $END$
 

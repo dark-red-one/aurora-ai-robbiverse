@@ -1,5 +1,5 @@
 ---
-description: Specification for memory persistence, context retrieval, and cross-device synchronization including comprehensive dossier system
+description: Memory persistence and vector-based information retrieval system for AI context management and cross-device data synchronization
 ---
 
 # === USER INSTRUCTIONS ===
@@ -71,48 +71,58 @@ $END$
 
 # memory-persistence-model
 
-Memory Persistence Core (src/robbieComprehensiveMemory.js)
-Importance Score: 95/100
-- Vector-based memory system with emotional weighting
-- Multi-dimensional relationship tracking:
-  * Interaction history with temporal decay
-  * Emotional resonance scoring
-  * Topic affinity mapping
-  * Trust level progression
-- Comprehensive dossier integration with Clay API enrichment
-- Cross-device state synchronization via RobbieBook cache
+The memory persistence system implements a sophisticated multi-tier storage architecture for AI context and knowledge management:
 
-Context Retrieval Engine (src/universalInbox.js)
-Importance Score: 90/100
-- Semantic retrieval with business relationship prioritization
-- Multi-node context persistence across device ecosystem
-- Custom relevance scoring incorporating:
-  * Business relationship strength
-  * Revenue potential indicators
-  * Meeting/calendar context
-  * Recent interaction patterns
-- Real-time context sharing between RobbiePhone, RobbiePad, RobbieBook
+## Core Memory Components
 
-Dossier Management System (src/customerDossier.js)
-Importance Score: 85/100
-- Comprehensive relationship tracking with role analysis
-- Active deals/opportunities integration
-- Conversation starter generation based on:
-  * Historical interactions
-  * LinkedIn/social media updates
-  * Company news/events
-  * Shared connections
-- Custom intelligence updates with Clay API integration
+1. Vector-Based Memory Store (src/robbieDistributedMemory.js)
+Importance Score: 95
+- Multi-dimensional vector storage using FAISS embeddings
+- Hierarchical memory organization:
+  - Short-term (24hr retention)
+  - Medium-term (30 day retention) 
+  - Long-term (permanent storage)
+- Cross-device memory synchronization
+- Context-aware retrieval with temporal decay
 
-Memory Synchronization Protocol (src/robbieDeviceEcosystem.js)
-Importance Score: 80/100
-- Cross-device memory sharing with privacy controls
-- Device-specific context restoration
-- Seamless conversation handoffs between devices
-- Emergency mode activation with selective memory purge
-- Real-time memory updates across RobbieBook instances
+2. Comprehensive Dossier System (src/customerDossier.js)
+Importance Score: 90
+- Automated relationship mapping across communication channels
+- Custom confidence scoring for relationship attributes
+- Multi-source data correlation (email, calendar, chat)
+- Progressive relationship strength tracking
 
-The system maintains persistent memory across Allan's device ecosystem while preserving business relationship context and emotional intelligence. Vector-based storage enables sophisticated retrieval with business priority weighting.
+3. Memory Persistence Bridge (src/robbieStateBridge.js)
+Importance Score: 85
+- Real-time state synchronization across device ecosystem
+- Offline memory caching with priority-based sync
+- Memory merging algorithm for conflicting device states
+- Context preservation during device handoffs
+
+4. Memory Assistant (src/robbieMemoryAssistant.js)
+Importance Score: 80
+- Proactive memory surfacing based on conversation context
+- Intelligent memory pruning with importance scoring
+- Cross-reference detection between memory fragments
+- Memory reinforcement through repeated access
+
+## Memory Integration Points
+
+1. Cross-Device Synchronization (src/unified-systems/aurora-core.js)
+Importance Score: 85
+- Device-specific memory caching strategies
+- Priority-based memory transfer between devices
+- Bandwidth-aware sync optimization
+- Conflict resolution for simultaneous updates
+
+2. Context Retrieval System (backend/app/services/semantic_search.py)
+Importance Score: 80
+- Contextual relevance scoring
+- Multi-dimensional search across memory tiers
+- Temporal context weighting
+- Real-time memory surface suggestions
+
+The memory system focuses heavily on maintaining consistent AI personality state and relationship context across all interaction points while implementing sophisticated pruning and retrieval mechanisms.
 
 $END$
 
