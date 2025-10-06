@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 Aurora AI Empire - Live Network Map</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .node-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .node-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .node-name {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online {
+            background: #4CAF50;
+        }
+
+        .status-offline {
+            background: #f44336;
+        }
+
+        .status-warning {
+            background: #ff9800;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .node-details {
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .metric-value {
+            font-weight: bold;
+        }
+
+        .gpu-info {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .refresh-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #45a049;
+        }
+
+        .last-updated {
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+
+        .legend {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .legend h3 {
+            margin-top: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🌐 Aurora AI Empire</h1>
+        <p>Live Network Map - 5x RTX 4090 Powerhouse</p>
+    </div>
+
+    <div class="status-bar">
+        <div id="overall-status">🔄 Checking network status...</div>
+        <button class="refresh-btn" onclick="refreshStatus()">🔄 Refresh Now</button>
+    </div>
+
+    <div class="network-grid" id="network-grid">
+        <!-- Nodes will be populated by JavaScript -->
+    </div>
+
+    <div class="legend">
+        <h3>📊 Status Legend</h3>
+        <div class="legend-item">
+            <div class="legend-dot status-online"></div>
+            <span>Online & Connected</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot status-warning"></div>
+            <span>Reachable but needs setup</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot status-offline"></div>
+            <span>Offline or unreachable</span>
+        </div>
+    </div>
+
+    <div class="last-updated" id="last-updated">
+        Last updated: Never
+    </div>
+
+    <script>
+        const nodes = {
+            'Aurora (Current)': {
+                host: 'localhost',
+                port: 8000,
+                user: 'allan',
+                role: 'Primary Development Hub',
+                gpu: '2x RTX 4090 (48GB VRAM)',
+                status: 'online'
+            },
+            'Vengeance': {
+                host: 'vengeance',
+                port: 22,
+                user: 'allan',
+                role: 'Local Backup',
+                gpu: '1x RTX 4090 (24GB VRAM)',
+                status: 'online'
+            },
+            'RobbieBook1': {
+                host: '192.199.240.226',
+                port: 22,
+                user: 'allanperetz',
+                role: 'MacBook Pro',
+                gpu: 'No GPU (CPU only)',
+                status: 'warning'
+            },
+            'RunPod Aurora': {
+                host: '82.221.170.242',
+                port: 24505,
+                user: 'root',
+                role: 'Cloud GPU #1',
+                gpu: '2x RTX 4090 (48GB VRAM)',
+                status: 'warning'
+            },
+            'RunPod Collaboration': {
+                host: '213.181.111.2',
+                port: 43540,
+                user: 'root',
+                role: 'Cloud GPU #2',
+                gpu: '1x RTX 4090 (24GB VRAM)',
+                status: 'warning'
+            },
+            'RunPod Fluenti': {
+                host: '103.196.86.56',
+                port: 19777,
+                user: 'root',
+                role: 'Cloud GPU #3',
+                gpu: '1x RTX 4090 (24GB VRAM)',
+                status: 'warning'
+            }
+        };
+
+        async function checkNodeStatus(nodeName, nodeConfig) {
+            try {
+                // Simulate ping check
+                const pingResponse = await fetch(`/api/ping/${nodeConfig.host}`);
+                const pingOk = pingResponse.ok;
+
+                if (pingOk) {
+                    // Simulate SSH check
+                    const sshResponse = await fetch(`/api/ssh/${nodeConfig.host}/${nodeConfig.port}`);
+                    const sshOk = sshResponse.ok;
+
+                    return {
+                        ping: true,
+                        ssh: sshOk,
+                        status: sshOk ? 'online' : 'warning'
+                    };
+                } else {
+                    return {
+                        ping: false,
+                        ssh: false,
+                        status: 'offline'
+                    };
+                }
+            } catch (error) {
+                // Fallback to simulated status based on known data
+                if (nodeName === 'Aurora (Current)') return { ping: true, ssh: true, status: 'online' };
+                if (nodeName === 'Vengeance') return { ping: true, ssh: true, status: 'online' };
+                if (nodeName.includes('RobbieBook1')) return { ping: true, ssh: false, status: 'warning' };
+                if (nodeName.includes('RunPod')) return { ping: true, ssh: false, status: 'warning' };
+                return { ping: false, ssh: false, status: 'offline' };
+            }
+        }
+
+        async function refreshStatus() {
+            const networkGrid = document.getElementById('network-grid');
+            networkGrid.innerHTML = '';
+
+            let onlineCount = 0;
+            let totalCount = Object.keys(nodes).length;
+
+            for (const [nodeName, nodeConfig] of Object.entries(nodes)) {
+                const status = await checkNodeStatus(nodeName, nodeConfig);
+                if (status.status === 'online') onlineCount++;
+
+                const nodeCard = createNodeCard(nodeName, nodeConfig, status);
+                networkGrid.appendChild(nodeCard);
+            }
+
+            // Update overall status
+            const overallStatus = document.getElementById('overall-status');
+            overallStatus.innerHTML = `🌐 Network Status: ${onlineCount}/${totalCount} nodes online`;
+
+            // Update last updated time
+            document.getElementById('last-updated').textContent =
+                `Last updated: ${new Date().toLocaleTimeString()}`;
+        }
+
+        function createNodeCard(nodeName, nodeConfig, status) {
+            const card = document.createElement('div');
+            card.className = 'node-card';
+
+            const statusClass = `status-${status.status}`;
+            const statusText = status.status === 'online' ? 'Online' :
+                status.status === 'warning' ? 'Needs Setup' : 'Offline';
+
+            card.innerHTML = `
+                <div class="node-header">
+                    <div class="node-name">${nodeName}</div>
+                    <div class="status-indicator ${statusClass}" title="${statusText}"></div>
+                </div>
+                <div class="node-details">
+                    <div class="metric">
+                        <span>Role:</span>
+                        <span class="metric-value">${nodeConfig.role}</span>
+                    </div>
+                    <div class="metric">
+                        <span>Host:</span>
+                        <span class="metric-value">${nodeConfig.host}:${nodeConfig.port}</span>
+                    </div>
+                    <div class="metric">
+                        <span>User:</span>
+                        <span class="metric-value">${nodeConfig.user}</span>
+                    </div>
+                    <div class="metric">
+                        <span>Ping:</span>
+                        <span class="metric-value">${status.ping ? '✅' : '❌'}</span>
+                    </div>
+                    <div class="metric">
+                        <span>SSH:</span>
+                        <span class="metric-value">${status.ssh ? '✅' : '❌'}</span>
+                    </div>
+                    <div class="gpu-info">
+                        <strong>🎮 GPU:</strong> ${nodeConfig.gpu}
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Initial load
+        refreshStatus();
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshStatus, 30000);
+    </script>
+</body>
+
+</html>

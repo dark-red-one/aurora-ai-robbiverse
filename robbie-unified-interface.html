@@ -7,7 +7,8 @@
     <title>Robbie Command Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -233,11 +234,27 @@
         }
 
         @keyframes matrix-glitch {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-2px); }
-            40% { transform: translateX(2px); }
-            60% { transform: translateX(-1px); }
-            80% { transform: translateX(1px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-2px);
+            }
+
+            40% {
+                transform: translateX(2px);
+            }
+
+            60% {
+                transform: translateX(-1px);
+            }
+
+            80% {
+                transform: translateX(1px);
+            }
         }
 
         /* Emergency Buttons */
@@ -411,11 +428,13 @@
         }
 
         .beacon-tile-trend {
-            display: none; /* Hidden in compact mode */
+            display: none;
+            /* Hidden in compact mode */
         }
 
         .beacon-tile-bar {
-            display: none; /* Hidden in compact mode */
+            display: none;
+            /* Hidden in compact mode */
         }
 
         /* Show trend on hover */
@@ -526,10 +545,13 @@
         }
 
         @keyframes avatarPulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
                 transform: scale(1);
             }
+
             50% {
                 box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 40px rgba(0, 212, 255, 0.3);
                 transform: scale(1.02);
@@ -541,10 +563,13 @@
         }
 
         @keyframes avatarThinking {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
                 border-color: #ff6b35;
             }
+
             50% {
                 box-shadow: 0 0 40px rgba(255, 107, 53, 0.8), 0 0 60px rgba(255, 107, 53, 0.4);
                 border-color: #ffaa00;
@@ -568,6 +593,7 @@
                 opacity: 1;
                 transform: translate(0, 0) scale(1);
             }
+
             100% {
                 opacity: 0;
                 transform: translate(var(--offset-x, 0), var(--offset-y, -50px)) scale(0.3) rotate(360deg);
@@ -1128,11 +1154,15 @@
             box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
         }
 
-        .sticky-categories, .sticky-authors, .sticky-search {
+        .sticky-categories,
+        .sticky-authors,
+        .sticky-search {
             margin-bottom: 25px;
         }
 
-        .sticky-categories h3, .sticky-authors h3, .sticky-search h3 {
+        .sticky-categories h3,
+        .sticky-authors h3,
+        .sticky-search h3 {
             color: #e0e0e0;
             font-size: 14px;
             font-weight: 600;
@@ -1169,12 +1199,35 @@
             flex-shrink: 0;
         }
 
-        .dot.all { background: #e0e0e0; }
-        .dot.intel { background: #FFE082; } /* Pastel Yellow */
-        .dot.reference { background: #A5D6A7; } /* Pastel Green */
-        .dot.drafts { background: #BBDEFB; } /* Pastel Blue */
-        .dot.connections { background: #FFCDD2; } /* Pastel Red */
-        .dot.shower-thoughts { background: #E1BEE7; } /* Pastel Purple */
+        .dot.all {
+            background: #e0e0e0;
+        }
+
+        .dot.intel {
+            background: #FFE082;
+        }
+
+        /* Pastel Yellow */
+        .dot.reference {
+            background: #A5D6A7;
+        }
+
+        /* Pastel Green */
+        .dot.drafts {
+            background: #BBDEFB;
+        }
+
+        /* Pastel Blue */
+        .dot.connections {
+            background: #FFCDD2;
+        }
+
+        /* Pastel Red */
+        .dot.shower-thoughts {
+            background: #E1BEE7;
+        }
+
+        /* Pastel Purple */
 
         .category-item span:not(.dot) {
             color: #e0e0e0;
@@ -1241,7 +1294,8 @@
 
         /* BEAUTIFUL PASTEL STICKY NOTES */
         .sticky-note {
-            background: linear-gradient(135deg, #FFE082 0%, #FFC107 100%); /* Pastel Yellow */
+            background: linear-gradient(135deg, #FFE082 0%, #FFC107 100%);
+            /* Pastel Yellow */
             color: #333;
             padding: 20px;
             border-radius: 12px;
@@ -1276,27 +1330,32 @@
 
         /* Pastel Color Variants */
         .sticky-note.intel {
-            background: linear-gradient(135deg, #FFE082 0%, #FFC107 100%); /* Pastel Yellow */
+            background: linear-gradient(135deg, #FFE082 0%, #FFC107 100%);
+            /* Pastel Yellow */
             color: #333;
         }
 
         .sticky-note.reference {
-            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%); /* Pastel Green */
+            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%);
+            /* Pastel Green */
             color: #2E7D32;
         }
 
         .sticky-note.drafts {
-            background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%); /* Pastel Blue */
+            background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+            /* Pastel Blue */
             color: #1565C0;
         }
 
         .sticky-note.connections {
-            background: linear-gradient(135deg, #FFCDD2 0%, #EF9A9A 100%); /* Pastel Red */
+            background: linear-gradient(135deg, #FFCDD2 0%, #EF9A9A 100%);
+            /* Pastel Red */
             color: #C62828;
         }
 
         .sticky-note.shower-thoughts {
-            background: linear-gradient(135deg, #E1BEE7 0%, #CE93D8 100%); /* Pastel Purple */
+            background: linear-gradient(135deg, #E1BEE7 0%, #CE93D8 100%);
+            /* Pastel Purple */
             color: #7B1FA2;
         }
 
@@ -2218,6 +2277,19 @@
             background: #00d4ff;
             border-radius: 3px;
         }
+
+        .testpilot-pill {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 
@@ -2304,7 +2376,7 @@
                     <span class="nav-badge">12</span>
                 </div>
             </div>
-            
+
             <div class="nav-section">
                 <div class="nav-section-title">Productivity</div>
                 <div class="sidebar-nav-item" data-tab="tasks">
@@ -2312,10 +2384,9 @@
                     <span>Tasks</span>
                     <span class="nav-badge">5</span>
                 </div>
-                <div class="sidebar-nav-item expandable" data-tab="calendar">
+                <div class="sidebar-nav-item" data-tab="calendar">
                     <span class="sidebar-nav-icon">📅</span>
                     <span>Calendar</span>
-                    <span class="nav-expand-icon">▶</span>
                 </div>
                 <div class="sidebar-nav-item expandable" data-tab="money">
                     <span class="sidebar-nav-icon">💰</span>
@@ -2337,7 +2408,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="nav-section">
                 <div class="nav-section-title">System</div>
                 <div class="sidebar-nav-item expandable" data-tab="setup">
@@ -2375,8 +2446,7 @@
         <div class="header">
             <div class="header-left">
                 <div class="logo">
-                    <img src="/static/logos/testpilot-logo.svg" alt="TestPilot CPG"
-                        style="height: 32px; vertical-align: middle;" onerror="this.style.display='none'">
+                    <div class="testpilot-pill">TestPilot CPG</div>
                 </div>
             </div>
             <div class="header-right">
@@ -2436,7 +2506,7 @@
                             <h2>🎨 Stickies</h2>
                             <button class="new-sticky-btn" onclick="createNewSticky()">+ New</button>
                         </div>
-                        
+
                         <!-- Categories Filter -->
                         <div class="sticky-categories">
                             <h3>Categories</h3>
@@ -2535,7 +2605,8 @@
                         <div class="sticky-modal-footer">
                             <button class="btn-secondary" onclick="closeStickyModal()">Cancel</button>
                             <button class="btn-primary" onclick="saveStickyNote()">Save</button>
-                            <button class="btn-danger" id="delete-btn" onclick="deleteStickyNote()" style="display: none;">Delete</button>
+                            <button class="btn-danger" id="delete-btn" onclick="deleteStickyNote()"
+                                style="display: none;">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -2824,7 +2895,7 @@
                     <div class="sync-dashboard-section">
                         <h2 class="sync-dashboard-title">🔄 RobbieBook1 Sync Status</h2>
                         <p class="sync-dashboard-subtitle">Real-time sync between RobbieBook1 and Elephant</p>
-                        
+
                         <div class="sync-status-grid">
                             <div class="sync-status-card">
                                 <div class="sync-status-header">
@@ -2834,7 +2905,7 @@
                                 <div class="sync-status-value" id="sync-db-status">Connected</div>
                                 <div class="sync-status-detail" id="sync-db-time">~150ms</div>
                             </div>
-                            
+
                             <div class="sync-status-card">
                                 <div class="sync-status-header">
                                     <span class="sync-status-icon">🔄</span>
@@ -2843,7 +2914,7 @@
                                 <div class="sync-status-value" id="sync-last-time">Never</div>
                                 <div class="sync-status-detail" id="sync-count">0 syncs</div>
                             </div>
-                            
+
                             <div class="sync-status-card">
                                 <div class="sync-status-header">
                                     <span class="sync-status-icon">📧</span>
@@ -2852,7 +2923,7 @@
                                 <div class="sync-status-value" id="sync-email-count">0</div>
                                 <div class="sync-status-detail">synced</div>
                             </div>
-                            
+
                             <div class="sync-status-card">
                                 <div class="sync-status-header">
                                     <span class="sync-status-icon">📅</span>
@@ -2862,7 +2933,7 @@
                                 <div class="sync-status-detail">synced</div>
                             </div>
                         </div>
-                        
+
                         <div class="sync-controls">
                             <button class="sync-btn sync-btn-primary" onclick="runSyncNow()">
                                 <span class="sync-btn-icon">🔄</span>
@@ -2877,7 +2948,7 @@
                                 OAuth Setup
                             </button>
                         </div>
-                        
+
                         <div class="sync-logs">
                             <div class="sync-logs-header">
                                 <span class="sync-logs-icon">📝</span>
@@ -3023,14 +3094,14 @@
                     this.messageInput.disabled = false;
                     this.messageInput.placeholder = 'Type message or /help for commands...';
                     this.messageInput.focus();
-                    
+
                     // Debug: Log input state
                     console.log('🎯 Chat input enabled:', {
                         disabled: this.messageInput.disabled,
                         placeholder: this.messageInput.placeholder,
                         value: this.messageInput.value
                     });
-                    
+
                     // Force re-initialize input handlers if needed
                     this.initializeInput();
 
@@ -3041,7 +3112,7 @@
             connectWebSocket() {
                 // Use secure WebSocket for HTTPS pages, fallback to ws for HTTP
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const wsUrl = `${protocol}//${window.location.hostname}:8007/ws/allan`;
+                const wsUrl = `${protocol}//${window.location.hostname}:8080/ws/allan`;
                 this.ws = new WebSocket(wsUrl);
 
                 this.ws.onopen = () => {
@@ -3070,7 +3141,7 @@
                             thinkingText.textContent = data.content;
                         }
                         this.scrollToBottom();
-                        
+
                     } else if (data.type === 'content') {
                         // Remove typing indicator on first content chunk
                         const typing = document.getElementById('typing');
@@ -3082,7 +3153,7 @@
                             currentMsg = document.createElement('div');
                             currentMsg.id = 'robbie-streaming';
                             currentMsg.className = 'message robbie';
-                            
+
                             // Get current mood and create proper Robbie tag (RED with mood in italics)
                             const mood = ''; // Will be set by mood system
                             const robbieTag = `<span style="color: #ff5555;">&lt;Robbie&gt;</span>`;
@@ -3096,7 +3167,7 @@
                             textSpan.textContent += data.content;
                         }
                         this.scrollToBottom();
-                        
+
                     } else if (data.type === 'done') {
                         // Finalize message
                         const msg = document.getElementById('robbie-streaming');
@@ -3110,7 +3181,7 @@
                             }
                         }
                         this.scrollToBottom();
-                        
+
                     } else if (data.type === 'chunk') {
                         // Legacy support for old chunk format
                         const typing = document.getElementById('typing');
@@ -3165,12 +3236,12 @@
                         this.sendMessage();
                     }
                 });
-                
+
                 // Ensure input is enabled and focusable
                 this.messageInput.addEventListener('focus', () => {
                     console.log('🎯 Chat input focused');
                 });
-                
+
                 this.messageInput.addEventListener('blur', () => {
                     console.log('🎯 Chat input blurred');
                 });
@@ -3249,8 +3320,8 @@
                 this.scrollToBottom();
 
                 // Send to server (TODO: include file data in payload)
-                const payload = JSON.stringify({ 
-                    type: "message", 
+                const payload = JSON.stringify({
+                    type: "message",
                     content: message,
                     personality: "robbie"
                 });
@@ -3366,7 +3437,7 @@
         // Initialize terminal when page loads
         // 📊 BeaconTiles Widget - Update system monitors with REAL data
         let previousMetrics = { cpu: 12, mem: 34, sql: 61 };
-        
+
         async function updateSystemMonitors() {
             try {
                 // Fetch real system stats from backend
@@ -3420,7 +3491,7 @@
 
                 // Store for next comparison
                 previousMetrics = { cpu, mem, sql };
-                
+
                 console.log('📊 BeaconTiles updated:', { cpu, mem, sql, trends: { cpuDiff, memDiff, sqlDiff } });
             } catch (error) {
                 console.warn('Failed to fetch system stats, using fallback:', error);
@@ -3498,7 +3569,7 @@
         }
 
         // ==================== AI-POWERED MOOD SYSTEM ====================
-        
+
         // Mood evaluation state tracking
         const moodState = {
             currentMood: 'friendly',
@@ -3520,15 +3591,15 @@
         async function initializeMoodSystem() {
             // Connect to mood WebSocket
             await connectMoodWebSocket();
-            
+
             // Start activity tracking
             startActivityTracking();
-            
+
             // Start 20-second mood evaluation cron
             setInterval(() => {
                 evaluateMood();
             }, 20000);
-            
+
             console.log('🎭 AI Mood system initialized');
         }
 
@@ -3537,26 +3608,26 @@
             try {
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 const wsUrl = `${protocol}//localhost:8007/api/v1/mood/ws/${moodState.userId}`;
-                
+
                 moodWebSocket = new WebSocket(wsUrl);
-                
+
                 moodWebSocket.onopen = () => {
                     moodWsConnected = true;
                     console.log('🎭 Mood WebSocket connected');
-                    
+
                     // Send initial activity data
                     sendActivityData('connection', 'frontend_connected');
                 };
-                
+
                 moodWebSocket.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     handleMoodUpdate(data);
                 };
-                
+
                 moodWebSocket.onclose = () => {
                     moodWsConnected = false;
                     console.log('🎭 Mood WebSocket disconnected');
-                    
+
                     // Attempt to reconnect after 5 seconds
                     setTimeout(() => {
                         if (!moodWsConnected) {
@@ -3564,11 +3635,11 @@
                         }
                     }, 5000);
                 };
-                
+
                 moodWebSocket.onerror = (error) => {
                     console.error('🎭 Mood WebSocket error:', error);
                 };
-                
+
             } catch (error) {
                 console.error('🎭 Failed to connect mood WebSocket:', error);
             }
@@ -3577,7 +3648,7 @@
         // Send activity data to backend
         function sendActivityData(activityType, description, additionalData = {}) {
             if (!moodWsConnected || !moodWebSocket) return;
-            
+
             const activityData = {
                 type: 'activity',
                 data: {
@@ -3588,7 +3659,7 @@
                     ...additionalData
                 }
             };
-            
+
             try {
                 moodWebSocket.send(JSON.stringify(activityData));
                 console.log('🎭 Activity sent:', activityType, description);
@@ -3602,18 +3673,18 @@
             if (data.type === 'mood_update') {
                 const newMood = data.mood;
                 const reasoning = data.reasoning;
-                
+
                 // Update mood state
                 moodState.currentMood = newMood;
                 moodState.moodStartTime = Date.now();
                 moodState.moodDuration = data.duration;
-                
+
                 // Update visual mood
                 setMood(newMood, newMood.toLowerCase());
-                
+
                 // Log mood change
                 console.log(`🎭 Mood updated: ${newMood} - ${reasoning}`);
-                
+
                 // Show mood reasoning in tooltip
                 updateMoodTooltip(newMood, reasoning);
             }
@@ -3634,7 +3705,7 @@
                     'blushing': '😳',
                     'bossy': '😤'
                 };
-                
+
                 const emoji = moodEmojis[mood] || '😊';
                 tooltip.textContent = `${emoji} ${mood.charAt(0).toUpperCase() + mood.slice(1)}`;
                 tooltip.title = reasoning; // Show reasoning on hover
@@ -3650,23 +3721,23 @@
                     className: e.target.className
                 });
             });
-            
+
             // Track typing
             const messageInput = document.getElementById('messageInput');
             if (messageInput) {
                 messageInput.addEventListener('input', () => {
                     sendActivityData('typing', 'User typing message');
                 });
-                
+
                 messageInput.addEventListener('focus', () => {
                     sendActivityData('input_focus', 'User focused input');
                 });
-                
+
                 messageInput.addEventListener('blur', () => {
                     sendActivityData('input_blur', 'User blurred input');
                 });
             }
-            
+
             // Track navigation
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(navItem => {
@@ -3676,7 +3747,7 @@
                     });
                 });
             });
-            
+
             // Track slider changes
             document.addEventListener('input', (e) => {
                 if (e.target.classList.contains('personality-slider-input')) {
@@ -3686,7 +3757,7 @@
                     });
                 }
             });
-            
+
             console.log('🎭 Activity tracking started');
         }
 
@@ -3695,7 +3766,7 @@
             const now = Date.now();
             const timeSinceMoodStart = now - moodState.moodStartTime;
             const timeSinceActivity = now - moodState.lastActivity;
-            
+
             // Check if mood timer has expired
             if (moodState.moodDuration && timeSinceMoodStart > moodState.moodDuration) {
                 console.log('🎭 Mood timer expired, requesting new mood analysis');
@@ -3704,7 +3775,7 @@
                     duration: moodState.moodDuration
                 });
             }
-            
+
             // Check for idle time
             if (timeSinceActivity > 60000) { // 1 minute idle
                 moodState.idleTime = timeSinceActivity;
@@ -4166,9 +4237,9 @@
 
             syncInProgress = true;
             addSyncLog('Starting sync operation...');
-            
+
             // Simulate sync process with real API call
-            fetch('http://localhost:8007/api/v1/sync/', { 
+            fetch('http://localhost:8007/api/v1/sync/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -4203,7 +4274,7 @@
 
         function testSyncConnection() {
             addSyncLog('Testing database connection...');
-            
+
             // Simulate connection test
             setTimeout(() => {
                 addSyncLog('Database connection successful!', 'success');
@@ -4222,7 +4293,7 @@
         function initSyncDashboard() {
             addSyncLog('Sync dashboard initialized');
             addSyncLog('Ready for sync operations');
-            
+
             // Auto-refresh sync status every 30 seconds
             setInterval(() => {
                 if (!syncInProgress) {
@@ -4249,12 +4320,12 @@
 
                 let text = '';
                 const columnLength = Math.floor(Math.random() * 8) + 8; // Longer columns
-                
+
                 for (let j = 0; j < columnLength; j++) {
-                    const char = Math.random() < 0.2 ? 
-                        specialChars[Math.floor(Math.random() * specialChars.length)] : 
+                    const char = Math.random() < 0.2 ?
+                        specialChars[Math.floor(Math.random() * specialChars.length)] :
                         characters[Math.floor(Math.random() * characters.length)];
-                    
+
                     // Add glitch effect to special characters
                     const isSpecial = Math.random() < 0.25;
                     if (isSpecial) {
@@ -4280,17 +4351,17 @@
                 setTimeout(() => {
                     const particle = document.createElement('div');
                     particle.className = 'matrix-particle';
-                    
+
                     // Random colors matching the matrix columns
                     const colors = ['#ff6b35', '#4ecdc4', '#ff6b9d', '#45b7d1', '#96ceb4', '#feca57'];
                     particle.style.color = colors[Math.floor(Math.random() * colors.length)];
-                    
+
                     particle.style.left = Math.random() * 100 + '%';
                     particle.style.animationDuration = (Math.random() * 3 + 2) + 's'; // Faster
                     particle.style.animationDelay = Math.random() * 1.5 + 's';
-                    
+
                     container.appendChild(particle);
-                    
+
                     // Remove particle after animation
                     setTimeout(() => {
                         if (particle.parentNode) {
@@ -4309,31 +4380,31 @@
             const rect = element.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            
+
             // Create 12 sparkles in a burst pattern
             for (let i = 0; i < 12; i++) {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'sparkle';
-                
+
                 // Random colors for sparkles
                 const colors = ['#00d4ff', '#ff6b35', '#4ecdc4', '#ff6b9d', '#feca57'];
                 sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
+
                 // Position at center of avatar
                 sparkle.style.left = centerX + 'px';
                 sparkle.style.top = centerY + 'px';
-                
+
                 // Random angle for burst effect
                 const angle = (i / 12) * Math.PI * 2;
                 const distance = 30 + Math.random() * 20;
                 const offsetX = Math.cos(angle) * distance;
                 const offsetY = Math.sin(angle) * distance;
-                
+
                 sparkle.style.setProperty('--offset-x', offsetX + 'px');
                 sparkle.style.setProperty('--offset-y', offsetY + 'px');
-                
+
                 document.body.appendChild(sparkle);
-                
+
                 // Remove after animation
                 setTimeout(() => {
                     if (sparkle.parentNode) {
@@ -4347,16 +4418,16 @@
         function handleAvatarClick() {
             const avatarCircle = document.querySelector('.sidebar-avatar-circle');
             if (!avatarCircle) return;
-            
+
             // Create sparkle burst
             createSparkles(avatarCircle);
-            
+
             // Add thinking state briefly
             avatarCircle.classList.add('thinking');
             setTimeout(() => {
                 avatarCircle.classList.remove('thinking');
             }, 2000);
-            
+
             console.log('✨ SPARKLE BURST! Avatar clicked!');
         }
 
@@ -4449,14 +4520,14 @@
             try {
                 // Load stickies from database API
                 await loadStickiesFromAPI();
-                
+
                 // Render initial notes
                 renderStickyNotes();
                 updateCategoryCounts();
-                
+
                 // Set up event listeners
                 setupStickyEventListeners();
-                
+
                 console.log('✅ Sticky notes loaded from database');
             } catch (error) {
                 console.error('❌ Error loading stickies:', error);
@@ -4474,7 +4545,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                
+
                 // Convert API data to frontend format
                 stickyNotes = data.map(sticky => ({
                     id: sticky.id,
@@ -4487,7 +4558,7 @@
                     priority: sticky.priority,
                     tags: sticky.tags || []
                 }));
-                
+
                 console.log(`📋 Loaded ${stickyNotes.length} stickies from database`);
             } catch (error) {
                 console.error('❌ API Error:', error);
@@ -4523,15 +4594,15 @@
             let filteredNotes = stickyNotes.filter(note => {
                 // Category filter
                 if (currentFilter !== 'all' && note.category !== currentFilter) return false;
-                
+
                 // Author filter
                 if (note.author === 'Allan' && !allanFilter) return false;
                 if (note.author === 'Robbie' && !robbieFilter) return false;
-                
+
                 // Search filter
-                if (searchTerm && !note.title.toLowerCase().includes(searchTerm) && 
+                if (searchTerm && !note.title.toLowerCase().includes(searchTerm) &&
                     !note.content.toLowerCase().includes(searchTerm)) return false;
-                
+
                 return true;
             });
 
@@ -4561,7 +4632,7 @@
         function updateCategoryCounts() {
             const categories = ['all', 'intel', 'reference', 'drafts', 'connections', 'shower-thoughts'];
             categories.forEach(category => {
-                const count = category === 'all' ? stickyNotes.length : 
+                const count = category === 'all' ? stickyNotes.length :
                     stickyNotes.filter(note => note.category === category).length;
                 document.getElementById(`${category}-count`).textContent = count;
             });
@@ -4630,7 +4701,7 @@
                 renderStickyNotes();
                 updateCategoryCounts();
                 closeStickyModal();
-                
+
                 console.log('✅ Sticky note saved to database');
             } catch (error) {
                 console.error('❌ Error saving sticky note:', error);
@@ -4646,11 +4717,11 @@
                 },
                 body: JSON.stringify(stickyData)
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return await response.json();
         }
 
@@ -4662,11 +4733,11 @@
                 },
                 body: JSON.stringify(updateData)
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return await response.json();
         }
 
@@ -4674,13 +4745,13 @@
             if (confirm('Are you sure you want to delete this sticky note?')) {
                 try {
                     await deleteStickyNoteAPI(id);
-                    
+
                     // Reload stickies from database
                     await loadStickiesFromAPI();
                     renderStickyNotes();
                     updateCategoryCounts();
                     closeStickyModal();
-                    
+
                     console.log('✅ Sticky note deleted from database');
                 } catch (error) {
                     console.error('❌ Error deleting sticky note:', error);
@@ -4693,11 +4764,11 @@
             const response = await fetch(`${API_BASE_URL}/stickies/${stickyId}`, {
                 method: 'DELETE'
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return await response.json();
         }
 
