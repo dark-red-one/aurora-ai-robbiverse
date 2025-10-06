@@ -90,7 +90,8 @@ CREATE TABLE IF NOT EXISTS gmail_messages (
     snippet TEXT,
     -- Short preview
     -- Vector embedding for semantic search (stored as TEXT until pgvector is installed)
-    embedding_json TEXT, -- JSON array of 1536 floats, will convert to VECTOR(1536) later
+    embedding_json TEXT,
+    -- JSON array of 1536 floats, will convert to VECTOR(1536) later
     -- Metadata
     labels TEXT [],
     -- Gmail labels
@@ -149,7 +150,8 @@ CREATE TABLE IF NOT EXISTS calendar_events (
     description TEXT,
     location VARCHAR(500),
     -- Vector embedding for semantic search (stored as TEXT until pgvector is installed)
-    embedding_json TEXT, -- JSON array of 1536 floats, will convert to VECTOR(1536) later
+    embedding_json TEXT,
+    -- JSON array of 1536 floats, will convert to VECTOR(1536) later
     -- Timing
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
@@ -252,7 +254,8 @@ CREATE TABLE IF NOT EXISTS google_tasks (
     title VARCHAR(500),
     notes TEXT,
     -- Vector embedding for semantic search (stored as TEXT until pgvector is installed)
-    embedding_json TEXT, -- JSON array of 1536 floats, will convert to VECTOR(1536) later
+    embedding_json TEXT,
+    -- JSON array of 1536 floats, will convert to VECTOR(1536) later
     -- Status
     status VARCHAR(50) DEFAULT 'needsAction',
     -- needsAction, completed
@@ -307,7 +310,8 @@ CREATE TABLE IF NOT EXISTS google_contacts (
     -- Notes
     notes TEXT,
     -- Vector embedding for semantic search (stored as TEXT until pgvector is installed)
-    embedding_json TEXT, -- JSON array of 1536 floats, will convert to VECTOR(1536) later
+    embedding_json TEXT,
+    -- JSON array of 1536 floats, will convert to VECTOR(1536) later
     -- Metadata
     photo_url TEXT,
     groups TEXT [],
