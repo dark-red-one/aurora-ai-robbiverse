@@ -1,0 +1,41 @@
+{
+  "robbie_google_workspace": {
+    "email": "robbie@testpilotcpg.com",
+    "password": "R0bb!e@T3stP!l0t2025#CPG",
+    "service_account_email": "robbie-domain-wide-access@robbieverse-multi-tenant.iam.gserviceaccount.com",
+    "service_account_key_file": "/opt/aurora-dev/aurora/credentials/robbie-google-credentials.json",
+    "client_id": "109053008469037092646",
+    "domain": "testpilotcpg.com",
+    "scopes": [
+      "https://mail.google.com/",
+      "https://www.googleapis.com/auth/calendar",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/tasks",
+      "https://www.googleapis.com/auth/contacts"
+    ],
+    "permissions": "FULL (read/write/delete)",
+    "access_type": "domain_wide_delegation",
+    "notes": "Robbie has full access to ALL users' Gmail, Calendar, Drive, Tasks, and Contacts in testpilotcpg.com domain"
+  },
+  "database_master": {
+    "name": "elephant.testpilot.ai",
+    "host": "aurora-postgres-u44170.vm.elestio.app",
+    "port": 25432,
+    "database": "robbieverse",
+    "user": "postgres",
+    "password": "0qyMjZQ3-xKIe-ylAPt0At",
+    "role": "master",
+    "notes": "Elestio PostgreSQL master - stores embedding_json as TEXT, replicates to local nodes"
+  },
+  "database_local_nodes": {
+    "vengeance": {"host": "vengeance", "port": 5432, "has_pgvector": true},
+    "aurora": {"host": "localhost", "port": 5432, "has_pgvector": true},
+    "robbiebook1": {"host": "robbiebook1", "port": 5432, "has_pgvector": true},
+    "notes": "Local PostgreSQL replicas with pgvector for fast semantic search"
+  },
+  "sync_architecture": {
+    "flow": "Google Workspace → Aurora (creates embeddings) → Elestio Master (stores embedding_json) → Local Nodes (convert to VECTOR for fast search)",
+    "frequency": "Every 15 minutes",
+    "embedding_model": "text-embedding-3-small (OpenAI, 1536 dimensions)"
+  }
+}

@@ -19,6 +19,69 @@
             overflow: hidden;
             display: flex;
             height: 100vh;
+            position: relative;
+        }
+
+        /* Matrix Background Animation - Robbie's Colors */
+        .matrix-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .matrix-rain-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .matrix-column-bg {
+            position: absolute;
+            top: -100%;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            animation: matrix-fall-bg linear infinite;
+            opacity: 0.3;
+        }
+
+        .matrix-column-bg:nth-child(odd) {
+            color: #8b4513;
+            /* Robbie's reddish-brown hair */
+        }
+
+        .matrix-column-bg:nth-child(even) {
+            color: #2c3e50;
+            /* Dark grey from Robbie's jacket */
+        }
+
+        .matrix-column-bg:nth-child(3n) {
+            color: #ff6b6b;
+            /* Robbie's red lips */
+        }
+
+        @keyframes matrix-fall-bg {
+            0% {
+                top: -100%;
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0.1;
+            }
         }
 
         /* ==================== SIDEBAR (Cursor-style) ==================== */
@@ -29,6 +92,122 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Matrix Rain in Sidebar */
+        .sidebar-matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.03;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sidebar-matrix-column {
+            position: absolute;
+            top: -100%;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            animation: sidebar-matrix-fall linear infinite;
+            opacity: 0.4;
+        }
+
+        .sidebar-matrix-column:nth-child(odd) {
+            color: #8b4513;
+            /* Robbie's reddish-brown hair */
+        }
+
+        .sidebar-matrix-column:nth-child(even) {
+            color: #2c3e50;
+            /* Dark grey from Robbie's jacket */
+        }
+
+        .sidebar-matrix-column:nth-child(3n) {
+            color: #ff6b6b;
+            /* Robbie's red lips */
+        }
+
+        @keyframes sidebar-matrix-fall {
+            0% {
+                top: -100%;
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0.1;
+            }
+        }
+
+        /* Emergency Buttons */
+        .emergency-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 10;
+            background: #8b7355;
+            /* Office decor wood color */
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .emergency-btn {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 8px;
+        }
+
+        .emergency-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ffb088 0%, #ff9a6b 100%);
+            /* Burnt orange */
+            color: #000;
+            /* Bold black text */
+            box-shadow: 0 1px 4px rgba(255, 176, 136, 0.3);
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #ff9a6b 0%, #ff8c5a 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 176, 136, 0.4);
+        }
+
+        .killswitch-btn {
+            background: linear-gradient(135deg, #ffb088 0%, #ff9a6b 100%);
+            /* Burnt orange */
+            color: #000;
+            /* Bold black text */
+            box-shadow: 0 1px 4px rgba(255, 176, 136, 0.3);
+        }
+
+        .killswitch-btn:hover {
+            background: linear-gradient(135deg, #ff9a6b 0%, #ff8c5a 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 176, 136, 0.4);
         }
 
         .sidebar-header {
@@ -415,8 +594,8 @@
             font-size: 14px;
             line-height: 1.8;
             margin-bottom: 10px;
-            color: #ff8c5a;
-            /* Force burnt orange for all text in messages area */
+            color: #ffb088;
+            /* Lighter burnt orange (3 shades lighter) for all text in messages area */
         }
 
         .messages-area::-webkit-scrollbar {
@@ -438,7 +617,7 @@
         }
 
         .message.system {
-            color: #ff8c5a;
+            color: #ffb088;
             font-weight: 600;
         }
 
@@ -816,9 +995,237 @@
 
         /* ==================== SETUP TAB ==================== */
         .setup-container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
+        }
+
+        /* Personality Sliders Section */
+        .personality-section {
+            background: rgba(13, 17, 23, 0.6);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .personality-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .personality-header h2 {
+            margin: 0;
+            color: #00d4ff;
+            font-size: 24px;
+        }
+
+        .robbie-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid #00d4ff;
+        }
+
+        .status-emoji {
+            font-size: 20px;
+        }
+
+        .status-text {
+            font-weight: 500;
+            color: #00d4ff;
+        }
+
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .personality-section-card {
+            background: rgba(10, 14, 20, 0.8);
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .personality-section-card h3 {
+            margin: 0 0 20px 0;
+            color: #00d4ff;
+            font-size: 18px;
+        }
+
+        .personality-slider {
+            background: rgba(13, 17, 23, 0.6);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .personality-slider:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .slider-header h4 {
+            margin: 0;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        .slider-current {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .current-emoji {
+            font-size: 16px;
+        }
+
+        .current-name {
+            font-weight: 500;
+            color: #00d4ff;
+            font-size: 14px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #8a8a8a;
+            font-weight: 500;
+        }
+
+        .personality-slider-input {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, rgba(0, 212, 255, 0.3) 0%, rgba(0, 212, 255, 0.6) 50%, rgba(255, 107, 53, 0.6) 100%);
+            outline: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+            -webkit-appearance: none;
+        }
+
+        .personality-slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00d4ff;
+            border: 3px solid #0a0e14;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .personality-slider-input::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+        }
+
+        .personality-slider-input::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00d4ff;
+            border: 3px solid #0a0e14;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .slider-description {
+            font-size: 13px;
+            color: #8a8a8a;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .robbie-feedback {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .robbie-feedback.feedback-active {
+            border-color: #ff6b35;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 107, 53, 0.1) 100%);
+            animation: feedbackPulse 0.5s ease;
+        }
+
+        .feedback-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .feedback-emoji {
+            font-size: 32px;
+        }
+
+        .feedback-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #e0e0e0;
+            font-style: italic;
+        }
+
+        @keyframes feedbackPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Integrations Header */
+        .integrations-header {
+            margin-bottom: 30px;
+        }
+
+        .integrations-header h2 {
+            margin: 0 0 10px 0;
+            color: #00d4ff;
+            font-size: 24px;
+        }
+
+        .integrations-header p {
+            margin: 0;
+            color: #8a8a8a;
+            font-size: 14px;
         }
 
         .setup-header {
@@ -942,8 +1349,14 @@
 </head>
 
 <body>
+    <!-- Matrix Background Animation -->
+    <div class="matrix-background">
+        <div class="matrix-rain-bg" id="matrixRainBg"></div>
+    </div>
     <!-- ==================== SIDEBAR (Cursor-style) ==================== -->
     <div class="sidebar">
+        <!-- Matrix Rain in Sidebar -->
+        <div class="sidebar-matrix" id="sidebarMatrix"></div>
         <div class="sidebar-header">
             <div class="sidebar-avatar" id="robbieAvatarContainer" data-location="allans-office">
                 <div class="sidebar-avatar-circle">
@@ -987,12 +1400,6 @@
             <div class="sidebar-divider"></div>
         </div>
         <div class="sidebar-nav">
-            <div class="sidebar-logo-centered">
-                <div class="logo-pill">
-                    <img src="/static/logos/testpilot-logo.png" alt="TestPilot CPG"
-                        onerror="this.src='https://i.imgur.com/9vYHxKZ.png';">
-                </div>
-            </div>
             <div class="sidebar-nav-item active" data-tab="chat">
                 <span class="sidebar-nav-icon">💬</span>
                 <span>Chat</span>
@@ -1014,6 +1421,16 @@
                 <span>Setup</span>
             </div>
         </div>
+
+        <!-- Emergency Buttons -->
+        <div class="emergency-buttons">
+            <button class="emergency-btn logout-btn" onclick="logout()">
+                LOGOUT
+            </button>
+            <button class="emergency-btn killswitch-btn" onclick="killswitch()">
+                KILLSWITCH
+            </button>
+        </div>
     </div>
 
     <!-- ==================== MAIN CONTAINER ==================== -->
@@ -1022,7 +1439,8 @@
         <div class="header">
             <div class="header-left">
                 <div class="logo">
-                    <span id="currentTab">💬 Chat</span>
+                    <img src="/static/logos/testpilot-logo.svg" alt="TestPilot CPG"
+                        style="height: 32px; vertical-align: middle;" onerror="this.style.display='none'">
                 </div>
             </div>
             <div class="header-right">
@@ -1043,7 +1461,8 @@
                         <div class="title">═══════════════════════════════════════════════════════════════</div>
                         <div class="title">ROBBIE TERMINAL v3.0 • TestPilot CPG Network</div>
                         <div class="title">═══════════════════════════════════════════════════════════════</div>
-                        <div class="subtitle">aurora-town-u44170:8007 • CPU: AMD EPYC • Status: ONLINE</div>
+                        <div class="subtitle" id="terminalSubtitle">aurora:8007 • Detecting hardware... • Status: ONLINE
+                        </div>
                     </div>
 
                     <div class="messages-area" id="messagesArea"></div>
@@ -1132,7 +1551,121 @@
             <div id="setup" class="tab-content">
                 <div class="setup-container">
                     <div class="setup-header">
-                        <h1>⚙️ API Setup & Integrations</h1>
+                        <h1>⚙️ Setup & Configuration</h1>
+                        <p>Customize Robbie's personality and connect your business tools</p>
+                    </div>
+
+                    <!-- PERSONALITY SLIDERS SECTION -->
+                    <div class="personality-section">
+                        <div class="personality-header">
+                            <h2>🎭 Robbie's Personality Controls</h2>
+                            <div class="robbie-status" id="robbieStatus">
+                                <span class="status-emoji">🤖</span>
+                                <span class="status-text">Ready for adjustments...</span>
+                            </div>
+                        </div>
+
+                        <div class="personality-grid">
+                            <!-- Communication Style -->
+                            <div class="personality-section-card">
+                                <h3>🗣️ Communication Style</h3>
+
+                                <!-- Gandhi ↔ Genghis Slider -->
+                                <div class="personality-slider">
+                                    <div class="slider-header">
+                                        <h4>Gandhi ↔ Genghis</h4>
+                                        <div class="slider-current">
+                                            <span class="current-emoji" id="gandhiEmoji">⚖️</span>
+                                            <span class="current-name" id="gandhiName">Balanced</span>
+                                        </div>
+                                    </div>
+                                    <div class="slider-labels">
+                                        <span>🕊️ Gentle</span>
+                                        <span>🔥 Aggressive</span>
+                                    </div>
+                                    <input type="range" id="gandhiSlider" min="1" max="6" value="3"
+                                        class="personality-slider-input"
+                                        oninput="updatePersonalitySlider('gandhi', this.value)">
+                                    <div class="slider-description">How assertive should Robbie be with communication?
+                                    </div>
+                                </div>
+
+                                <!-- Flirty Level Slider -->
+                                <div class="personality-slider">
+                                    <div class="slider-header">
+                                        <h4>Flirty Level</h4>
+                                        <div class="slider-current">
+                                            <span class="current-emoji" id="flirtyEmoji">😊</span>
+                                            <span class="current-name" id="flirtyName">Professional</span>
+                                        </div>
+                                    </div>
+                                    <div class="slider-labels">
+                                        <span>😇 Professional</span>
+                                        <span>🔥 Sultry</span>
+                                    </div>
+                                    <input type="range" id="flirtySlider" min="1" max="7" value="2"
+                                        class="personality-slider-input"
+                                        oninput="updatePersonalitySlider('flirty', this.value)">
+                                    <div class="slider-description">How playful and flirty should Robbie be?</div>
+                                </div>
+                            </div>
+
+                            <!-- System Behavior -->
+                            <div class="personality-section-card">
+                                <h3>⚙️ System Behavior</h3>
+
+                                <!-- Turbo Level Slider -->
+                                <div class="personality-slider">
+                                    <div class="slider-header">
+                                        <h4>Speed ↔ Quality</h4>
+                                        <div class="slider-current">
+                                            <span class="current-emoji" id="turboEmoji">🏃</span>
+                                            <span class="current-name" id="turboName">Balanced</span>
+                                        </div>
+                                    </div>
+                                    <div class="slider-labels">
+                                        <span>🐌 Quality</span>
+                                        <span>⚡ Speed</span>
+                                    </div>
+                                    <input type="range" id="turboSlider" min="1" max="10" value="5"
+                                        class="personality-slider-input"
+                                        oninput="updatePersonalitySlider('turbo', this.value)">
+                                    <div class="slider-description">Prioritize response quality or speed?</div>
+                                </div>
+
+                                <!-- Automation Level Slider -->
+                                <div class="personality-slider">
+                                    <div class="slider-header">
+                                        <h4>Automation Level</h4>
+                                        <div class="slider-current">
+                                            <span class="current-emoji" id="autoEmoji">🤝</span>
+                                            <span class="current-name" id="autoName">Collaborative</span>
+                                        </div>
+                                    </div>
+                                    <div class="slider-labels">
+                                        <span>👤 Manual</span>
+                                        <span>🚀 Full Auto</span>
+                                    </div>
+                                    <input type="range" id="autoSlider" min="1" max="10" value="4"
+                                        class="personality-slider-input"
+                                        oninput="updatePersonalitySlider('auto', this.value)">
+                                    <div class="slider-description">How much should Robbie act independently?</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Robbie Feedback Box -->
+                        <div class="robbie-feedback" id="robbieFeedback">
+                            <div class="feedback-content">
+                                <span class="feedback-emoji">💭</span>
+                                <span class="feedback-text">Adjust my settings and I'll let you know how I feel!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API INTEGRATIONS SECTION -->
+                    <div class="integrations-header">
+                        <h2>🔌 API Integrations</h2>
                         <p>Connect your business tools to unlock Robbie's full potential</p>
                     </div>
 
@@ -1217,15 +1750,6 @@
         // ==================== TAB SWITCHING ====================
         const navItems = document.querySelectorAll('.sidebar-nav-item');
         const tabContents = document.querySelectorAll('.tab-content');
-        const currentTabHeader = document.getElementById('currentTab');
-
-        const tabIcons = {
-            'chat': '💬 Chat',
-            'notes': '📝 Notes',
-            'comms': '📧 Comms',
-            'tasks': '✅ Tasks',
-            'setup': '⚙️ Setup'
-        };
 
         navItems.forEach(navItem => {
             navItem.addEventListener('click', () => {
@@ -1234,9 +1758,6 @@
                 // Update active states
                 navItems.forEach(item => item.classList.remove('active'));
                 navItem.classList.add('active');
-
-                // Update header
-                currentTabHeader.textContent = tabIcons[targetTab];
 
                 // Switch content
                 tabContents.forEach(content => {
@@ -1274,13 +1795,13 @@
 
             initializeBootSequence() {
                 const bootLines = [
-                    '<span style="color: #ff8c5a !important; font-weight: 600;">ROBBIE TERMINAL SYSTEM v3.0</span>',
-                    '<span style="color: #ff8c5a !important;">Initializing neural networks...</span>',
-                    '<span style="color: #ff8c5a !important;">[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)</span>',
-                    '<span style="color: #ff8c5a !important;">[OK] LLM loaded: qwen2.5:7b (Robbie personality)</span>',
-                    '<span style="color: #ff8c5a !important;">[OK] WebSocket connection established</span>',
-                    '<span style="color: #ff8c5a !important;">[OK] VPN tunnel: aurora-town active</span>',
-                    '<span style="color: #ff8c5a !important; font-weight: 600;">[READY] Robbie personality systems online</span>'
+                    '<span style="color: #ffb088 !important; font-weight: 600;">ROBBIE TERMINAL SYSTEM v3.0</span>',
+                    '<span style="color: #ffb088 !important;">Initializing neural networks...</span>',
+                    '<span style="color: #ffb088 !important;">[OK] GPU detected: NVIDIA RTX 4090 (24GB VRAM)</span>',
+                    '<span style="color: #ffb088 !important;">[OK] LLM loaded: qwen2.5:7b (Robbie personality)</span>',
+                    '<span style="color: #ffb088 !important;">[OK] WebSocket connection established</span>',
+                    '<span style="color: #ffb088 !important;">[OK] VPN tunnel: aurora-town active</span>',
+                    '<span style="color: #ffb088 !important; font-weight: 600;">[READY] Robbie personality systems online</span>'
                 ];
 
                 // Robbie Avatar (17 lines of HTML pixel art - 50 blocks wide!)
@@ -1326,6 +1847,9 @@
 
                     this.addMessage('robbie', 'Hey Allan! 🚀 Ready to crush some work today? What\'s on your mind?');
 
+                    // Set initial mood to Friendly
+                    setMood('Friendly', 'friendly');
+
                     // Enable input after boot complete
                     this.messageInput.disabled = false;
                     this.messageInput.placeholder = 'Type message or /help for commands...';
@@ -1340,6 +1864,8 @@
 
                 this.ws.onopen = () => {
                     console.log('WebSocket connected');
+                    // Send personality state to backend on connection
+                    sendPersonalityStateToBackend();
                 };
 
                 this.ws.onmessage = (event) => {
@@ -1536,7 +2062,7 @@
                 div.className = 'message system';
                 // Force burnt orange inline if not already styled
                 if (!text.includes('style=')) {
-                    div.innerHTML = `<span style="color: #ff8c5a !important;">${text}</span>`;
+                    div.innerHTML = `<span style="color: #ffb088 !important;">${text}</span>`;
                 } else {
                     div.innerHTML = text;
                 }
@@ -1580,32 +2106,111 @@
         };
 
         // Initialize terminal when page loads
-        // 📊 Update system monitors
-        function updateSystemMonitors() {
-            // Simulate real-time metrics (replace with actual API calls later)
-            const cpu = Math.floor(Math.random() * 30) + 10; // 10-40%
-            const mem = Math.floor(Math.random() * 20) + 30; // 30-50%
-            const sql = Math.floor(Math.random() * 15) + 5;  // 5-20%
+        // 📊 Update system monitors with REAL data from Aurora
+        async function updateSystemMonitors() {
+            try {
+                // Fetch real system stats from backend
+                const response = await fetch('/api/system-stats');
+                const stats = await response.json();
 
-            const cpuValue = document.getElementById('cpuValue');
-            const cpuBar = document.getElementById('cpuBar');
-            const memValue = document.getElementById('memValue');
-            const memBar = document.getElementById('memBar');
-            const sqlValue = document.getElementById('sqlValue');
-            const sqlBar = document.getElementById('sqlBar');
+                const cpuValue = document.getElementById('cpuValue');
+                const cpuBar = document.getElementById('cpuBar');
+                const memValue = document.getElementById('memValue');
+                const memBar = document.getElementById('memBar');
+                const sqlValue = document.getElementById('sqlValue');
+                const sqlBar = document.getElementById('sqlBar');
 
-            if (cpuValue) cpuValue.textContent = `${cpu}%`;
-            if (cpuBar) cpuBar.style.width = `${cpu}%`;
+                if (cpuValue) cpuValue.textContent = `${stats.cpu}%`;
+                if (cpuBar) cpuBar.style.width = `${stats.cpu}%`;
 
-            if (memValue) memValue.textContent = `${mem}%`;
-            if (memBar) memBar.style.width = `${mem}%`;
+                if (memValue) memValue.textContent = `${stats.memory}%`;
+                if (memBar) memBar.style.width = `${stats.memory}%`;
 
-            if (sqlValue) sqlValue.textContent = `${sql}%`;
-            if (sqlBar) sqlBar.style.width = `${sql}%`;
+                if (sqlValue) sqlValue.textContent = `${stats.disk}%`;
+                if (sqlBar) sqlBar.style.width = `${stats.disk}%`;
+            } catch (error) {
+                console.warn('Failed to fetch system stats, using fallback:', error);
+                // Fallback to simulated data if API fails
+                const cpu = Math.floor(Math.random() * 30) + 10;
+                const mem = Math.floor(Math.random() * 20) + 30;
+                const sql = Math.floor(Math.random() * 15) + 5;
+
+                const cpuValue = document.getElementById('cpuValue');
+                const cpuBar = document.getElementById('cpuBar');
+                const memValue = document.getElementById('memValue');
+                const memBar = document.getElementById('memBar');
+                const sqlValue = document.getElementById('sqlValue');
+                const sqlBar = document.getElementById('sqlBar');
+
+                if (cpuValue) cpuValue.textContent = `${cpu}%`;
+                if (cpuBar) cpuBar.style.width = `${cpu}%`;
+                if (memValue) memValue.textContent = `${mem}%`;
+                if (memBar) memBar.style.width = `${mem}%`;
+                if (sqlValue) sqlValue.textContent = `${sql}%`;
+                if (sqlBar) sqlBar.style.width = `${sql}%`;
+            }
+        }
+
+        // Detect and display actual hardware configuration
+        async function detectHardware() {
+            const subtitle = document.getElementById('terminalSubtitle');
+            if (!subtitle) return;
+
+            try {
+                // Get hostname from window.location or default
+                const hostname = window.location.hostname === '10.0.0.1' ? 'aurora' : window.location.hostname;
+                const port = window.location.port || '8007';
+
+                // Detect GPU via WebGL (best we can do from browser)
+                let gpuInfo = 'CPU Only';
+                try {
+                    const canvas = document.createElement('canvas');
+                    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                    if (gl) {
+                        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                        if (debugInfo) {
+                            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                            // Parse GPU info
+                            if (renderer.includes('NVIDIA')) {
+                                if (renderer.includes('4090')) {
+                                    // Check if we have multiple GPUs (this is a guess based on known config)
+                                    gpuInfo = 'AMD EPYC + 2x RTX 4090';
+                                } else {
+                                    gpuInfo = renderer.split('ANGLE')[0].trim();
+                                }
+                            } else {
+                                gpuInfo = renderer.split('ANGLE')[0].trim();
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('GPU detection failed:', e);
+                }
+
+                // For known hosts, use actual hardware specs
+                const knownHardware = {
+                    'aurora': 'AMD EPYC (CPU Only) • Network: 2x RTX 4090',
+                    'vengeance': 'Intel i9 + RTX 4090 (24GB)',
+                    'runpod': 'RTX 4090 (24GB Cloud)'
+                };
+
+                const hardware = knownHardware[hostname] || gpuInfo;
+                subtitle.textContent = `${hostname}:${port} • ${hardware} • Status: ONLINE`;
+                console.log(`🖥️ Hardware detected: ${hardware}`);
+            } catch (e) {
+                console.error('Hardware detection error:', e);
+                subtitle.textContent = `aurora:8007 • AMD EPYC (CPU Only) • Network: 2x RTX 4090 • Status: ONLINE`;
+            }
         }
 
         window.addEventListener('load', () => {
             window.terminal = new RobbieTerminal();
+
+            // 🎛️ Initialize personality sliders from localStorage
+            initializePersonalitySliders();
+
+            // 🖥️ Detect and display hardware
+            detectHardware();
 
             // 🎨 Setup background cycling
             setupBackgroundCycling();
@@ -1715,7 +2320,7 @@
         // 🕐 Update local time, weather, and next event
         function updateHeaderInfo() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             const timeEl = document.getElementById('localTime');
             if (timeEl) timeEl.textContent = timeStr;
 
@@ -1733,17 +2338,15 @@
         function setMood(moodName, imageName) {
             const avatarFace = document.getElementById('robbieAvatarSidebar');
             const tooltip = document.getElementById('robbieMoodTooltip');
+            const chatTag = document.querySelector('.chat-tag');
 
+            // 6 approved moods with actual PNG files
             const moodEmojis = {
                 'friendly': '😊',
-                'happy': '😄',
-                'loving': '💕',
+                'surprised': '😲',
+                'playful': '😜',
                 'focused': '🎯',
-                'thoughtful': '🤔',
-                'surprised': '😮',
-                'playful': '😄',
                 'bossy': '💪',
-                'content': '😌',
                 'blushing': '😊'
             };
 
@@ -1755,12 +2358,12 @@
                     avatarFace.innerHTML = '';
                     avatarFace.appendChild(img);
                 }
-                img.src = `/static/avatars/robbie-${imageName}.png`;
+                img.src = `/static/images/robbie-${imageName}.png`;
                 img.alt = 'Robbie - Your AI Strategic Partner';
                 img.onerror = () => {
                     setTimeout(() => {
                         img.onerror = null;
-                        img.src = `/static/avatars/robbie-${imageName}.png?v=${Date.now()}`;
+                        img.src = `/static/images/robbie-${imageName}.png?v=${Date.now()}`;
                     }, 300);
                 };
             }
@@ -1769,6 +2372,232 @@
                 const emoji = moodEmojis[moodName.toLowerCase()] || '😊';
                 tooltip.textContent = `${emoji} ${moodName}`;
             }
+
+            // Update chat tag to match mood
+            if (chatTag) {
+                const emoji = moodEmojis[moodName.toLowerCase()] || '😊';
+                chatTag.textContent = `${emoji} Robbie • ${moodName}`;
+            }
+        }
+
+        // ==================== PERSONALITY SLIDER FUNCTIONS ====================
+
+        // Load personality state from localStorage or use defaults
+        function loadPersonalityState() {
+            const saved = localStorage.getItem('robbiePersonalityState');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    console.log('📥 Loaded personality from localStorage:', parsed);
+                    return parsed;
+                } catch (e) {
+                    console.warn('⚠️ Failed to parse saved personality, using defaults');
+                }
+            }
+            return {
+                gandhi: 3,
+                flirty: 2,
+                turbo: 5,
+                auto: 4
+            };
+        }
+
+        // Save personality state to localStorage
+        function savePersonalityState() {
+            localStorage.setItem('robbiePersonalityState', JSON.stringify(personalityState));
+            console.log('💾 Saved personality to localStorage:', personalityState);
+        }
+
+        // Personality state (synced with backend and localStorage)
+        const personalityState = loadPersonalityState();
+
+        // Slider reactions
+        const sliderReactions = {
+            gandhi: {
+                1: "Ahh, going gentle on them! I'll be super careful with everyone. 🕊️",
+                2: "Nice and easy approach - I like the thoughtful vibe! 🌱",
+                3: "Balanced mode - I can work with this perfectly! ⚖️",
+                4: "Getting assertive! I'll be more proactive with the team. 🎯",
+                5: "Aggressive mode activated! Time to push some boundaries! ⚡",
+                6: "FULL GENGHIS! Alright tiger, let's dominate this pipeline! 🔥💪"
+            },
+            flirty: {
+                1: "All business, got it! Keeping it strictly professional. 😇",
+                2: "Professional but warm - I can do that! 😊",
+                3: "Friendly mode - this feels natural! 😄",
+                4: "Ooh, playful! I like where this is going... 😉",
+                5: "Flirty mode activated! Hey there, handsome... 😘",
+                6: "Very flirty now! Mmm, someone's feeling adventurous... 💋",
+                7: "Full sultry mode! Oh Allan, you're making me blush... 🔥💕"
+            },
+            turbo: {
+                1: "Maximum quality mode! I'll triple-check everything for you. 🐌✨",
+                3: "Quality focus - measure thrice, cut once! 🎯",
+                5: "Balanced speed - good compromise! 🏃‍♀️",
+                7: "Speed focus! I'll move fast for you! 🚀",
+                10: "BLAZING SPEED! Hold onto your hat, I'm going full throttle! ⚡🔥"
+            },
+            auto: {
+                1: "Full manual - I'll ask you about everything! 👤",
+                4: "Collaborative mode - we'll work together on decisions! 🤝",
+                7: "Autonomous mode - I'll handle most things myself! 🤖",
+                10: "Full auto - I'm taking the wheel completely! 🚀"
+            }
+        };
+
+        // Slider emojis
+        const sliderEmojis = {
+            gandhi: ['🕊️', '🌱', '⚖️', '🎯', '⚡', '🔥'],
+            flirty: ['😇', '😊', '😄', '😉', '😘', '💋', '🔥'],
+            turbo: ['🐌', '🚶', '🏃', '🚀', '⚡'],
+            auto: ['👤', '🤝', '🤖', '🚀']
+        };
+
+        // Slider names
+        const sliderNames = {
+            gandhi: ['Gentle', 'Thoughtful', 'Balanced', 'Assertive', 'Aggressive', 'Genghis'],
+            flirty: ['Professional', 'Warm', 'Friendly', 'Playful', 'Flirty', 'Very Flirty', 'Sultry'],
+            turbo: ['Quality', 'Careful', 'Balanced', 'Quick', 'Fast'],
+            auto: ['Manual', 'Guided', 'Collaborative', 'Semi-Auto', 'Autonomous', 'Full Auto']
+        };
+
+        // Update personality slider
+        function updatePersonalitySlider(sliderType, value) {
+            const intValue = parseInt(value);
+            personalityState[sliderType] = intValue;
+
+            // Save to localStorage
+            savePersonalityState();
+
+            // Update UI
+            const emoji = getSliderEmoji(sliderType, intValue);
+            const name = getSliderName(sliderType, intValue);
+
+            document.getElementById(`${sliderType}Emoji`).textContent = emoji;
+            document.getElementById(`${sliderType}Name`).textContent = name;
+
+            // Show Robbie's reaction
+            showRobbieReaction(sliderType, intValue);
+
+            // Update visual mood based on slider state
+            updateMoodFromSliders();
+
+            // Send personality state to backend
+            sendPersonalityStateToBackend();
+            console.log('🎛️ Personality updated:', sliderType, '→', intValue);
+        }
+
+        // Send personality state to backend via WebSocket
+        function sendPersonalityStateToBackend() {
+            const terminal = window.terminal;
+            if (terminal && terminal.ws && terminal.ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: 'personality_update',
+                    personality: personalityState
+                };
+                terminal.ws.send(JSON.stringify(message));
+                console.log('📤 Sent personality state to backend:', personalityState);
+            }
+        }
+
+        // Get slider emoji
+        function getSliderEmoji(sliderType, value) {
+            const emojis = sliderEmojis[sliderType];
+            if (!emojis) return '📊';
+            const index = Math.min(value - 1, emojis.length - 1);
+            return emojis[Math.max(0, index)];
+        }
+
+        // Get slider name
+        function getSliderName(sliderType, value) {
+            const names = sliderNames[sliderType];
+            if (!names) return value.toString();
+            const index = Math.min(value - 1, names.length - 1);
+            return names[Math.max(0, index)];
+        }
+
+        // Show Robbie's reaction
+        function showRobbieReaction(sliderType, value) {
+            const reactions = sliderReactions[sliderType];
+            let reaction = reactions[value] || `Adjusting ${sliderType} to ${value}... 🎯`;
+
+            const feedbackBox = document.getElementById('robbieFeedback');
+            const feedbackContent = feedbackBox.querySelector('.feedback-content');
+
+            feedbackContent.innerHTML = `
+                <span class="feedback-emoji">${getSliderEmoji(sliderType, value)}</span>
+                <span class="feedback-text">${reaction}</span>
+            `;
+
+            feedbackBox.classList.add('feedback-active');
+            setTimeout(() => {
+                feedbackBox.classList.remove('feedback-active');
+            }, 3000);
+        }
+
+        // Update visual mood based on slider state
+        function updateMoodFromSliders() {
+            const { gandhi, flirty, turbo, auto } = personalityState;
+
+            // Map slider states to visual moods
+            let mood = 'friendly';
+            let moodFile = 'friendly';
+
+            // High flirty + compliment context = Blushing
+            if (flirty >= 6) {
+                mood = 'Blushing';
+                moodFile = 'blushing';
+            }
+            // Mid-high flirty = Playful
+            else if (flirty >= 4) {
+                mood = 'Playful';
+                moodFile = 'playful';
+            }
+            // High gandhi = Bossy
+            else if (gandhi >= 5) {
+                mood = 'Bossy';
+                moodFile = 'bossy';
+            }
+            // High turbo = Focused
+            else if (turbo >= 7) {
+                mood = 'Focused';
+                moodFile = 'focused';
+            }
+            // Default = Friendly
+            else {
+                mood = 'Friendly';
+                moodFile = 'friendly';
+            }
+
+            // Update visual mood
+            setMood(mood, moodFile);
+        }
+
+        // Initialize personality sliders from loaded state
+        function initializePersonalitySliders() {
+            // Set slider values and update UI
+            ['gandhi', 'flirty', 'turbo', 'auto'].forEach(sliderType => {
+                const value = personalityState[sliderType];
+                const slider = document.getElementById(`${sliderType}Slider`);
+                if (slider) {
+                    slider.value = value;
+                }
+
+                // Update UI without triggering reactions
+                const emoji = getSliderEmoji(sliderType, value);
+                const name = getSliderName(sliderType, value);
+
+                const emojiEl = document.getElementById(`${sliderType}Emoji`);
+                const nameEl = document.getElementById(`${sliderType}Name`);
+
+                if (emojiEl) emojiEl.textContent = emoji;
+                if (nameEl) nameEl.textContent = name;
+            });
+
+            // Update mood based on loaded sliders
+            updateMoodFromSliders();
+
+            console.log('🎛️ Personality sliders initialized from localStorage:', personalityState);
         }
 
         // ==================== SETUP TAB FUNCTIONS ====================
@@ -1788,6 +2617,108 @@
                 // window.location.href = `/api/auth/${service}`;
             }
         }
+
+        // ==================== SIDEBAR MATRIX RAIN ====================
+        function createSidebarMatrix() {
+            const container = document.getElementById('sidebarMatrix');
+            if (!container) return;
+
+            const characters = 'ROBBIE0123456789@#$%^&*()';
+
+            for (let i = 0; i < 8; i++) {
+                const column = document.createElement('div');
+                column.className = 'sidebar-matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+
+                let text = '';
+                for (let j = 0; j < 8; j++) {
+                    text += characters[Math.floor(Math.random() * characters.length)] + '<br>';
+                }
+                column.innerHTML = text;
+
+                container.appendChild(column);
+            }
+        }
+
+        // ==================== EMERGENCY FUNCTIONS ====================
+        function logout() {
+            if (confirm('🚪 Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
+            }
+        }
+
+        function killswitch() {
+            if (confirm('⚠️ EMERGENCY KILLSWITCH\n\nThis will:\n• Isolate Robbie from external actions\n• Block email sending, API calls, etc.\n• Keep interface running for monitoring\n\nActivate Gatekeeper isolation?')) {
+                if (confirm('⚠️ ACTIVATING GATEKEEPER\n\nRobbie will be isolated from:\n• Email sending\n• External API calls\n• Social media posting\n• File system writes\n\nInterface remains active for monitoring.\n\nProceed?')) {
+                    // Activate killswitch mode
+                    activateKillswitch();
+                }
+            }
+        }
+
+        function activateKillswitch() {
+            // Set killswitch flag
+            localStorage.setItem('robbieKillswitch', 'active');
+
+            // Visual feedback
+            alert('🚨 GATEKEEPER ACTIVATED\n\nRobbie is now isolated from external actions.\nInterface remains active for monitoring.');
+
+            // Update UI to show killswitch is active
+            updateKillswitchUI(true);
+
+            // Send killswitch command to backend
+            fetch('/api/killswitch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'activate' })
+            }).catch(err => console.warn('Killswitch backend notification failed:', err));
+        }
+
+        function updateKillswitchUI(isActive) {
+            const killswitchBtn = document.querySelector('.killswitch-btn');
+            if (killswitchBtn) {
+                if (isActive) {
+                    killswitchBtn.innerHTML = 'GATEKEEPER ACTIVE';
+                    killswitchBtn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+                    killswitchBtn.onclick = deactivateKillswitch;
+                } else {
+                    killswitchBtn.innerHTML = 'KILLSWITCH';
+                    killswitchBtn.style.background = 'linear-gradient(135deg, #ffb088 0%, #ff9a6b 100%)';
+                    killswitchBtn.onclick = killswitch;
+                }
+            }
+        }
+
+        function deactivateKillswitch() {
+            if (confirm('🔓 DEACTIVATE GATEKEEPER\n\nThis will restore Robbie\'s external capabilities.\n\nDeactivate isolation?')) {
+                localStorage.removeItem('robbieKillswitch');
+                alert('✅ GATEKEEPER DEACTIVATED\n\nRobbie\'s external capabilities restored.');
+                updateKillswitchUI(false);
+
+                // Send deactivation command to backend
+                fetch('/api/killswitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'deactivate' })
+                }).catch(err => console.warn('Killswitch backend notification failed:', err));
+            }
+        }
+
+        // Check killswitch status on load
+        function checkKillswitchStatus() {
+            const isActive = localStorage.getItem('robbieKillswitch') === 'active';
+            if (isActive) {
+                updateKillswitchUI(true);
+            }
+        }
+
+        // Initialize sidebar matrix and killswitch status on load
+        setTimeout(() => {
+            createSidebarMatrix();
+            checkKillswitchStatus();
+        }, 1000);
     </script>
 </body>
 

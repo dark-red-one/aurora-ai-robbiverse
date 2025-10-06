@@ -23,3 +23,12 @@ town.lan {
     reload 30s
   }
 }
+
+testpilot.ai {
+  log
+  errors
+  file /etc/coredns/zones/testpilot.ai.db {
+    transfer to 10.0.0.0/24
+    reload 30s
+  }
+}

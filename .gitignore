@@ -65,3 +65,4 @@ api_keys.txt
 # OS files
 .DS_Store
 Thumbs.db
+.credentials/*.json
