@@ -6,6 +6,20 @@
 
 ---
 
+## 🚨 CONNECTION FIX (READ THIS FIRST!)
+
+**Having trouble connecting to RobbieBook1 or other nodes?**
+```bash
+# Fix all connections immediately
+./deployment/robbiebook-connection-fix.sh
+
+# Test everything
+~/test-connections.sh
+
+# Full guide
+cat docs/ROBBIEBOOK_CONNECTION_GUIDE.md
+```
+
 ## 🚀 Quick Start
 
 ```bash
@@ -25,6 +39,15 @@ cd backend && uvicorn app.main:app --reload
 # Run frontend
 cd frontend && npm start
 ```
+
+---
+
+## 📚 Essential Documentation
+
+- **[QUICK_START.md](QUICK_START.md)** - Your go-to reference
+- **[RobbieBook Connection Guide](docs/ROBBIEBOOK_CONNECTION_GUIDE.md)** - Never get stuck connecting
+- **[RunPod Network](docs/ACTUAL_RUNPOD_NETWORK.md)** - 5x RTX 4090 setup
+- **[RobbieBook1 Setup](docs/ROBBIEBOOK1_COMPLETE_SETUP.md)** - MacBook configuration
 
 ---
 

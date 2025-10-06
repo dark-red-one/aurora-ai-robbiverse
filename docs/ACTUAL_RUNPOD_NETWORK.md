@@ -1,9 +1,11 @@
 # 🚀 ACTUAL RUNPOD NETWORK - 3 RTX 4090 POWERHOUSES
+
 **Real RunPod Infrastructure Discovery**
 
-## 🎯 THE ACTUAL 3-POD NETWORK:
+## 🎯 THE ACTUAL 3-POD NETWORK
 
 ### 🏛️ Pod 1: Aurora (CURRENT/AUTHORITY)
+
 - **ID:** `2tbwzatlrjdy7i`
 - **Host:** `54acac6cfcfe`
 - **SSH:** `root@82.221.170.242 -p 24505`
@@ -13,6 +15,7 @@
 - **Status:** ✅ ACTIVE (where we are now)
 
 ### 🤝 Pod 2: Collaboration
+
 - **ID:** `7k1blgn8pa3k43`
 - **SSH:** `root@213.181.111.2 -p 43540`
 - **DNS:** `collaboration.testpilot.ai`
@@ -21,6 +24,7 @@
 - **Status:** 🔍 NEEDS ACCESS SETUP
 
 ### 📈 Pod 3: Fluenti Marketing
+
 - **ID:** `n4zcnj47dy7q05` (fluenti-marketing-001)  
 - **SSH:** `root@103.196.86.56 -p 19777`
 - **DNS:** `fluenti.testpilot.ai`
@@ -29,14 +33,16 @@
 - **Status:** 🔍 NEEDS ACCESS SETUP
 
 ### 💻 Machine 4: Vengeance (LOCAL)
+
 - **DNS:** `vengeance.testpilot.ai` (dynamic)
-- **GPUs:** 1x RTX 4090 (24GB VRAM) 
+- **GPUs:** 1x RTX 4090 (24GB VRAM)
 - **Role:** Local development, Windows→Linux migration
 - **Status:** 🔄 Ready for Linux transformation
 
-## 🔧 DIRECT SYNC NETWORK IMPLEMENTATION:
+## 🔧 DIRECT SYNC NETWORK IMPLEMENTATION
 
-### Aurora Authority Commands:
+### Aurora Authority Commands
+
 ```bash
 # Sync TO Collaboration Pod
 rsync -avz --delete -e "ssh -p 43540" /workspace/aurora/ root@213.181.111.2:/workspace/aurora/
@@ -49,7 +55,8 @@ ssh root@213.181.111.2 -p 43540 "hostname && nvidia-smi --query-gpu=name --forma
 ssh root@103.196.86.56 -p 19777 "hostname && nvidia-smi --query-gpu=name --format=csv,noheader"
 ```
 
-### MacBook Sync Options:
+### MacBook Sync Options
+
 ```bash
 # From Aurora (primary)
 rsync -avz --delete -e "ssh -p 24505" root@82.221.170.242:/workspace/aurora/ ~/aurora-local/
@@ -61,15 +68,17 @@ rsync -avz --delete -e "ssh -p 43540" root@213.181.111.2:/workspace/aurora/ ~/au
 rsync -avz --delete -e "ssh -p 19777" root@103.196.86.56:/workspace/aurora/ ~/aurora-local/
 ```
 
-## 🌐 DNS MAPPING STRATEGY:
+## 🌐 DNS MAPPING STRATEGY
 
-### Domain Purpose:
+### Domain Purpose
+
 - **aurora.testpilot.ai** → Primary development (current Aurora)
 - **collaboration.testpilot.ai** → Team collaboration hub  
 - **fluenti.testpilot.ai** → Marketing AI operations
 - **vengeance.testpilot.ai** → Local development (future Linux)
 
-### Load Balancing Potential:
+### Load Balancing Potential
+
 ```
 Client Request → DNS Router → Available Pod
                     ↓
@@ -78,9 +87,10 @@ Client Request → DNS Router → Available Pod
     fluenti.testpilot.ai (priority 3)
 ```
 
-## 🚀 NEXT DISCOVERY STEPS:
+## 🚀 NEXT DISCOVERY STEPS
 
 ### Step 1: Discover Other Pod Capabilities
+
 ```bash
 # Test collaboration pod
 ssh root@213.181.111.2 -p 43540 << 'EOF'
@@ -100,6 +110,7 @@ EOF
 ```
 
 ### Step 2: Deploy Aurora to All Pods
+
 ```bash
 # Clone Aurora to collaboration pod
 ssh root@213.181.111.2 -p 43540 "cd /workspace && git clone https://github.com/dark-red-one/aurora-ai-robbiverse.git aurora"
@@ -109,6 +120,7 @@ ssh root@103.196.86.56 -p 19777 "cd /workspace && git clone https://github.com/d
 ```
 
 ### Step 3: Establish Real-Time Sync
+
 ```bash
 # Aurora push to both backup pods
 #!/bin/bash
@@ -125,9 +137,10 @@ echo "✅ Fluenti pod synced"
 echo "🎯 All pods synchronized with Aurora authority"
 ```
 
-## 🎯 ACTUAL GPU POWER - 5X RTX 4090 NETWORK:
+## 🎯 ACTUAL GPU POWER - 5X RTX 4090 NETWORK
 
 ### **THE REAL COUNT:**
+
 - **Aurora:** 2x RTX 4090 = 48GB VRAM ✅ (current authority)
 - **Collaboration:** 1x RTX 4090 = 24GB VRAM 🔗 (backup pod #1)  
 - **Fluenti:** 1x RTX 4090 = 24GB VRAM 🔗 (backup pod #2)
@@ -135,6 +148,7 @@ echo "🎯 All pods synchronized with Aurora authority"
 - **TOTAL:** **5x RTX 4090 = 120GB VRAM**
 
 ### **DISTRIBUTED AI EMPIRE POWER:**
+
 - **120GB total VRAM** across 4 machines
 - **Parallel training** capability across cloud + local
 - **Redundant backup** with 3 cloud pods
