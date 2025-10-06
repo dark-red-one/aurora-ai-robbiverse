@@ -20,7 +20,7 @@ export class ApprovalUI {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
             padding: 20px; 
             background: #1a1a1a; 

@@ -33,7 +33,7 @@ export class CompleteTabbedInterface {
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
             color: #cccccc;
             min-height: 100vh;

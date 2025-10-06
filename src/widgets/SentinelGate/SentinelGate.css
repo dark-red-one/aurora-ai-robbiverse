@@ -6,7 +6,7 @@
   min-height: 100vh;
   padding: 2rem 1rem;
   background: #f9fafb;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .sentinel-gate--dark {
