@@ -66,3 +66,5 @@ api_keys.txt
 .DS_Store
 Thumbs.db
 .credentials/*.json
+google-credentials.json
+.credentials/
