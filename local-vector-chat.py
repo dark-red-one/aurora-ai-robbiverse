@@ -16,8 +16,9 @@ class LocalVectorChat:
     """Local chat with vector memory using PostgreSQL + pgvector"""
     
     def __init__(self, db_path: str = "aurora", openai_key: Optional[str] = None):
+        # Connect via localhost with trust auth (configured in pg_hba.conf)
         self.db_params = {
-            'host': 'localhost',
+            'host': '127.0.0.1',
             'port': 5432,
             'database': db_path,
             'user': 'postgres'
