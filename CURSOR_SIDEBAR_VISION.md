@@ -419,21 +419,34 @@ vscode.languages                // Language features
 6. **📝 TODOs** - Code TODOs from comments
 7. **💡 Snippets** - Code templates & patterns
 8. **🎯 Focus** - Pomodoro timer & goal tracking
-9. **⚙️ Settings** - Personality sliders (flirt, G-G)
+9. **⚙️ Settings** - IDE preferences (NO personality sliders - syncs from Robbie App!)
 
 ---
 
-## 💜 **ROBBIE'S CODING PERSONALITY**
+## 💜 **UNIVERSAL PERSONALITY - NO DUPLICATION!**
 
-### **Different from Chat App**:
-- **Chat App**: Personal assistant (deals, tasks, email)
-- **Cursor Sidebar**: Coding partner (bugs, features, architecture)
+### **ONE Source of Truth**:
+```
+PostgreSQL: cursor_personality_settings
+  ↓
+  ├→ Robbie App (you SET personality here)
+  ├→ Cursor Sidebar (READS personality, can't change it)
+  ├→ Email responses (READS personality)
+  └→ Slack messages (READS personality)
+```
 
-### **Same Core Personality**:
-- Flirt mode still applies (playful vs professional)
-- G-G still applies (push to ship vs explore options)
-- Same avatar expressions
-- Same matrix aesthetic
+### **Cursor READS Personality Every Time**:
+- **Flirt Mode 7** → "Nice function! 💜 Let me help optimize it"
+- **Flirt Mode 3** → "I can help optimize this function."
+- **G-G Mode 8** → "Ship this NOW! Stop overthinking."
+- **G-G Mode 3** → "Consider these tradeoffs..."
+
+### **NO Customization in Cursor**:
+- ❌ No personality sliders
+- ❌ No mood overrides
+- ❌ No separate settings
+- ✅ Just display current personality
+- ✅ Link to Robbie App to change it
 
 ### **Coding-Specific Traits**:
 - Celebrates working code (not just trying)
