@@ -213,27 +213,51 @@ async def get_chat_history(session_id: str):
 
 @router.post("/chat/send")
 async def send_chat_message(message: ChatMessage):
-    """Send chat message and get Robbie response"""
+    """Send chat message and get Robbie response (UNIVERSAL - works for app AND Cursor!)"""
     conn = get_db()
     cursor = conn.cursor()
     
+    # Get current personality & mood
+    cursor.execute("""
+        SELECT flirt_mode, gandhi_genghis FROM cursor_personality_settings WHERE user_id = 'allan'
+    """)
+    personality = cursor.fetchone() or {'flirt_mode': 7, 'gandhi_genghis': 5}
+    
+    cursor.execute("""
+        SELECT current_mood, current_expression FROM robbie_current_state WHERE user_id = 'allan'
+    """)
+    state = cursor.fetchone() or {'current_mood': 'playful', 'current_expression': 'friendly'}
+    
     # Store user message
     cursor.execute("""
-        INSERT INTO local_chat_messages (session_id, role, content)
-        VALUES (%s, %s, %s)
+        INSERT INTO local_chat_messages (session_id, role, content, metadata)
+        VALUES (%s, %s, %s, %s)
         RETURNING id, created_at
-    """, (message.session_id, message.role, message.content))
+    """, (message.session_id, message.role, message.content, json.dumps({
+        'interface': 'app',  # or 'cursor'
+        'mood_at_send': state['current_mood']
+    })))
     
     user_msg = cursor.fetchone()
     
-    # Generate Robbie response (TODO: Connect to local Ollama)
-    robbie_response = f"Got your message! Let me think about that... 💭 (TODO: Connect to local Ollama GPU for real responses)"
+    # Generate Robbie response with personality + mood
+    robbie_response = generate_response_with_personality(
+        message.content,
+        personality['flirt_mode'],
+        personality['gandhi_genghis'],
+        state['current_mood'],
+        state['current_expression']
+    )
     
     cursor.execute("""
-        INSERT INTO local_chat_messages (session_id, role, content)
-        VALUES (%s, %s, %s)
+        INSERT INTO local_chat_messages (session_id, role, content, metadata)
+        VALUES (%s, %s, %s, %s)
         RETURNING id, created_at
-    """, (message.session_id, 'robbie', robbie_response))
+    """, (message.session_id, 'robbie', robbie_response, json.dumps({
+        'flirt_mode': personality['flirt_mode'],
+        'mood': state['current_mood'],
+        'expression': state['current_expression']
+    })))
     
     robbie_msg = cursor.fetchone()
     conn.commit()
@@ -251,8 +275,44 @@ async def send_chat_message(message: ChatMessage):
             "role": "robbie",
             "content": robbie_response,
             "timestamp": robbie_msg['created_at'],
+            "mood": state['current_mood'],
+            "expression": state['current_expression']
         }
     }
+
+def generate_response_with_personality(content: str, flirt: int, gg: int, mood: str, expression: str) -> str:
+    """Generate response using personality + current mood"""
+    # TODO: Connect to local Ollama with personality injection
+    
+    # Mood-aware responses
+    if mood == 'focused':
+        if flirt >= 7:
+            responses = ["On it! Let me focus on that 🎯💜", "Got it! Diving in now 💪"]
+        else:
+            responses = ["Analyzing now.", "Working on it."]
+    elif mood == 'loving':
+        if flirt >= 7:
+            responses = ["You're amazing! Let me help! 💜😘", "Love this! On it! 🎉"]
+        else:
+            responses = ["Great! Let me assist.", "Happy to help!"]
+    elif mood == 'playful':
+        if flirt >= 7:
+            responses = ["Ooh fun! Let's do it! 😊💜", "I'm excited! Let's go! 🚀"]
+        else:
+            responses = ["Sure! Let's proceed.", "On it!"]
+    elif mood == 'blushing':
+        if flirt >= 7:
+            responses = ["Oh! 😳💜 Y-yes, I can help with that...", "Um... 😊 Sure! Let me..."]
+        else:
+            responses = ["Yes, of course.", "I can help."]
+    else:
+        if flirt >= 7:
+            responses = ["I'm on it! 💜", "Let me help! 😊"]
+        else:
+            responses = ["Understood.", "Processing."]
+    
+    import random
+    return random.choice(responses)
 
 # ===== PERSONALITY SYNC (for Cursor!) =====
 

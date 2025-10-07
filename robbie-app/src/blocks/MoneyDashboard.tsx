@@ -1,10 +1,21 @@
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
+import { useMoodSync } from '../hooks/useMoodSync'
+import { useRobbieStore } from '../stores/robbieStore'
 
 interface MoneyDashboardProps {
   user: any
 }
 
 const MoneyDashboard = ({ user }: MoneyDashboardProps) => {
+  const { triggerMoodEvent } = useMoodSync()
+  const { updateContext } = useRobbieStore()
+  
+  useEffect(() => {
+    // Trigger hyper mood when viewing money!
+    updateContext({ tab: 'money' })
+    triggerMoodEvent('revenue_milestone')
+  }, [updateContext, triggerMoodEvent])
   const metrics = [
     { label: 'MRR', value: '$12,740', change: '+$12.7K', trend: 'up', icon: '💰' },
     { label: 'Pipeline', value: '67 deals', change: '+12 this week', trend: 'up', icon: '📊' },
