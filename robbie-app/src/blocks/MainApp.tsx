@@ -2,12 +2,16 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import MatrixRain from '../components/MatrixRain'
 import Sidebar from '../components/Sidebar'
+import SyncIndicator from '../components/SyncIndicator'
+import MoodIndicator from './MoodIndicator'
 import ChatInterface from './ChatInterface'
 import StickyNotes from './StickyNotes'
 import TaskBoard from './TaskBoard'
 import CommsCenter from './CommsCenter'
 import MoneyDashboard from './MoneyDashboard'
 import SetupPanel from './SetupPanel'
+import { useSyncStore } from '../stores/syncStore'
+import { useRobbieStore } from '../stores/robbieStore'
 
 interface MainAppProps {
   user: any
@@ -18,7 +22,9 @@ type ActiveTab = 'chat' | 'notes' | 'tasks' | 'comms' | 'money' | 'setup'
 
 const MainApp = ({ user, onLogout }: MainAppProps) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('chat')
-  const [robbieExpression, setRobbieExpression] = useState('friendly')
+  const { currentExpression, setExpression } = useRobbieStore()
+  const { lastSync, syncStatus, pendingChanges } = useSyncStore()
+  const [robbieExpression, setRobbieExpression] = useState(currentExpression)
 
   const renderContent = () => {
     switch (activeTab) {
@@ -63,6 +69,16 @@ const MainApp = ({ user, onLogout }: MainAppProps) => {
           {renderContent()}
         </motion.div>
       </main>
+      
+      {/* Universal mood indicator */}
+      <MoodIndicator />
+      
+      {/* Sync status indicator */}
+      <SyncIndicator 
+        lastSync={lastSync} 
+        status={syncStatus} 
+        pendingChanges={pendingChanges} 
+      />
     </div>
   )
 }

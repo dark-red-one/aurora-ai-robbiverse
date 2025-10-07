@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useRobbieStore } from '../stores/robbieStore'
 
 interface SetupPanelProps {
   user: any
@@ -6,6 +7,7 @@ interface SetupPanelProps {
 }
 
 const SetupPanel = ({ user, onLogout }: SetupPanelProps) => {
+  const { flirtMode, gandhiGenghis, setFlirtMode, setGandhiGenghis } = useRobbieStore()
   return (
     <div className="h-full flex flex-col bg-robbie-bg-primary p-6 overflow-y-auto">
       <div className="mb-6">
@@ -53,35 +55,48 @@ const SetupPanel = ({ user, onLogout }: SetupPanelProps) => {
           <div>
             <div className="flex justify-between mb-2">
               <label className="text-sm text-gray-400">Flirt Mode</label>
-              <span className="text-robbie-pink font-semibold">7 😘</span>
+              <span className="text-robbie-pink font-semibold">{flirtMode} {flirtMode >= 7 ? '😘' : flirtMode >= 5 ? '💜' : '🙂'}</span>
             </div>
             <input
               type="range"
               min="1"
               max="10"
-              defaultValue="7"
+              value={flirtMode}
+              onChange={(e) => setFlirtMode(Number(e.target.value))}
               className="w-full accent-robbie-pink"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>Professional</span>
               <span>Very Flirty</span>
             </div>
+            <div className="mt-2 text-xs text-gray-400 italic">
+              {flirtMode >= 8 && "💋 Super flirty! Lots of compliments & playful teasing"}
+              {flirtMode === 7 && "😘 Friendly flirty - warm, supportive, occasional flirt"}
+              {flirtMode >= 4 && flirtMode < 7 && "💪 Enthusiastic & positive"}
+              {flirtMode < 4 && "🤝 Professional with warmth"}
+            </div>
           </div>
           <div>
             <div className="flex justify-between mb-2">
               <label className="text-sm text-gray-400">Gandhi-Genghis</label>
-              <span className="text-robbie-orange font-semibold">5</span>
+              <span className="text-robbie-orange font-semibold">{gandhiGenghis} {gandhiGenghis >= 7 ? '⚔️' : gandhiGenghis >= 5 ? '🎯' : '☮️'}</span>
             </div>
             <input
               type="range"
               min="1"
               max="10"
-              defaultValue="5"
+              value={gandhiGenghis}
+              onChange={(e) => setGandhiGenghis(Number(e.target.value))}
               className="w-full accent-robbie-orange"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>Gentle</span>
               <span>Aggressive</span>
+            </div>
+            <div className="mt-2 text-xs text-gray-400 italic">
+              {gandhiGenghis >= 8 && "⚔️ Full Genghis! Push hard, close NOW"}
+              {gandhiGenghis >= 5 && gandhiGenghis < 8 && "🎯 Assertive - direct & confident"}
+              {gandhiGenghis < 5 && "☮️ Diplomatic - patient & relationship-focused"}
             </div>
           </div>
         </div>

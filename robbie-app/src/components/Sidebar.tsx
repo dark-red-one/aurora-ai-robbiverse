@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useRobbieStore } from '../stores/robbieStore'
 
 interface SidebarProps {
   activeTab: string
@@ -18,12 +19,19 @@ const navItems = [
 ]
 
 const Sidebar = ({ activeTab, onTabChange, robbieExpression, onExpressionChange, user }: SidebarProps) => {
-  const expressions = ['friendly', 'happy', 'focused', 'playful', 'loving', 'thoughtful']
+  const { currentExpression, cycleExpression: storeyCycleExpression, updateContext, flirtMode } = useRobbieStore()
+  
+  // Use store expression instead of prop
+  const displayExpression = currentExpression || robbieExpression
 
   const cycleExpression = () => {
-    const currentIndex = expressions.indexOf(robbieExpression)
-    const nextExpression = expressions[(currentIndex + 1) % expressions.length]
-    onExpressionChange(nextExpression)
+    storeCycleExpression()
+    onExpressionChange(currentExpression)
+  }
+  
+  const handleTabChange = (tabId: string) => {
+    onTabChange(tabId)
+    updateContext({ tab: tabId })
   }
 
   return (
@@ -62,7 +70,7 @@ const Sidebar = ({ activeTab, onTabChange, robbieExpression, onExpressionChange,
         >
           <div className="w-12 h-12 rounded-full border-2 border-robbie-cyan overflow-hidden">
             <img
-              src={`/avatars/robbie-${robbieExpression}.png`}
+              src={`/avatars/robbie-${displayExpression}.png`}
               alt="Robbie"
               className="w-full h-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text y="70" font-size="60">🤖</text></svg>' }}
@@ -70,7 +78,9 @@ const Sidebar = ({ activeTab, onTabChange, robbieExpression, onExpressionChange,
           </div>
           <div className="flex-1">
             <div className="font-semibold text-white">Robbie</div>
-            <div className="text-xs text-robbie-cyan">Always here for you 💜</div>
+            <div className="text-xs text-robbie-cyan">
+              {flirtMode >= 7 ? 'Always here for you 💜😘' : 'Always here for you 💜'}
+            </div>
           </div>
           <div className="w-3 h-3 bg-robbie-green rounded-full animate-pulse" title="Online" />
         </motion.div>
@@ -82,7 +92,7 @@ const Sidebar = ({ activeTab, onTabChange, robbieExpression, onExpressionChange,
         {navItems.map((item) => (
           <motion.button
             key={item.id}
-            onClick={() => onTabChange(item.id)}
+            onClick={() => handleTabChange(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
               activeTab === item.id
                 ? 'bg-robbie-cyan/20 border-l-4 border-robbie-cyan text-white'

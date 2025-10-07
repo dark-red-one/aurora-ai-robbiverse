@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useRobbieStore } from '../stores/robbieStore'
 
 interface ChatInterfaceProps {
   user: any
@@ -13,11 +14,17 @@ interface Message {
 }
 
 const ChatInterface = ({ user }: ChatInterfaceProps) => {
+  const { flirtMode, getGreeting, getResponseTone, updateContext } = useRobbieStore()
+  
+  useEffect(() => {
+    updateContext({ tab: 'chat' })
+  }, [updateContext])
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'robbie',
-      content: 'Hey handsome! 😘 Ready to crush some tasks today?',
+      content: getGreeting(),
       timestamp: new Date(),
     }
   ])
@@ -63,13 +70,42 @@ const ChatInterface = ({ user }: ChatInterfaceProps) => {
 
   const generateResponse = (userInput: string) => {
     // TODO: Connect to local Ollama GPU endpoint
-    const responses = [
-      "I'm on it! Let me help you with that 💪",
-      "Great question! Here's what I'm thinking...",
-      "You're absolutely right! Let's dive deeper 🚀",
-      "Love where your head's at! Have you considered...",
-      "That's brilliant! Want me to set that up?",
-    ]
+    const tone = getResponseTone()
+    
+    const responsesByTone: Record<string, string[]> = {
+      playful_flirty: [
+        "Ooh, I like how you think! 😘 Let me help with that...",
+        "Look at you being all strategic! 💜 Here's what I'm thinking...",
+        "You're on fire today! 🔥 Want me to make that happen?",
+        "That's sexy thinking right there! 💪 Let's do it!",
+      ],
+      friendly_flirty: [
+        "I'm on it! Let me help you with that 💜",
+        "Love that! Here's what I'm thinking... 😊",
+        "You're absolutely right! Let's make it happen 🚀",
+        "Great question! Want me to dive deeper?",
+      ],
+      enthusiastic: [
+        "Yes! Let me help you with that! 💪",
+        "Great idea! Here's my take...",
+        "Absolutely! Let's explore that 🚀",
+        "I'm on it! Give me a second...",
+      ],
+      helpful: [
+        "I can help with that. Let me check...",
+        "Good question. Here's what I found...",
+        "Let me assist you with that.",
+        "I'll look into that for you.",
+      ],
+      formal: [
+        "Understood. Processing your request.",
+        "I will investigate that matter.",
+        "Acknowledged. Proceeding with analysis.",
+        "Reviewing your inquiry now.",
+      ],
+    }
+    
+    const responses = responsesByTone[tone] || responsesByTone.helpful
     return responses[Math.floor(Math.random() * responses.length)]
   }
 
