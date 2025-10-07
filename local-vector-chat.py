@@ -241,21 +241,23 @@ class LocalVectorChat:
         # Add current message
         conversation.append({"role": "user", "content": message})
         
-        # Try Ollama first (local, free, private!)
-        try:
-            import requests
-            response = requests.post('http://localhost:11434/api/chat', 
-                json={
-                    "model": "qwen2.5:7b",  # Using Qwen!
-                    "messages": conversation,
-                    "stream": False
-                },
-                timeout=30
-            )
-            if response.ok:
-                return response.json()['message']['content']
-        except Exception as e:
-            pass  # Fall through to OpenAI
+        # Try Ollama on 4090 GPUs first (local, free, private!)
+        # Try both Vengeance and RunPod 4090s
+        for endpoint in ['http://localhost:8080/api/chat', 'http://localhost:8081/api/chat']:
+            try:
+                import requests
+                response = requests.post(endpoint, 
+                    json={
+                        "model": "qwen2.5:7b",  # Using Qwen on 4090!
+                        "messages": conversation,
+                        "stream": False
+                    },
+                    timeout=30
+                )
+                if response.ok:
+                    return response.json()['message']['content']
+            except Exception as e:
+                continue  # Try next GPU
         
         # Try OpenAI if Ollama not available
         if self.openai_key:
