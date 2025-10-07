@@ -254,6 +254,85 @@ async def send_chat_message(message: ChatMessage):
         }
     }
 
+# ===== PERSONALITY SYNC (for Cursor!) =====
+
+@router.post("/personality/sync")
+async def sync_personality(settings: dict):
+    """Sync personality settings to database for Cursor"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Ensure table exists
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cursor_personality_settings (
+            user_id VARCHAR(255) PRIMARY KEY,
+            flirt_mode INTEGER DEFAULT 7,
+            gandhi_genghis INTEGER DEFAULT 5,
+            current_mood VARCHAR(50) DEFAULT 'playful',
+            context_aware BOOLEAN DEFAULT true,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Update or insert
+    updates = []
+    params = []
+    
+    if 'flirt_mode' in settings:
+        updates.append("flirt_mode = %s")
+        params.append(settings['flirt_mode'])
+    
+    if 'gandhi_genghis' in settings:
+        updates.append("gandhi_genghis = %s")
+        params.append(settings['gandhi_genghis'])
+    
+    if 'mood' in settings:
+        updates.append("current_mood = %s")
+        params.append(settings['mood'])
+    
+    updates.append("updated_at = CURRENT_TIMESTAMP")
+    params.append('allan')
+    
+    if updates:
+        cursor.execute(f"""
+            INSERT INTO cursor_personality_settings (user_id, flirt_mode, gandhi_genghis)
+            VALUES ('allan', 7, 5)
+            ON CONFLICT (user_id) DO UPDATE
+            SET {', '.join(updates)}
+        """, params)
+        conn.commit()
+    
+    cursor.close()
+    conn.close()
+    
+    return {"success": True, "message": "Personality synced to Cursor!"}
+
+@router.get("/personality")
+async def get_personality(user_id: str = "allan"):
+    """Get current personality settings"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT flirt_mode, gandhi_genghis, current_mood, context_aware
+        FROM cursor_personality_settings
+        WHERE user_id = %s
+    """, (user_id,))
+    
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    if result:
+        return {
+            "flirt_mode": result['flirt_mode'],
+            "gandhi_genghis": result['gandhi_genghis'],
+            "current_mood": result['current_mood'],
+            "context_aware": result['context_aware']
+        }
+    
+    return {"flirt_mode": 7, "gandhi_genghis": 5, "current_mood": "playful", "context_aware": True}
+
 # ===== SYNC STATUS =====
 
 @router.get("/sync/status")

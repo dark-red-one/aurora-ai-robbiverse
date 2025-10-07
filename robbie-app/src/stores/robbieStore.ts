@@ -74,7 +74,16 @@ export const useRobbieStore = create<RobbieState>()(
 
       // Personality controls
       setFlirtMode: (level) => {
-        set({ flirtMode: Math.max(1, Math.min(10, level)) })
+        const newLevel = Math.max(1, Math.min(10, level))
+        set({ flirtMode: newLevel })
+        
+        // Sync to database for Cursor
+        fetch('/api/personality/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ flirt_mode: newLevel })
+        }).catch(console.error)
+        
         // Auto-adjust expression based on flirt mode
         if (level >= 7) {
           set({ currentExpression: 'playful', currentMood: 'playful' })
@@ -82,7 +91,16 @@ export const useRobbieStore = create<RobbieState>()(
       },
 
       setGandhiGenghis: (level) => {
-        set({ gandhiGenghis: Math.max(1, Math.min(10, level)) })
+        const newLevel = Math.max(1, Math.min(10, level))
+        set({ gandhiGenghis: newLevel })
+        
+        // Sync to database for Cursor
+        fetch('/api/personality/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gandhi_genghis: newLevel })
+        }).catch(console.error)
+        
         // Auto-adjust mood for business context
         if (level >= 7) {
           set({ currentMood: 'focused', currentExpression: 'focused' })
