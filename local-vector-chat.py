@@ -246,7 +246,7 @@ class LocalVectorChat:
             import requests
             response = requests.post('http://localhost:11434/api/chat', 
                 json={
-                    "model": "llama3.1:8b",
+                    "model": "qwen2.5:7b",  # Using Qwen!
                     "messages": conversation,
                     "stream": False
                 },
