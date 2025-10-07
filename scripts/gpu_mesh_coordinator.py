@@ -219,7 +219,7 @@ class GPUMeshCoordinator:
                 
                 await asyncio.sleep(5)  # Check every 5 seconds
                 
-                    except Exception as e:
+            except Exception as e:
                 logger.error(f"❌ Load balancer error: {e}")
 
     async def _find_best_node(self, task: Task) -> Optional[GPUNode]:
@@ -379,7 +379,7 @@ class GPUMeshCoordinator:
 
     def get_mesh_status(self) -> Dict:
         """Get current mesh status"""
-            return {
+        return {
             "nodes": {node_id: asdict(node) for node_id, node in self.nodes.items()},
             "metrics": self.metrics,
             "task_queue_size": len([t for t in self.task_queue if t.status == "pending"]),
@@ -412,7 +412,9 @@ async def main():
         # Keep running
         while True:
             status = coordinator.get_mesh_status()
-            logger.info(f"📊 Mesh Status: {status['healthy_nodes']}/{status['nodes']} nodes healthy")
+            total_nodes = len(status['nodes'])
+            healthy_nodes = sum(1 for n in status['nodes'].values() if n['status'] == 'healthy')
+            logger.info(f"📊 Mesh Status: {healthy_nodes}/{total_nodes} nodes healthy, {status['task_queue_size']} tasks queued")
             await asyncio.sleep(60)
             
     except KeyboardInterrupt:

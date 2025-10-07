@@ -68,3 +68,4 @@ Thumbs.db
 .credentials/*.json
 google-credentials.json
 .credentials/
+infrastructure/docker/data/
