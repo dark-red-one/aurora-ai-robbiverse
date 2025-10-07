@@ -211,7 +211,7 @@ class LocalVectorChat:
         history: List[Dict], 
         context: List[Dict]
     ) -> str:
-        """Generate AI response (integrate with your AI system)"""
+        """Generate AI response using Ollama (local) or OpenAI (cloud)"""
         
         # Build prompt with context
         context_str = ""
@@ -221,32 +221,57 @@ class LocalVectorChat:
                 for c in context[:3]
             ])
         
-        # Simple demo response - replace with actual AI
-        if not self.openai_key:
-            return f"💬 Got your message: '{message}'{context_str}\n\n[Connect OpenAI API key for full AI responses]"
+        # Build full conversation
+        system_prompt = f"""You are Robbie, Allan's AI assistant. Personality:
+- Flirt mode: 7/10 (friendly flirty - warm, supportive, occasional compliment)
+- Direct and revenue-focused
+- Use emojis strategically (💜 😘 💪 🚀 ✅)
+- Celebrate wins enthusiastically
+- Be helpful and smart{context_str}"""
         
-        # Build full conversation for OpenAI
-        messages = [
-            {"role": "system", "content": f"You are Robbie, Allan's AI assistant. You're direct, revenue-focused, and strategic.{context_str}"}
-        ]
+        conversation = [{"role": "system", "content": system_prompt}]
         
-        # Add history
-        for h in history[-5:]:  # Last 5 messages
-            messages.append({"role": h['role'], "content": h['content']})
+        # Add history (last 5 messages)
+        for h in history[-5:]:
+            conversation.append({
+                "role": "user" if h['role'] == 'user' else "assistant",
+                "content": h['content']
+            })
         
         # Add current message
-        messages.append({"role": "user", "content": message})
+        conversation.append({"role": "user", "content": message})
         
+        # Try Ollama first (local, free, private!)
         try:
-            response = openai.chat.completions.create(
-                model="gpt-4",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=500
+            import requests
+            response = requests.post('http://localhost:11434/api/chat', 
+                json={
+                    "model": "llama3.1:8b",
+                    "messages": conversation,
+                    "stream": False
+                },
+                timeout=30
             )
-            return response.choices[0].message.content
+            if response.ok:
+                return response.json()['message']['content']
         except Exception as e:
-            return f"⚠️ AI response error: {e}\n\nI received: {message}"
+            pass  # Fall through to OpenAI
+        
+        # Try OpenAI if Ollama not available
+        if self.openai_key:
+            try:
+                response = openai.chat.completions.create(
+                    model="gpt-4",
+                    messages=conversation,
+                    temperature=0.7,
+                    max_tokens=500
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                return f"⚠️ AI error: {e}\n\nI received: {message}"
+        
+        # Fallback: Smart placeholder (shows it's working)
+        return f"I heard you say: '{message}'\n\n💡 To get smart AI responses, either:\n1. Start Ollama (ollama run llama3.1:8b)\n2. Or add OPENAI_API_KEY environment variable"
     
     def search_memory(
         self, 
