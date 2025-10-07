@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Aurora</title>
+    <style>
+        body { background: #0a0a18; color: #fff; font-family: Arial; }
+        .debug { margin: 20px; padding: 20px; border: 1px solid #00d4ff; }
+        .avatar-test { width: 140px; height: 140px; border-radius: 50%; border: 3px solid #00d4ff; }
+        .matrix-test { height: 200px; background: #000; position: relative; overflow: hidden; }
+        .matrix-column { position: absolute; color: #0f4; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="debug">
+        <h2>🔍 Aurora Debug Test</h2>
+        
+        <h3>1. Avatar Test</h3>
+        <img src="http://aurora.testpilot.ai/static/images/robbie-friendly.png" class="avatar-test" alt="Robbie">
+        <p>Avatar should be round and visible</p>
+        
+        <h3>2. Matrix Animation Test</h3>
+        <div class="matrix-test" id="matrixTest"></div>
+        <p>Matrix rain should be falling</p>
+        
+        <h3>3. API Test</h3>
+        <button onclick="testAPI()">Test Chat API</button>
+        <div id="apiResult"></div>
+        
+        <h3>4. Console Logs</h3>
+        <div id="consoleLogs"></div>
+    </div>
+
+    <script>
+        // Matrix animation test
+        function createMatrixTest() {
+            const container = document.getElementById('matrixTest');
+            for (let i = 0; i < 10; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animation = `fall ${Math.random() * 3 + 2}s linear infinite`;
+                column.textContent = '01';
+                container.appendChild(column);
+            }
+        }
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% { top: -100%; }
+                100% { top: 100%; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // API test
+        async function testAPI() {
+            try {
+                const response = await fetch('http://aurora.testpilot.ai/robbie');
+                const data = await response.json();
+                document.getElementById('apiResult').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('apiResult').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Console logging
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            document.getElementById('consoleLogs').innerHTML += '<div>' + args.join(' ') + '</div>';
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Debug page loaded');
+            createMatrixTest();
+            console.log('✅ Matrix animation started');
+        });
+    </script>
+</body>
+</html>

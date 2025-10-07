@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🤖 Robbie - Universal AI State</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            border-bottom: 2px solid #00d4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 28px; font-weight: bold; color: #00d4ff; }
+        .mood-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 18px;
+        }
+        .mood-emoji {
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .panel {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        .panel-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .avatar-chat-panel {
+            grid-column: 1 / -1;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .robbie-avatar {
+            font-size: 48px; /* Reduced from 80px (40% smaller) */
+            margin-bottom: 20px;
+            image-rendering: pixelated; /* Pixelated effect */
+            filter: contrast(1.2);
+            user-select: none;
+        }
+        .chat-area {
+            background: #2d2d2d;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            margin-top: 15px;
+        }
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .chat-user {
+            background: #1565c0;
+            text-align: right;
+        }
+        .chat-ai {
+            background: #2d2d2d;
+            border-left: 3px solid #00d4ff;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .chat-input {
+            background: #2d2d2d;
+            border: 1px solid #00d4ff;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 16px;
+            width: 400px;
+            outline: none;
+        }
+        .chat-input:focus {
+            border-color: #4caf50;
+        }
+        .model-selector {
+            background: #2d2d2d;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 212, 255, 0.3);
+        }
+        .hot-topic-item {
+            background: #2d2d2d;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ff6b6b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .hot-topic-item.priority-high { border-left-color: #ff6b6b; }
+        .hot-topic-item.priority-medium { border-left-color: #ffa500; }
+        .hot-topic-item.priority-low { border-left-color: #4caf50; }
+        .topic-count {
+            background: #ff6b6b;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .commitment-item {
+            background: #2d2d2d;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ffa500;
+        }
+        .commitment-deadline {
+            font-size: 12px;
+            color: #ffa500;
+            margin-top: 5px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid #00d4ff;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        .sync-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🤖 Robbie - Universal State Active</div>
+        <div class="mood-display">
+            <span>Mood:</span>
+            <span class="mood-emoji" id="moodEmoji">🔥</span>
+            <span id="moodText">Hyper</span>
+            <span class="sync-status" title="Synced across all interfaces"></span>
+        </div>
+        <div style="font-size: 14px; color: #4caf50;">
+            💾 Network DB: Connected
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Robbie Avatar Chat Panel -->
+        <div class="panel avatar-chat-panel">
+            <div class="robbie-avatar" id="avatarEmoji" title="Robbie">🤖</div>
+            <div class="panel-title">Chat with Robbie (Network-Wide Memory)</div>
+            <div class="chat-area" id="avatarChat">
+                <div class="chat-message chat-ai">
+                    Hey Allan 🔥 I'm Robbie - ONE entity across Cursor, Chat, Mobile, and Aurora-town. 
+                    My mood, commitments, and memory sync everywhere. Ask me anything or track our progress.
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="avatarChatInput" placeholder="Type your message to Robbie..." onkeypress="handleChatKey(event)">
+                <button class="btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Hot Topics (Universal Memory) -->
+        <div class="panel">
+            <div class="panel-title">
+                🔥 Hot Topics (Universal Memory)
+            </div>
+            <div id="hotTopicsList">
+                <!-- Populated from database -->
+            </div>
+        </div>
+
+        <!-- Active Commitments -->
+        <div class="panel">
+            <div class="panel-title">
+                📌 Active Commitments
+            </div>
+            <div id="commitmentsList">
+                <!-- Populated from database -->
+            </div>
+        </div>
+
+        <!-- Calendar Events (Next 24h) -->
+        <div class="panel">
+            <div class="panel-title">
+                📅 Upcoming Events
+            </div>
+            <div id="calendarList">
+                <!-- Populated from database -->
+            </div>
+        </div>
+
+        <!-- Network Stats -->
+        <div class="panel">
+            <div class="panel-title">
+                🌐 Network Stats
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="activeCursor">1</div>
+                    <div class="stat-label">Cursor Instances</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeChat">1</div>
+                    <div class="stat-label">Chat Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeMobile">0</div>
+                    <div class="stat-label">Mobile Apps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lastSync">2s</div>
+                    <div class="stat-label">Last Sync</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Universal AI State Bridge
+        const personalityId = 'robbie';
+        let currentState = null;
+        
+        // Load initial state from database
+        async function loadState() {
+            try {
+                // In production, this would query the actual backend API
+                // For demo, we'll simulate with local data
+                
+                // Get current mood
+                const mood = await getMoodFromDB();
+                updateMoodDisplay(mood);
+                
+                // Get hot topics
+                const hotTopics = await getHotTopics();
+                renderHotTopics(hotTopics);
+                
+                // Get commitments
+                const commitments = await getCommitments();
+                renderCommitments(commitments);
+                
+                // Get calendar events
+                const events = await getCalendarEvents();
+                renderCalendarEvents(events);
+                
+                console.log('✅ State loaded from network database');
+            } catch (error) {
+                console.error('❌ Failed to load state:', error);
+            }
+        }
+        
+        async function getMoodFromDB() {
+            // Query: SELECT current_mood, current_mode FROM ai_personality_state WHERE personality_id = 'robbie'
+            return {
+                current_mood: 7, // Hyper
+                current_mode: 'progress-driven',
+                emoji: '🔥',
+                name: 'Hyper'
+            };
+        }
+        
+        async function getHotTopics() {
+            // Query: SELECT memory_type, content, priority FROM ai_working_memory 
+            //        WHERE personality_id = 'robbie' AND priority >= 7
+            //        ORDER BY priority DESC LIMIT 10
+            return [
+                { topic: 'Revenue urgency - deals need closing', priority: 10, mentions: 15 },
+                { topic: 'Universal AI State implementation', priority: 9, mentions: 12 },
+                { topic: 'AllanBot training acceleration', priority: 8, mentions: 8 },
+                { topic: '$200K loan from father-in-law', priority: 8, mentions: 6 },
+                { topic: 'Expert-Trained AI strategy', priority: 7, mentions: 10 }
+            ];
+        }
+        
+        async function getCommitments() {
+            // Query: SELECT * FROM ai_commitments 
+            //        WHERE personality_id = 'robbie' AND status = 'active'
+            //        ORDER BY deadline
+            return [
+                { 
+                    commitment: 'Ship widget system',
+                    deadline: '2025-10-08 17:00:00',
+                    priority: 10
+                },
+                {
+                    commitment: 'Integrate Universal AI State in chat',
+                    deadline: '2025-10-06 12:00:00',
+                    priority: 9
+                },
+                {
+                    commitment: 'Close Simply Good Foods deal',
+                    deadline: '2025-10-10 17:00:00',
+                    priority: 10
+                }
+            ];
+        }
+        
+        async function getCalendarEvents() {
+            // Query: SELECT * FROM ai_calendar_events 
+            //        WHERE start_time > datetime('now') 
+            //        AND start_time < datetime('now', '+24 hours')
+            const now = new Date();
+            return [
+                {
+                    title: 'Sales call with Simply Good Foods',
+                    start_time: new Date(now.getTime() + 2 * 60 * 60 * 1000), // 2 hours from now
+                    location: 'Zoom',
+                    preparation: 'Review pricing deck'
+                }
+            ];
+        }
+        
+        function updateMoodDisplay(mood) {
+            document.getElementById('moodEmoji').textContent = mood.emoji;
+            document.getElementById('moodText').textContent = mood.name;
+            document.getElementById('avatarEmoji').textContent = mood.emoji;
+        }
+        
+        function renderHotTopics(topics) {
+            const container = document.getElementById('hotTopicsList');
+            container.innerHTML = topics.map(topic => {
+                const priorityClass = topic.priority >= 9 ? 'priority-high' : 
+                                     topic.priority >= 7 ? 'priority-medium' : 'priority-low';
+                return `
+                    <div class="hot-topic-item ${priorityClass}">
+                        <span>${topic.topic}</span>
+                        <span class="topic-count">${topic.mentions}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderCommitments(commitments) {
+            const container = document.getElementById('commitmentsList');
+            container.innerHTML = commitments.map(c => {
+                const deadline = new Date(c.deadline);
+                const hoursUntil = Math.round((deadline - new Date()) / (1000 * 60 * 60));
+                return `
+                    <div class="commitment-item">
+                        <div>${c.commitment}</div>
+                        <div class="commitment-deadline">
+                            📅 ${hoursUntil > 0 ? `${hoursUntil}h away` : 'OVERDUE'} - ${deadline.toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderCalendarEvents(events) {
+            const container = document.getElementById('calendarList');
+            if (events.length === 0) {
+                container.innerHTML = '<div style="color: #666; padding: 10px;">No upcoming events in next 24 hours</div>';
+                return;
+            }
+            
+            container.innerHTML = events.map(e => {
+                const start = new Date(e.start_time);
+                const minutesUntil = Math.round((start - new Date()) / (1000 * 60));
+                return `
+                    <div class="commitment-item" style="border-left-color: #00d4ff;">
+                        <div><strong>${e.title}</strong></div>
+                        <div class="commitment-deadline">
+                            ⏰ ${minutesUntil > 0 ? `In ${minutesUntil} minutes` : 'NOW'} - ${e.location}
+                        </div>
+                        ${e.preparation ? `<div style="font-size: 12px; margin-top: 5px; color: #ccc;">📋 ${e.preparation}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function handleChatKey(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('avatarChatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            const chatArea = document.getElementById('avatarChat');
+            chatArea.innerHTML += `<div class="chat-message chat-user">${escapeHtml(message)}</div>`;
+            
+            // Clear input
+            input.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                let response = '';
+                
+                if (message.toLowerCase().includes('mood')) {
+                    response = "My mood is Hyper 🔥 (level 7) - synced across ALL interfaces. I manage my own moods based on context and what we're working on. Right now we're pushing for progress!";
+                } else if (message.toLowerCase().includes('commit')) {
+                    response = "I'm tracking 3 active commitments across the network. Widget system due in 3 days, Simply Good Foods deal closing, and integrating the Universal AI State. All visible in Cursor, Chat, Mobile - everywhere.";
+                } else if (message.toLowerCase().includes('remind')) {
+                    response = "I'll remind you on EVERY interface - Cursor, Chat, Phone. Sales call in 2 hours. I'll ping you at 15 min, 5 min, and 1 min before. Can't miss it.";
+                } else {
+                    response = "Got it. I'm Robbie - ONE entity network-wide. Whatever we discuss here is remembered in Cursor, Chat, everywhere. My memories, mood, commitments all sync via SQL database.";
+                }
+                
+                chatArea.innerHTML += `<div class="chat-message chat-ai">${response}</div>`;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 500);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Auto-refresh state every 5 seconds
+        setInterval(loadState, 5000);
+        
+        // Update sync timer
+        let lastSyncSeconds = 0;
+        setInterval(() => {
+            lastSyncSeconds++;
+            document.getElementById('lastSync').textContent = `${lastSyncSeconds}s`;
+        }, 1000);
+        
+        // Reset sync timer on state load
+        function resetSyncTimer() {
+            lastSyncSeconds = 0;
+        }
+        
+        // Load initial state
+        loadState();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

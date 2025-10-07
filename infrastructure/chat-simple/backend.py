@@ -317,7 +317,9 @@ async def get_ui_page(request: Request):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+    print("🔌 WebSocket connection attempt received")
+    await websocket.accept()
+    print("✅ WebSocket connected successfully")
     try:
         while True:
             data = await websocket.receive_text()
@@ -329,11 +331,21 @@ async def websocket_endpoint(websocket: WebSocket):
             
             if message.strip():
                 print(f"🚀 Processing message: {message}")
-                await stream_llm_response(message, websocket)
+                # Simple echo response for now
+                response = f"Robbie: I received your message: '{message}' 🚀"
+                await websocket.send_text(json.dumps({
+                    "type": "message",
+                    "content": response
+                }))
             
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
         print("🔌 WebSocket disconnected")
+    except Exception as e:
+        print(f"❌ WebSocket error: {e}")
+
+@app.get("/test")
+async def test_endpoint():
+    return {"message": "Test endpoint working"}
 
 @app.get("/api/status")
 async def get_status():

@@ -1,0 +1,100 @@
+        /* Matrix Background Animation - ENHANCED - Robbie's Colors */
+        .matrix-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .matrix-rain-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .matrix-column-bg {
+            position: absolute;
+            top: -100%;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            animation: matrix-fall-bg linear infinite;
+            opacity: 0.7;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .matrix-column-bg:nth-child(odd) {
+            color: #ff6b35;
+            /* Robbie's energy - orange */
+        }
+
+        .matrix-column-bg:nth-child(even) {
+            color: #4ecdc4;
+            /* Robbie's intelligence - teal */
+        }
+
+        .matrix-column-bg:nth-child(3n) {
+            color: #ff6b9d;
+            /* Robbie's personality - pink */
+        }
+
+        @keyframes matrix-fall-bg {
+            0% {
+                top: -100%;
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0.1;
+            }
+        }
+
+        /* ==================== SIDEBAR (Cursor-style) ==================== */
+        .sidebar {
+            width: 260px;
+            background: #0d1117;
+            border-right: 2px solid #00d4ff;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Enhanced Matrix Rain in Sidebar - MORE PRONOUNCED */
+        .sidebar-matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.18;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sidebar-matrix-column {
+            position: absolute;
+            top: -100%;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            animation: sidebar-matrix-fall linear infinite;
+            opacity: 0.85;
+            text-shadow: 0 0 12px currentColor, 0 0 20px currentColor;
+            transition: all 0.3s ease;
+        }
+

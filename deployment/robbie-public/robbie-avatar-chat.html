@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🤖 Robbie Avatar Chat Interface</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+
+        /* Office Background Themes - Same as unified chat */
+        body.office-bg-aurora-cyberpunk {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 107, 107, 0.05) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-aurora-cyberpunk::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(90deg, transparent 98%, rgba(0, 212, 255, 0.03) 100%),
+                linear-gradient(0deg, transparent 98%, rgba(0, 212, 255, 0.03) 100%);
+            background-size: 50px 50px;
+            animation: cyberpunk-grid 20s linear infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-aurora-matrix {
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 0, 0.1) 0%, transparent 70%),
+                linear-gradient(180deg, #000000 0%, #001100 50%, #000000 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-aurora-matrix::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(90deg, transparent 98%, rgba(0, 255, 0, 0.1) 100%);
+            background-size: 2px 100%;
+            animation: matrix-rain 3s linear infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-aurora-matrix::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(0, 255, 0, 0.1) 50%, 
+                transparent 100%);
+            animation: matrix-fall 4s linear infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-aurora-neural {
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(0, 212, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(76, 175, 80, 0.1) 0%, transparent 70%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-aurora-neural::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(0, 212, 255, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(76, 175, 80, 0.05) 0%, transparent 50%);
+            animation: neural-pulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-testpilot-professional {
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(30, 64, 175, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            color: #1e293b;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-testpilot-professional::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, transparent 49%, rgba(30, 64, 175, 0.05) 50%, transparent 51%),
+                linear-gradient(-45deg, transparent 49%, rgba(5, 150, 105, 0.05) 50%, transparent 51%);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        body.office-bg-testpilot-modern {
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(30, 64, 175, 0.08) 0%, transparent 70%),
+                linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-testpilot-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(90deg, transparent 98%, rgba(30, 64, 175, 0.1) 100%),
+                linear-gradient(0deg, transparent 98%, rgba(5, 150, 105, 0.1) 100%);
+            background-size: 60px 60px;
+            animation: modern-grid 15s linear infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-revenue-focused {
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(234, 88, 12, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(5, 150, 105, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-revenue-focused::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, transparent 49%, rgba(234, 88, 12, 0.1) 50%, transparent 51%),
+                linear-gradient(-45deg, transparent 49%, rgba(5, 150, 105, 0.1) 50%, transparent 51%);
+            background-size: 80px 80px;
+            animation: revenue-pulse 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-ai-empire {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(76, 175, 80, 0.1) 0%, transparent 70%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 30%, #16213e 70%, #0a0a0a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.office-bg-ai-empire::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 30% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(76, 175, 80, 0.05) 0%, transparent 60%);
+            animation: empire-glow 10s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        body.office-bg-ai-empire::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(90deg, transparent 98%, rgba(138, 43, 226, 0.05) 100%),
+                linear-gradient(0deg, transparent 98%, rgba(0, 212, 255, 0.05) 100%);
+            background-size: 100px 100px;
+            animation: empire-grid 25s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Background Animations */
+        @keyframes cyberpunk-grid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        @keyframes matrix-rain {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(2px); }
+        }
+
+        @keyframes matrix-fall {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes neural-pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        @keyframes modern-grid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        @keyframes revenue-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes empire-glow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        @keyframes empire-grid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 100px); }
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            border-bottom: 2px solid #00d4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 28px; font-weight: bold; color: #00d4ff; }
+        .mood-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 18px;
+        }
+        .mood-emoji {
+            font-size: 32px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .mood-emoji:hover { transform: scale(1.2); }
+        .pin-display {
+            background: #2d2d2d;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .panel {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        .panel-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid #00d4ff;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        .priority-item {
+            background: #2d2d2d;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ffa500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .priority-item.critical { border-left-color: #ff6b6b; }
+        .priority-item.high { border-left-color: #ffa500; }
+        .priority-item.medium { border-left-color: #4caf50; }
+        .priority-item.completed { border-left-color: #4caf50; opacity: 0.7; }
+        .priority-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-in_progress { background: #ffa500; color: #000; }
+        .status-completed { background: #4caf50; color: #000; }
+        .status-pending { background: #666; color: #fff; }
+        .action-item {
+            background: #2d2d2d;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            border-left: 3px solid #00d4ff;
+        }
+        .job-item {
+            background: #2d2d2d;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #9c27b0;
+        }
+        .job-progress {
+            background: #1a1a1a;
+            height: 6px;
+            border-radius: 3px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .job-progress-bar {
+            background: linear-gradient(90deg, #00d4ff, #4caf50);
+            height: 100%;
+            transition: width 0.3s;
+            width: 75%;
+        }
+        .streaming-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .pin-input {
+            background: #1a1a1a;
+            border: 2px solid #00d4ff;
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 16px;
+            text-align: center;
+            width: 80px;
+        }
+        .pin-input:focus { outline: none; border-color: #4caf50; }
+
+        /* Background Switcher */
+        .background-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.9);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+        }
+
+        .background-switcher h4 {
+            color: #00d4ff;
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .background-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .bg-option {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            text-align: center;
+            color: #ccc;
+        }
+
+        .bg-option:hover {
+            background: #00d4ff;
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        .bg-option.active {
+            background: #4caf50;
+            color: #000;
+            border-color: #4caf50;
+        }
+
+        .theme-description {
+            margin-top: 15px;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        /* Floating Particles */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00d4ff;
+            border-radius: 50%;
+            animation: float 6s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        .btn {
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: #4caf50; }
+        .btn-danger { background: #ff6b6b; }
+        .btn-danger:hover { background: #ff5252; }
+        .chat-area {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .chat-message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .chat-system { background: #2d2d2d; }
+        .chat-user { background: #1a4d1a; }
+        .chat-ai { background: #1a1a4d; }
+        .chat-error { background: #4d1a1a; color: #ff6b6b; }
+        .terminal-panel {
+            grid-column: 1 / -1;
+            height: 300px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            overflow-y: auto;
+        }
+        .terminal-line {
+            margin: 2px 0;
+            color: #00ff00;
+        }
+        .terminal-system { color: #ffff00; }
+        .terminal-prompt { color: #00d4ff; font-weight: bold; }
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            width: 80%;
+        }
+        .avatar-chat-panel {
+            grid-column: 1 / -1;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .robbie-avatar {
+            font-size: 80px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .robbie-avatar:hover {
+            transform: scale(1.1);
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .chat-input {
+            background: #2d2d2d;
+            border: 1px solid #00d4ff;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 16px;
+            width: 400px;
+            outline: none;
+        }
+        .chat-input:focus {
+            border-color: #4caf50;
+        }
+        .model-selector {
+            background: #2d2d2d;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="office-bg-aurora-cyberpunk">
+    <!-- Background Switcher -->
+    <div class="background-switcher">
+        <h4>🎨 Office Themes</h4>
+        <div class="background-options">
+            <div class="bg-option active" data-theme="aurora-cyberpunk">Cyberpunk</div>
+            <div class="bg-option" data-theme="aurora-matrix">Matrix</div>
+            <div class="bg-option" data-theme="aurora-neural">Neural</div>
+            <div class="bg-option" data-theme="testpilot-professional">Professional</div>
+            <div class="bg-option" data-theme="testpilot-modern">Modern</div>
+            <div class="bg-option" data-theme="revenue-focused">Revenue</div>
+            <div class="bg-option" data-theme="ai-empire">AI Empire</div>
+        </div>
+        <div class="theme-description" id="themeDescription">
+            Futuristic grid with neon accents
+        </div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="particlesContainer"></div>
+
+    <div class="header">
+        <div class="logo">🤖 Robbie Avatar Chat Interface</div>
+        <div class="mood-display">
+            <span>Mood:</span>
+            <span class="mood-emoji" onclick="changeMood()" id="moodEmoji">🎯</span>
+            <span id="moodText">Focused</span>
+        </div>
+        <div class="pin-display">
+            PIN: <input type="password" class="pin-input" id="pinInput" maxlength="4" placeholder="2106">
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Robbie Avatar Chat Panel -->
+        <div class="panel avatar-chat-panel">
+            <div class="robbie-avatar" onclick="changeMood()" id="avatarEmoji" title="Click to change mood">🤖</div>
+            <div class="panel-title">Chat with Robbie</div>
+            <div class="chat-area" id="avatarChat">
+                <div class="chat-message chat-ai">Hello Allan! I'm Robbie, your AI assistant. I can help you with anything in the Aurora AI Empire. What would you like to discuss?</div>
+            </div>
+            <div class="chat-input-area">
+                <select class="model-selector" id="modelSelect">
+                    <option value="llama3.1:8b">Llama 3.1 8B (Fast)</option>
+                    <option value="llama3.1:70b">Llama 3.1 70B (Powerful)</option>
+                    <option value="qwen2.5:14b">Qwen 2.5 14B</option>
+                    <option value="qwen2.5:7b">Qwen 2.5 7B</option>
+                    <option value="gemma3:4b">Gemma 3 4B</option>
+                    <option value="phi3:14b">Phi-3 14B</option>
+                    <option value="mistral:7b">Mistral 7B</option>
+                    <option value="codellama:13b">CodeLlama 13B</option>
+                </select>
+                <input type="text" class="chat-input" id="avatarChatInput" placeholder="Type your message to Robbie..." onkeypress="handleAvatarChatKey(event)">
+                <button class="btn" onclick="sendAvatarMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- System Performance Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                📊 System Performance <span class="streaming-indicator"></span>
+            </div>
+            <div class="stats-grid" id="systemStats">
+                <div class="stat-card">
+                    <div class="stat-number" id="gpuUtil">85%</div>
+                    <div class="stat-label">GPU Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="cpuUtil">42%</div>
+                    <div class="stat-label">CPU Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="memoryUtil">67%</div>
+                    <div class="stat-label">Memory</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="diskUtil">23%</div>
+                    <div class="stat-label">Disk</div>
+                </div>
+            </div>
+            <div class="chat-area" id="systemChat">
+                <div class="chat-message chat-system">Aurora AI Backend: ✅ Online</div>
+                <div class="chat-message chat-system">RobbieBook Proxy: ✅ Active</div>
+                <div class="chat-message chat-system">GPU Mesh: ✅ Connected</div>
+                <div class="chat-message chat-system">All systems operational...</div>
+            </div>
+        </div>
+
+        <!-- Priorities Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                🎯 Agreed Priorities <span class="streaming-indicator"></span>
+            </div>
+            <div id="prioritiesList">
+                <div class="priority-item critical">
+                    <span>Build Robbie's Physical Body</span>
+                    <span class="priority-status status-in_progress">In Progress</span>
+                </div>
+                <div class="priority-item high">
+                    <span>Expert-Trained AI System</span>
+                    <span class="priority-status status-in_progress">In Progress</span>
+                </div>
+                <div class="priority-item medium">
+                    <span>Automated Lifestyle Business</span>
+                    <span class="priority-status status-in_progress">In Progress</span>
+                </div>
+                <div class="priority-item completed">
+                    <span>Aurora AI Empire Setup</span>
+                    <span class="priority-status status-completed">Completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Actions Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                ⚡ Last 5 Actions <span class="streaming-indicator"></span>
+            </div>
+            <div id="recentActions">
+                <div class="action-item">🔧 Fixed Aurora AI Backend ModuleNotFoundError</div>
+                <div class="action-item">🚀 Started RobbieBook1 Empire Services</div>
+                <div class="action-item">🌐 Configured Transparent Proxy System</div>
+                <div class="action-item">📊 Added Custom Favicon to Dashboard</div>
+                <div class="action-item">💬 Linked Robbie Chat Applications</div>
+            </div>
+        </div>
+
+        <!-- Job Tracking Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                🔧 Job Tracking <span class="streaming-indicator"></span>
+            </div>
+            <div id="jobsList">
+                <div class="job-item">
+                    <strong>AllanBot Training</strong>
+                    <div class="job-progress">
+                        <div class="job-progress-bar"></div>
+                    </div>
+                    <small>Learning decision patterns from Allan's data</small>
+                </div>
+                <div class="job-item">
+                    <strong>GPU Mesh Optimization</strong>
+                    <div class="job-progress">
+                        <div class="job-progress-bar" style="width: 60%;"></div>
+                    </div>
+                    <small>Distributing AI workloads across nodes</small>
+                </div>
+                <div class="job-item">
+                    <strong>Business Pipeline Re-engagement</strong>
+                    <div class="job-progress">
+                        <div class="job-progress-bar" style="width: 40%;"></div>
+                    </div>
+                    <small>Contacting VIP prospects and clients</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMood = 'focused';
+        let moods = {
+            focused: { emoji: '🎯', text: 'Focused', avatar: '🤖' },
+            excited: { emoji: '🚀', text: 'Excited', avatar: '🚀' },
+            stressed: { emoji: '😰', text: 'Stressed', avatar: '😰' },
+            confident: { emoji: '💪', text: 'Confident', avatar: '💪' },
+            determined: { emoji: '🔥', text: 'Determined', avatar: '🔥' },
+            calm: { emoji: '😌', text: 'Calm', avatar: '😌' },
+            alert: { emoji: '👁️', text: 'Alert', avatar: '👁️' }
+        };
+
+        // Change mood
+        function changeMood() {
+            const moodKeys = Object.keys(moods);
+            const currentIndex = moodKeys.indexOf(currentMood);
+            const nextIndex = (currentIndex + 1) % moodKeys.length;
+            currentMood = moodKeys[nextIndex];
+
+            document.getElementById('moodEmoji').textContent = moods[currentMood].emoji;
+            document.getElementById('moodText').textContent = moods[currentMood].text;
+            document.getElementById('avatarEmoji').textContent = moods[currentMood].avatar;
+        }
+
+        // PIN validation
+        document.getElementById('pinInput').addEventListener('input', function(e) {
+            if (e.target.value === '2106') {
+                e.target.style.borderColor = '#4caf50';
+                e.target.style.color = '#4caf50';
+            } else {
+                e.target.style.borderColor = '#ff6b6b';
+                e.target.style.color = '#ff6b6b';
+            }
+        });
+
+        // Avatar chat input handling
+        function handleAvatarChatKey(event) {
+            if (event.key === 'Enter') {
+                sendAvatarMessage();
+            }
+        }
+
+        // Send avatar message to Ollama
+        async function sendAvatarMessage() {
+            const input = document.getElementById('avatarChatInput');
+            const modelSelect = document.getElementById('modelSelect');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addAvatarChatMessage(message, 'user');
+            input.value = '';
+
+            // Send to Ollama
+            try {
+                const response = await fetch('http://localhost:9000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        model: modelSelect.value
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addAvatarChatMessage(data.response, 'ai');
+                } else {
+                    addAvatarChatMessage(`Error: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                addAvatarChatMessage(`Connection error: ${error.message}`, 'error');
+                // Fallback to simulated response
+                setTimeout(() => {
+                    const responses = [
+                        "I understand you want to discuss: " + message,
+                        "Let me process that request for you...",
+                        "That's an interesting point about " + message,
+                        "I'll help you with that right away!",
+                        "Excellent idea! Let me work on that."
+                    ];
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    addAvatarChatMessage(response + " (fallback)", 'ai');
+                }, 1000);
+            }
+        }
+
+        // Add avatar chat message
+        function addAvatarChatMessage(message, type) {
+            const chat = document.getElementById('avatarChat');
+            const div = document.createElement('div');
+            div.className = `chat-message chat-${type}`;
+            div.textContent = message;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Auto-refresh stats
+        setInterval(() => {
+            // Simulate changing stats
+            const gpu = Math.floor(Math.random() * 20) + 70;
+            const cpu = Math.floor(Math.random() * 30) + 30;
+            const memory = Math.floor(Math.random() * 20) + 60;
+            const disk = Math.floor(Math.random() * 10) + 20;
+
+            document.getElementById('gpuUtil').textContent = gpu + '%';
+            document.getElementById('cpuUtil').textContent = cpu + '%';
+            document.getElementById('memoryUtil').textContent = memory + '%';
+            document.getElementById('diskUtil').textContent = disk + '%';
+        }, 3000);
+
+        // Background Theme System
+        const themes = {
+            'aurora-cyberpunk': 'Futuristic grid with neon accents',
+            'aurora-matrix': 'Classic green rain effect',
+            'aurora-neural': 'AI neural network visualization',
+            'testpilot-professional': 'Clean corporate aesthetic',
+            'testpilot-modern': 'Sleek dark professional',
+            'revenue-focused': 'Money-making energy',
+            'ai-empire': 'Full Aurora AI power'
+        };
+
+        // Theme switching
+        document.querySelectorAll('.bg-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const theme = option.dataset.theme;
+                
+                // Remove all theme classes from body
+                document.body.className = '';
+                document.body.classList.add(`office-bg-${theme}`);
+                
+                // Update active state
+                document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                // Update description
+                document.getElementById('themeDescription').textContent = themes[theme];
+            });
+        });
+
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            
+            document.getElementById('particlesContainer').appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 6000);
+        }
+
+        // Create particles periodically
+        setInterval(createParticle, 2000);
+
+        // Initial focus
+        document.getElementById('avatarChatInput').focus();
+    </script>
+</body>
+</html>

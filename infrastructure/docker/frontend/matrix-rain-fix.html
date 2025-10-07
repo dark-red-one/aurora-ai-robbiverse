@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matrix Rain Fix</title>
+    <style>
+        body { background: #0a0a18; color: #fff; font-family: Arial; }
+        .fix { margin: 20px; padding: 20px; border: 1px solid #00d4ff; }
+        pre { background: #000; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="fix">
+        <h2>🔧 Matrix Rain Fix</h2>
+        <p><strong>Issue:</strong> Main background matrix rain not working</p>
+        <p><strong>Solution:</strong> Add this function after createMatrixParticles():</p>
+        <pre>
+// ==================== MAIN BACKGROUND MATRIX RAIN ====================
+function createMatrixRain() {
+    const container = document.getElementById('matrixRainBg');
+    if (!container) return;
+
+    const characters = 'ROBBIE0123456789@#$%^&*()<>{}[]|\\/~`';
+    const specialChars = '★☆◆◇●○▲△■□▲▼◀▶';
+
+    // Create matrix columns for main background
+    for (let i = 0; i < 15; i++) {
+        const column = document.createElement('div');
+        column.className = 'matrix-column-bg';
+        column.style.left = Math.random() * 100 + '%';
+        column.style.animationDuration = (Math.random() * 6 + 3) + 's';
+        column.style.animationDelay = Math.random() * 2 + 's';
+        
+        let text = '';
+        const columnLength = Math.floor(Math.random() * 8) + 8;
+        for (let j = 0; j < columnLength; j++) {
+            const char = Math.random() < 0.2 ?
+                specialChars[Math.floor(Math.random() * specialChars.length)] :
+                characters[Math.floor(Math.random() * characters.length)];
+            
+            const isSpecial = Math.random() < 0.25;
+            if (isSpecial) {
+                text += `<span class="matrix-glitch">${char}</span><br>`;
+            } else {
+                text += char + '<br>';
+            }
+        }
+        column.innerHTML = text;
+        container.appendChild(column);
+    }
+}
+        </pre>
+        <p><strong>And add this call to the window load event after setupBackgroundCycling():</strong></p>
+        <pre>
+// 🌧️ Initialize matrix rain animations
+createMatrixRain();
+        </pre>
+        <p><strong>Status:</strong> ✅ No login window found - interface is clean</p>
+        <p><strong>Status:</strong> ✅ Avatar is round and working</p>
+        <p><strong>Status:</strong> ✅ Sidebar matrix rain is working</p>
+        <p><strong>Status:</strong> ❌ Main background matrix rain missing function</p>
+    </div>
+</body>
+</html>

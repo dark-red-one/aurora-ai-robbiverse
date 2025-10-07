@@ -1,243 +1,434 @@
 #!/usr/bin/env python3
 """
-Aurora AI Empire - GPU Fault Monitor
-Real-time monitoring and automatic recovery for GPU failures
+Aurora AI GPU Fault Monitor
+Real-time GPU health monitoring with automatic failover detection
 """
 
 import asyncio
-import subprocess
-import time
+import json
 import logging
-from datetime import datetime
-from typing import Dict, List
 import psutil
+import subprocess
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+import aiohttp
+import redis
+from dataclasses import dataclass
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+@dataclass
+class GPUHealthMetrics:
+    gpu_id: str
+    utilization: float
+    memory_used: float
+    memory_total: float
+    temperature: float
+    power_draw: float
+    clock_speed: float
+    status: str
+    last_check: datetime
+
 class GPUFaultMonitor:
-    def __init__(self):
-        self.gpu_health_history = {}
-        self.failure_threshold = 3  # consecutive failures before action
-        self.recovery_attempts = {}
-        self.max_recovery_attempts = 5
+    def __init__(self, node_id: str, redis_host="localhost", redis_port=6379):
+        self.node_id = node_id
+        self.redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+        self.gpu_metrics: List[GPUHealthMetrics] = []
+        self.running = False
         
-    def get_gpu_health(self) -> Dict:
-        """Get comprehensive GPU health status"""
-        try:
-            # Get GPU info
-            result = subprocess.run(
-                ["nvidia-smi", "--query-gpu=index,name,temperature.gpu,power.draw,memory.used,memory.total,utilization.gpu", 
-                 "--format=csv,noheader,nounits"],
-                capture_output=True, text=True, timeout=10
-            )
-            
-            if result.returncode != 0:
-                return {"status": "error", "error": "nvidia-smi failed"}
-            
-            gpus = []
-            for line in result.stdout.strip().split('\n'):
-                if line:
-                    parts = line.split(', ')
-                    if len(parts) >= 7:
-                        gpu_info = {
-                            "gpu_id": int(parts[0]),
-                            "name": parts[1],
-                            "temperature": float(parts[2]) if parts[2] != 'N/A' else 0,
-                            "power_draw": float(parts[3]) if parts[3] != 'N/A' else 0,
-                            "memory_used": int(parts[4]) if parts[4] != 'N/A' else 0,
-                            "memory_total": int(parts[5]) if parts[5] != 'N/A' else 0,
-                            "utilization": int(parts[6]) if parts[6] != 'N/A' else 0,
-                            "timestamp": datetime.now().isoformat()
-                        }
-                        
-                        # Calculate health metrics
-                        gpu_info["memory_usage_percent"] = (gpu_info["memory_used"] / gpu_info["memory_total"] * 100) if gpu_info["memory_total"] > 0 else 0
-                        gpu_info["health_score"] = self.calculate_health_score(gpu_info)
-                        gpu_info["status"] = self.determine_gpu_status(gpu_info)
-                        
-                        gpus.append(gpu_info)
-            
-            return {"status": "success", "gpus": gpus}
-            
-        except Exception as e:
-            logger.error(f"Error getting GPU health: {e}")
-            return {"status": "error", "error": str(e)}
-    
-    def calculate_health_score(self, gpu_info: Dict) -> float:
-        """Calculate GPU health score (0-100)"""
-        score = 100.0
+        # Health thresholds
+        self.thresholds = {
+            "utilization_warning": 85.0,
+            "utilization_critical": 95.0,
+            "temperature_warning": 80.0,
+            "temperature_critical": 90.0,
+            "memory_warning": 85.0,
+            "memory_critical": 95.0,
+            "power_warning": 90.0,
+            "power_critical": 95.0
+        }
         
-        # Temperature penalty (optimal: 60-70°C)
-        temp = gpu_info["temperature"]
-        if temp > 85:
-            score -= 30  # Critical temperature
-        elif temp > 75:
-            score -= 15  # High temperature
-        elif temp > 65:
-            score -= 5   # Slightly high
+        # Fault detection
+        self.fault_history: Dict[str, List[datetime]] = {}
+        self.consecutive_failures = 0
+        self.last_successful_check = datetime.now()
+
+    async def start(self):
+        """Start the GPU fault monitor"""
+        logger.info(f"🔍 Starting GPU Fault Monitor for node {self.node_id}")
+        self.running = True
         
-        # Memory usage penalty
-        memory_usage = gpu_info["memory_usage_percent"]
-        if memory_usage > 95:
-            score -= 25  # Critical memory usage
-        elif memory_usage > 85:
-            score -= 10  # High memory usage
+        # Start monitoring tasks
+        asyncio.create_task(self._continuous_monitoring())
+        asyncio.create_task(self._health_reporter())
+        asyncio.create_task(self._fault_analyzer())
         
-        # Utilization penalty (too high or too low can indicate issues)
-        utilization = gpu_info["utilization"]
-        if utilization > 95:
-            score -= 10  # Over-utilization
-        elif utilization < 5 and memory_usage > 50:
-            score -= 15  # Low utilization but high memory (potential leak)
-        
-        return max(0, score)
-    
-    def determine_gpu_status(self, gpu_info: Dict) -> str:
-        """Determine GPU status based on health metrics"""
-        health_score = gpu_info["health_score"]
-        temperature = gpu_info["temperature"]
-        memory_usage = gpu_info["memory_usage_percent"]
-        
-        if health_score < 30:
-            return "critical"
-        elif health_score < 50:
-            return "degraded"
-        elif temperature > 85 or memory_usage > 95:
-            return "warning"
-        else:
-            return "healthy"
-    
-    async def monitor_gpu_health(self):
+        logger.info("✅ GPU Fault Monitor started successfully")
+
+    async def _continuous_monitoring(self):
         """Continuously monitor GPU health"""
-        while True:
-            health_data = self.get_gpu_health()
+        while self.running:
+            try:
+                await self._check_gpu_health()
+                self.consecutive_failures = 0
+                self.last_successful_check = datetime.now()
+                
+            except Exception as e:
+                logger.error(f"❌ GPU health check failed: {e}")
+                self.consecutive_failures += 1
+                
+                # Report failure to coordinator
+                await self._report_fault("health_check_failure", str(e))
             
-            if health_data["status"] == "success":
-                for gpu in health_data["gpus"]:
-                    gpu_id = gpu["gpu_id"]
-                    
-                    # Update health history
-                    if gpu_id not in self.gpu_health_history:
-                        self.gpu_health_history[gpu_id] = []
-                    
-                    self.gpu_health_history[gpu_id].append(gpu)
-                    
-                    # Keep only last 10 readings
-                    if len(self.gpu_health_history[gpu_id]) > 10:
-                        self.gpu_health_history[gpu_id] = self.gpu_health_history[gpu_id][-10:]
-                    
-                    # Check for failures
-                    if gpu["status"] in ["critical", "degraded"]:
-                        await self.handle_gpu_failure(gpu)
-                    elif gpu["status"] == "warning":
-                        await self.handle_gpu_warning(gpu)
-                    else:
-                        # Reset failure count on healthy status
-                        if gpu_id in self.recovery_attempts:
-                            del self.recovery_attempts[gpu_id]
-            
-            await asyncio.sleep(5)  # Check every 5 seconds
-    
-    async def handle_gpu_failure(self, gpu: Dict):
-        """Handle GPU failure with automatic recovery"""
-        gpu_id = gpu["gpu_id"]
-        
-        if gpu_id not in self.recovery_attempts:
-            self.recovery_attempts[gpu_id] = 0
-        
-        self.recovery_attempts[gpu_id] += 1
-        
-        if self.recovery_attempts[gpu_id] > self.max_recovery_attempts:
-            logger.error(f"🚨 GPU {gpu_id} failed permanently after {self.max_recovery_attempts} recovery attempts")
-            return
-        
-        logger.warning(f"⚠️ GPU {gpu_id} failure detected (attempt {self.recovery_attempts[gpu_id]})")
-        logger.warning(f"   Health Score: {gpu['health_score']:.1f}")
-        logger.warning(f"   Temperature: {gpu['temperature']}°C")
-        logger.warning(f"   Memory Usage: {gpu['memory_usage_percent']:.1f}%")
-        
-        # Attempt recovery
-        await self.attempt_gpu_recovery(gpu)
-    
-    async def handle_gpu_warning(self, gpu: Dict):
-        """Handle GPU warning (monitor but don't take action yet)"""
-        gpu_id = gpu["gpu_id"]
-        logger.info(f"⚠️ GPU {gpu_id} warning: {gpu['status']}")
-        logger.info(f"   Health Score: {gpu['health_score']:.1f}")
-        logger.info(f"   Temperature: {gpu['temperature']}°C")
-        logger.info(f"   Memory Usage: {gpu['memory_usage_percent']:.1f}%")
-    
-    async def attempt_gpu_recovery(self, gpu: Dict):
-        """Attempt to recover a failed GPU"""
-        gpu_id = gpu["gpu_id"]
-        
-        logger.info(f"🔧 Attempting GPU {gpu_id} recovery...")
-        
+            await asyncio.sleep(10)  # Check every 10 seconds
+
+    async def _check_gpu_health(self):
+        """Check health of all GPUs on this node"""
         try:
-            # Method 1: Reset GPU (if supported)
-            result = subprocess.run(
-                ["nvidia-smi", "--gpu-reset", str(gpu_id)],
-                capture_output=True, text=True, timeout=30
-            )
+            # Get GPU information using nvidia-smi
+            gpu_info = await self._get_nvidia_smi_info()
             
-            if result.returncode == 0:
-                logger.info(f"✅ GPU {gpu_id} reset successful")
-                await asyncio.sleep(10)  # Wait for reset to take effect
+            if not gpu_info:
+                logger.warning("⚠️ No GPU information available")
                 return
             
+            # Process each GPU
+            current_metrics = []
+            for gpu_data in gpu_info:
+                metrics = GPUHealthMetrics(
+                    gpu_id=gpu_data["id"],
+                    utilization=gpu_data["utilization"],
+                    memory_used=gpu_data["memory_used"],
+                    memory_total=gpu_data["memory_total"],
+                    temperature=gpu_data["temperature"],
+                    power_draw=gpu_data["power_draw"],
+                    clock_speed=gpu_data["clock_speed"],
+                    status="healthy",
+                    last_check=datetime.now()
+                )
+                
+                # Check for issues
+                await self._evaluate_gpu_health(metrics)
+                current_metrics.append(metrics)
+            
+            self.gpu_metrics = current_metrics
+            
+            # Store metrics in Redis
+            await self._store_metrics(current_metrics)
+            
         except Exception as e:
-            logger.warning(f"GPU reset failed: {e}")
-        
-        # Method 2: Clear GPU memory
+            logger.error(f"❌ Error checking GPU health: {e}")
+            raise
+
+    async def _get_nvidia_smi_info(self) -> List[Dict]:
+        """Get GPU information from nvidia-smi"""
         try:
-            result = subprocess.run(
-                ["nvidia-smi", "--gpu-reset", str(gpu_id)],
-                capture_output=True, text=True, timeout=30
-            )
-            logger.info(f"🧹 GPU {gpu_id} memory cleared")
+            # Use nvidia-smi with JSON output
+            cmd = [
+                "nvidia-smi",
+                "--query-gpu=index,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw,clocks.current.graphics",
+                "--format=csv,noheader,nounits"
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode != 0:
+                logger.error(f"❌ nvidia-smi failed: {result.stderr}")
+                return []
+            
+            gpu_info = []
+            for line in result.stdout.strip().split('\n'):
+                if line.strip():
+                    parts = [p.strip() for p in line.split(',')]
+                    if len(parts) >= 7:
+                        gpu_info.append({
+                            "id": parts[0],
+                            "utilization": float(parts[1]) if parts[1] != "N/A" else 0.0,
+                            "memory_used": float(parts[2]) if parts[2] != "N/A" else 0.0,
+                            "memory_total": float(parts[3]) if parts[3] != "N/A" else 0.0,
+                            "temperature": float(parts[4]) if parts[4] != "N/A" else 0.0,
+                            "power_draw": float(parts[5]) if parts[5] != "N/A" else 0.0,
+                            "clock_speed": float(parts[6]) if parts[6] != "N/A" else 0.0
+                        })
+            
+            return gpu_info
+            
+        except subprocess.TimeoutExpired:
+            logger.error("❌ nvidia-smi command timed out")
+            return []
         except Exception as e:
-            logger.warning(f"Memory clear failed: {e}")
+            logger.error(f"❌ Error running nvidia-smi: {e}")
+            return []
+
+    async def _evaluate_gpu_health(self, metrics: GPUHealthMetrics):
+        """Evaluate GPU health against thresholds"""
+        issues = []
         
-        # Method 3: Restart CUDA context (if applicable)
-        logger.info(f"🔄 GPU {gpu_id} recovery attempt completed")
-    
-    def get_fault_summary(self) -> Dict:
-        """Get fault monitoring summary"""
-        total_gpus = len(self.gpu_health_history)
-        healthy_gpus = 0
-        warning_gpus = 0
-        failed_gpus = 0
+        # Check utilization
+        if metrics.utilization >= self.thresholds["utilization_critical"]:
+            issues.append(f"CRITICAL: GPU {metrics.gpu_id} utilization {metrics.utilization}%")
+            metrics.status = "critical"
+        elif metrics.utilization >= self.thresholds["utilization_warning"]:
+            issues.append(f"WARNING: GPU {metrics.gpu_id} utilization {metrics.utilization}%")
+            metrics.status = "warning"
         
-        for gpu_id, history in self.gpu_health_history.items():
-            if history:
-                latest = history[-1]
-                if latest["status"] == "healthy":
-                    healthy_gpus += 1
-                elif latest["status"] == "warning":
-                    warning_gpus += 1
+        # Check temperature
+        if metrics.temperature >= self.thresholds["temperature_critical"]:
+            issues.append(f"CRITICAL: GPU {metrics.gpu_id} temperature {metrics.temperature}°C")
+            metrics.status = "critical"
+        elif metrics.temperature >= self.thresholds["temperature_warning"]:
+            issues.append(f"WARNING: GPU {metrics.gpu_id} temperature {metrics.temperature}°C")
+            if metrics.status == "healthy":
+                metrics.status = "warning"
+        
+        # Check memory usage
+        memory_percent = (metrics.memory_used / metrics.memory_total) * 100
+        if memory_percent >= self.thresholds["memory_critical"]:
+            issues.append(f"CRITICAL: GPU {metrics.gpu_id} memory {memory_percent:.1f}%")
+            metrics.status = "critical"
+        elif memory_percent >= self.thresholds["memory_warning"]:
+            issues.append(f"WARNING: GPU {metrics.gpu_id} memory {memory_percent:.1f}%")
+            if metrics.status == "healthy":
+                metrics.status = "warning"
+        
+        # Check power draw
+        if metrics.power_draw >= self.thresholds["power_critical"]:
+            issues.append(f"CRITICAL: GPU {metrics.gpu_id} power {metrics.power_draw}W")
+            metrics.status = "critical"
+        elif metrics.power_draw >= self.thresholds["power_warning"]:
+            issues.append(f"WARNING: GPU {metrics.gpu_id} power {metrics.power_draw}W")
+            if metrics.status == "healthy":
+                metrics.status = "warning"
+        
+        # Report issues
+        if issues:
+            for issue in issues:
+                logger.warning(f"⚠️ {issue}")
+                await self._report_fault("gpu_issue", issue)
+
+    async def _store_metrics(self, metrics: List[GPUHealthMetrics]):
+        """Store GPU metrics in Redis"""
+        try:
+            metrics_data = {
+                "node_id": self.node_id,
+                "timestamp": datetime.now().isoformat(),
+                "gpus": []
+            }
+            
+            for gpu in metrics:
+                gpu_data = {
+                    "gpu_id": gpu.gpu_id,
+                    "utilization": gpu.utilization,
+                    "memory_used": gpu.memory_used,
+                    "memory_total": gpu.memory_total,
+                    "memory_percent": (gpu.memory_used / gpu.memory_total) * 100,
+                    "temperature": gpu.temperature,
+                    "power_draw": gpu.power_draw,
+                    "clock_speed": gpu.clock_speed,
+                    "status": gpu.status,
+                    "last_check": gpu.last_check.isoformat()
+                }
+                metrics_data["gpus"].append(gpu_data)
+            
+            # Store in Redis with expiration
+            key = f"gpu_metrics:{self.node_id}"
+            self.redis_client.setex(key, 300, json.dumps(metrics_data))  # 5 minute expiration
+            
+        except Exception as e:
+            logger.error(f"❌ Error storing metrics: {e}")
+
+    async def _health_reporter(self):
+        """Report health status to the coordinator"""
+        while self.running:
+            try:
+                # Calculate overall node health
+                if not self.gpu_metrics:
+                    overall_status = "unknown"
+                elif any(gpu.status == "critical" for gpu in self.gpu_metrics):
+                    overall_status = "critical"
+                elif any(gpu.status == "warning" for gpu in self.gpu_metrics):
+                    overall_status = "warning"
                 else:
-                    failed_gpus += 1
+                    overall_status = "healthy"
+                
+                # Calculate performance score
+                performance_score = await self._calculate_performance_score()
+                
+                # Report to coordinator
+                health_report = {
+                    "node_id": self.node_id,
+                    "status": overall_status,
+                    "gpu_count": len(self.gpu_metrics),
+                    "performance_score": performance_score,
+                    "gpu_utilization": sum(gpu.utilization for gpu in self.gpu_metrics) / len(self.gpu_metrics) if self.gpu_metrics else 0,
+                    "memory_used": sum(gpu.memory_used for gpu in self.gpu_metrics) / len(self.gpu_metrics) if self.gpu_metrics else 0,
+                    "timestamp": datetime.now().isoformat(),
+                    "consecutive_failures": self.consecutive_failures,
+                    "last_successful_check": self.last_successful_check.isoformat()
+                }
+                
+                # Store health report
+                self.redis_client.hset("node_health", self.node_id, json.dumps(health_report))
+                
+                await asyncio.sleep(30)  # Report every 30 seconds
+                
+            except Exception as e:
+                logger.error(f"❌ Error reporting health: {e}")
+
+    async def _calculate_performance_score(self) -> float:
+        """Calculate overall node performance score"""
+        if not self.gpu_metrics:
+            return 0.0
         
-        return {
-            "total_gpus": total_gpus,
-            "healthy_gpus": healthy_gpus,
-            "warning_gpus": warning_gpus,
-            "failed_gpus": failed_gpus,
-            "recovery_attempts": self.recovery_attempts,
-            "fault_tolerance": "enabled",
-            "auto_recovery": "enabled"
+        total_score = 0.0
+        for gpu in self.gpu_metrics:
+            # Base score
+            score = 1.0
+            
+            # Penalize high utilization
+            if gpu.utilization > 90:
+                score *= 0.5
+            elif gpu.utilization > 80:
+                score *= 0.8
+            
+            # Penalize high temperature
+            if gpu.temperature > 85:
+                score *= 0.7
+            elif gpu.temperature > 75:
+                score *= 0.9
+            
+            # Penalize high memory usage
+            memory_percent = (gpu.memory_used / gpu.memory_total) * 100
+            if memory_percent > 90:
+                score *= 0.6
+            elif memory_percent > 80:
+                score *= 0.8
+            
+            total_score += score
+        
+        return total_score / len(self.gpu_metrics)
+
+    async def _fault_analyzer(self):
+        """Analyze fault patterns and trends"""
+        while self.running:
+            try:
+                # Check for consecutive failures
+                if self.consecutive_failures >= 5:
+                    await self._report_fault("consecutive_failures", f"{self.consecutive_failures} consecutive failures")
+                
+                # Check for stale metrics
+                if self.gpu_metrics:
+                    oldest_check = min(gpu.last_check for gpu in self.gpu_metrics)
+                    if datetime.now() - oldest_check > timedelta(minutes=5):
+                        await self._report_fault("stale_metrics", "GPU metrics are stale")
+                
+                await asyncio.sleep(60)  # Analyze every minute
+                
+            except Exception as e:
+                logger.error(f"❌ Error in fault analyzer: {e}")
+
+    async def _report_fault(self, fault_type: str, fault_description: str):
+        """Report a fault to the coordinator"""
+        try:
+            fault_report = {
+                "node_id": self.node_id,
+                "fault_type": fault_type,
+                "description": fault_description,
+                "timestamp": datetime.now().isoformat(),
+                "severity": self._determine_severity(fault_type)
+            }
+            
+            # Store fault report
+            fault_key = f"fault:{self.node_id}:{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            self.redis_client.setex(fault_key, 3600, json.dumps(fault_report))  # 1 hour expiration
+            
+            # Add to fault history
+            if fault_type not in self.fault_history:
+                self.fault_history[fault_type] = []
+            
+            self.fault_history[fault_type].append(datetime.now())
+            
+            # Keep only recent faults (last 24 hours)
+            cutoff = datetime.now() - timedelta(hours=24)
+            self.fault_history[fault_type] = [
+                fault_time for fault_time in self.fault_history[fault_type]
+                if fault_time > cutoff
+            ]
+            
+            logger.error(f"🚨 FAULT REPORTED: {fault_type} - {fault_description}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error reporting fault: {e}")
+
+    def _determine_severity(self, fault_type: str) -> str:
+        """Determine fault severity"""
+        critical_faults = ["consecutive_failures", "stale_metrics", "health_check_failure"]
+        warning_faults = ["gpu_issue"]
+        
+        if fault_type in critical_faults:
+            return "critical"
+        elif fault_type in warning_faults:
+            return "warning"
+        else:
+            return "info"
+
+    async def stop(self):
+        """Stop the GPU fault monitor"""
+        logger.info("🛑 Stopping GPU Fault Monitor...")
+        self.running = False
+
+# Health endpoint for coordinator
+async def health_endpoint(request):
+    """HTTP health endpoint for the coordinator to check"""
+    try:
+        monitor = request.app['monitor']
+        
+        # Get current metrics
+        health_data = {
+            "node_id": monitor.node_id,
+            "status": "healthy" if monitor.consecutive_failures < 3 else "degraded",
+            "gpu_count": len(monitor.gpu_metrics),
+            "performance_score": await monitor._calculate_performance_score(),
+            "gpu_utilization": sum(gpu.utilization for gpu in monitor.gpu_metrics) / len(monitor.gpu_metrics) if monitor.gpu_metrics else 0,
+            "memory_used": sum(gpu.memory_used for gpu in monitor.gpu_metrics) / len(monitor.gpu_metrics) if monitor.gpu_metrics else 0,
+            "timestamp": datetime.now().isoformat()
         }
-    
-    async def start_fault_monitor(self):
-        """Start the fault monitoring system"""
-        logger.info("🔍 Starting GPU Fault Monitor...")
-        logger.info("🛡️ Fault tolerance and auto-recovery enabled...")
         
-        # Start monitoring
-        await self.monitor_gpu_health()
+        return aiohttp.web.json_response(health_data)
+        
+    except Exception as e:
+        logger.error(f"❌ Health endpoint error: {e}")
+        return aiohttp.web.json_response({"error": str(e)}, status=500)
+
+# Main execution
+async def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Aurora AI GPU Fault Monitor")
+    parser.add_argument("--node-id", required=True, help="Unique node identifier")
+    parser.add_argument("--redis-host", default="localhost", help="Redis host")
+    parser.add_argument("--redis-port", type=int, default=6379, help="Redis port")
+    args = parser.parse_args()
+    
+    monitor = GPUFaultMonitor(
+        node_id=args.node_id,
+        redis_host=args.redis_host,
+        redis_port=args.redis_port
+    )
+    
+    try:
+        await monitor.start()
+        
+        # Keep running
+        while True:
+            await asyncio.sleep(60)
+            
+    except KeyboardInterrupt:
+        logger.info("🛑 Received shutdown signal")
+    finally:
+        await monitor.stop()
 
 if __name__ == "__main__":
-    monitor = GPUFaultMonitor()
-    asyncio.run(monitor.start_fault_monitor())
+    asyncio.run(main())

@@ -4434,7 +4434,10 @@
         // ==================== EMERGENCY FUNCTIONS ====================
         function logout() {
             if (confirm('🚪 Are you sure you want to logout?')) {
-                window.location.href = '/auth/logout';
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user_email');
+                localStorage.removeItem('user_id');
+                window.location.href = '/auth/logout.html';
             }
         }
 

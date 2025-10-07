@@ -1,0 +1,14 @@
+[Unit]
+Description=Aurora Chat App Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/aurora-chat-app
+ExecStart=/usr/bin/python3 /var/www/aurora-chat-app/server.py 80
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

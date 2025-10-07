@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie - Authentication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a18;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Matrix Background Animation - ENHANCED - Robbie's Colors */
+        .matrix-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .matrix-rain-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .matrix-column-bg {
+            position: absolute;
+            top: -100%;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            animation: matrix-fall-bg linear infinite;
+            opacity: 0.7;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .matrix-column-bg:nth-child(odd) {
+            color: #00d4ff;
+            /* Robbie's primary - cyan */
+        }
+
+        .matrix-column-bg:nth-child(even) {
+            color: #4caf50;
+            /* Robbie's secondary - green */
+        }
+
+        .matrix-column-bg:nth-child(3n) {
+            color: #ff6b9d;
+            /* Robbie's personality - pink */
+        }
+
+        @keyframes matrix-fall-bg {
+            0% {
+                top: -100%;
+                opacity: 0.3;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                top: 100vh;
+                opacity: 0.1;
+            }
+        }
+
+        .auth-container {
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid #333;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            max-width: 450px;
+            width: 100%;
+            padding: 3rem;
+            animation: slideIn 0.5s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            position: relative;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .auth-subtitle {
+            color: #4caf50;
+            font-size: 0.875rem;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #1a202c;
+        }
+
+        .form-input {
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-button {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .auth-divider-text {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .oauth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .oauth-button {
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .oauth-button:hover {
+            border-color: #667eea;
+            background: #f9fafb;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .auth-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Robbie Avatar Styles */
+        .robbie-avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .robbie-avatar {
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5));
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(76, 175, 80, 0.2));
+            border: 4px solid rgba(0, 212, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .robbie-avatar:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.8));
+            border-color: rgba(0, 212, 255, 1);
+        }
+        
+        .robbie-avatar::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00d4ff, #4caf50, #ff6b9d, #ffc107);
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .robbie-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            color: #00d4ff;
+        }
+
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            transform: scale(1.2);
+        }
+
+            background: #4caf50;
+            color: #000;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+    </style>
+    </head>
+    <body>
+        <!-- Matrix Background Animation -->
+        <div class="matrix-background">
+            <div class="matrix-rain-bg" id="matrixRainBg"></div>
+        </div>
+        
+        <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo"><div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #00d4ff 0%, #ff6b35 100%); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 12px; text-align: center; line-height: 1.2;">TEST<br>PILOT</div></div>
+            <h1 class="auth-title">Welcome to Aurora!</h1>
+            <p class="auth-subtitle">Your AI Command Center</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form class="auth-form" id="authForm">
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="allan@testpilotcpg.com"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="form-input" 
+                    placeholder="••••••••"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="auth-button" id="submitButton">
+                Sign In
+            </button>
+        </form>
+
+
+        </div>
+
+
+    <script>
+        const authForm = document.getElementById('authForm');
+        const submitButton = document.getElementById('submitButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Signing in...';
+            errorMessage.classList.remove('show');
+            successMessage.classList.remove('show');
+
+            try {
+                // Real authentication
+                const authResult = await authenticateUser(email, password);
+                
+                if (authResult.success) {
+                    // Store real auth data
+                    localStorage.setItem('auth_token', authResult.token);
+                    localStorage.setItem('user_email', authResult.user.email);
+                    localStorage.setItem('user_id', authResult.user.id);
+                    localStorage.setItem('user_name', authResult.user.name);
+
+                    successMessage.textContent = `Welcome back, ${authResult.user.name}! 🚀`;
+                    successMessage.classList.add('show');
+
+                    // Redirect to main interface
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    throw new Error(authResult.error || 'Authentication failed');
+                }
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.classList.add('show');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign In';
+            }
+        });
+
+        // Robbie Avatar Mood System
+        const moods = [
+            { emoji: '😊', text: 'Friendly', color: '#4caf50' },
+            { emoji: '🎯', text: 'Focused', color: '#00d4ff' },
+            { emoji: '🚀', text: 'Turbo', color: '#ff6b9d' },
+            { emoji: '💰', text: 'Revenue', color: '#ffc107' },
+            { emoji: '🤔', text: 'Thinking', color: '#9c27b0' },
+            { emoji: '😎', text: 'Cool', color: '#2196f3' }
+        ];
+        
+        let currentMoodIndex = 0;
+        
+        function changeMood() {
+            currentMoodIndex = (currentMoodIndex + 1) % moods.length;
+            const mood = moods[currentMoodIndex];
+            
+            document.getElementById('moodEmoji').textContent = mood.emoji;
+            
+            // Add sparkle effect
+            const avatar = document.getElementById('avatarEmoji');
+            avatar.style.transform = 'scale(1.2)';
+            avatar.style.filter = 'drop-shadow(0 0 20px ' + mood.color + ')';
+            
+            setTimeout(() => {
+                avatar.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function toggleMode() {
+            // Toggle between login/signup
+            alert('Signup mode coming soon!');
+        }
+
+        // Real authentication function
+        async function authenticateUser(email, password) {
+            // For demo: accept any email/password combination
+            // Real database authentication
+            try {
+                const response = await fetch("http://localhost:8001/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                const authResult = await response.json();
+                if (authResult.success) {
+                // In a real app, this would call your backend API
+                // const response = await fetch('/api/auth/login', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ email, password })
+                // });
+                // const data = await response.json();
+                
+                // Demo: simulate successful authentication
+                return authResult;
+                    success: true,
+                    token: 'real_auth_token_' + Date.now(),
+                    user: {
+                        email: email,
+                        id: email.split('@')[0],
+                        name: email.split('@')[0]
+                    }
+                };
+            }
+            return authResult; success: false, error: 'Invalid credentials' };
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('auth_token')) {
+            window.location.href = 'index.html';
+        }
+
+        // Matrix Rain Animation
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrixRainBg');
+            const characters = '01ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const columns = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column-bg';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+                
+                let text = '';
+                for (let j = 0; j < 20; j++) {
+                    text += characters[Math.floor(Math.random() * characters.length)] + '<br>';
+                }
+                column.innerHTML = text;
+                matrixBg.appendChild(column);
+            }
+        }
+
+        // Start Matrix animation
+        createMatrixRain();
+    </script>
+</body>
+</html>

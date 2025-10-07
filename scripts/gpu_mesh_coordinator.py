@@ -1,290 +1,424 @@
 #!/usr/bin/env python3
 """
-Aurora AI Empire - Fault-Tolerant GPU Mesh Coordinator
-Wires all GPUs together with automatic failover and load balancing
+Aurora AI GPU Mesh Coordinator
+4-node fault-tolerant distributed GPU processing system
 """
 
 import asyncio
-import aiohttp
 import json
-import time
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional
-import psutil
-import subprocess
+import time
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple
+import aiohttp
+import redis
+from dataclasses import dataclass, asdict
+from enum import Enum
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+class NodeStatus(Enum):
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    FAILED = "failed"
+    RECOVERING = "recovering"
+
+class TaskPriority(Enum):
+    CRITICAL = 1  # Revenue-generating tasks
+    HIGH = 2      # Business operations
+    NORMAL = 3    # Standard AI processing
+    LOW = 4       # Background tasks
+
+@dataclass
+class GPUNode:
+    node_id: str
+    host: str
+    port: int
+    gpu_count: int
+    gpu_memory: int
+    status: NodeStatus
+    current_load: float
+    memory_used: float
+    last_heartbeat: datetime
+    capabilities: List[str]
+    performance_score: float = 0.0
+
+@dataclass
+class Task:
+    task_id: str
+    priority: TaskPriority
+    node_requirements: Dict
+    estimated_duration: float
+    created_at: datetime
+    assigned_node: Optional[str] = None
+    status: str = "pending"
+
 class GPUMeshCoordinator:
-    def __init__(self):
-        self.nodes = {
-            "aurora": {
-                "host": "localhost",
-                "port": 8000,
-                "gpus": 2,
-                "vram_total": 48,
-                "status": "active",
-                "last_heartbeat": None,
-                "tasks": [],
-                "priority": 1  # Primary node
-            },
-            "collaboration": {
-                "host": "collaboration.runpod.io",  # Placeholder
-                "port": 8000,
-                "gpus": 1,
-                "vram_total": 24,
-                "status": "offline",
-                "last_heartbeat": None,
-                "tasks": [],
-                "priority": 2
-            },
-            "fluenti": {
-                "host": "fluenti.runpod.io",  # Placeholder
-                "port": 8000,
-                "gpus": 1,
-                "vram_total": 24,
-                "status": "offline",
-                "last_heartbeat": None,
-                "tasks": [],
-                "priority": 3
-            },
-            "vengeance": {
-                "host": "vengeance.runpod.io",  # Placeholder
-                "port": 8000,
-                "gpus": 1,
-                "vram_total": 24,
-                "status": "offline",
-                "last_heartbeat": None,
-                "tasks": [],
-                "priority": 4
-            }
+    def __init__(self, redis_host="localhost", redis_port=6379):
+        self.redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+        self.nodes: Dict[str, GPUNode] = {}
+        self.task_queue: List[Task] = []
+        self.running = False
+        
+        # Performance metrics
+        self.metrics = {
+            "total_tasks_processed": 0,
+            "average_task_duration": 0.0,
+            "node_utilization": {},
+            "failover_count": 0,
+            "last_health_check": None
         }
         
-        self.task_queue = []
-        self.failed_nodes = set()
-        self.heartbeat_interval = 10  # seconds
-        self.fault_tolerance_threshold = 3  # failed heartbeats before marking offline
+        # Business priority weights
+        self.business_weights = {
+            "revenue_generation": 1.0,
+            "customer_interaction": 0.9,
+            "deal_processing": 0.95,
+            "background_analysis": 0.3
+        }
+
+    async def start(self):
+        """Start the GPU mesh coordinator"""
+        logger.info("🚀 Starting Aurora AI GPU Mesh Coordinator...")
+        self.running = True
         
-    async def get_gpu_status(self, node_name: str) -> Dict:
-        """Get real-time GPU status from a node"""
-        try:
-            node = self.nodes[node_name]
-            if node["status"] == "offline":
-                return {"status": "offline", "error": "Node offline"}
+        # Start background tasks
+        asyncio.create_task(self._health_monitor())
+        asyncio.create_task(self._load_balancer())
+        asyncio.create_task(self._metrics_collector())
+        
+        # Register known nodes
+        await self._register_initial_nodes()
+        
+        logger.info("✅ GPU Mesh Coordinator started successfully")
+
+    async def _register_initial_nodes(self):
+        """Register the 4-node GPU mesh topology"""
+        initial_nodes = [
+            {
+                "node_id": "aurora-town-main",
+                "host": "aurora-town-u44170.vm.elestio.app",
+                "port": 8001,
+                "gpu_count": 2,
+                "gpu_memory": 24,
+                "capabilities": ["llm_inference", "training", "business_processing"]
+            },
+            {
+                "node_id": "iceland-compute",
+                "host": "82.221.170.242",
+                "port": 24505,
+                "gpu_count": 1,
+                "gpu_memory": 24,
+                "capabilities": ["llm_inference", "analysis"]
+            },
+            {
+                "node_id": "vengeance-dev",
+                "host": "localhost",
+                "port": 8002,
+                "gpu_count": 1,
+                "gpu_memory": 24,
+                "capabilities": ["training", "development", "testing"]
+            },
+            {
+                "node_id": "backup-node",
+                "host": "backup.aurora.ai",
+                "port": 8003,
+                "gpu_count": 1,
+                "gpu_memory": 16,
+                "capabilities": ["llm_inference", "backup"]
+            }
+        ]
+        
+        for node_config in initial_nodes:
+            node = GPUNode(
+                node_id=node_config["node_id"],
+                host=node_config["host"],
+                port=node_config["port"],
+                gpu_count=node_config["gpu_count"],
+                gpu_memory=node_config["gpu_memory"],
+                status=NodeStatus.HEALTHY,
+                current_load=0.0,
+                memory_used=0.0,
+                last_heartbeat=datetime.now(),
+                capabilities=node_config["capabilities"],
+                performance_score=1.0
+            )
+            self.nodes[node.node_id] = node
+            logger.info(f"📡 Registered node: {node.node_id} at {node.host}:{node.port}")
+
+    async def _health_monitor(self):
+        """Continuously monitor GPU node health"""
+        while self.running:
+            try:
+                for node_id, node in self.nodes.items():
+                    health_status = await self._check_node_health(node)
+                    
+                    if health_status != node.status:
+                        logger.warning(f"⚠️ Node {node_id} status changed: {node.status.value} → {health_status.value}")
+                        
+                        if health_status == NodeStatus.FAILED:
+                            await self._handle_node_failure(node_id)
+                        elif health_status == NodeStatus.RECOVERING:
+                            await self._handle_node_recovery(node_id)
+                    
+                    node.status = health_status
+                    node.last_heartbeat = datetime.now()
                 
-            url = f"http://{node['host']}:{node['port']}/gpu/local/status"
-            timeout = aiohttp.ClientTimeout(total=5)
+                self.metrics["last_health_check"] = datetime.now()
+                
+            except Exception as e:
+                logger.error(f"❌ Health monitor error: {e}")
             
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.get(url) as response:
+            await asyncio.sleep(30)  # Check every 30 seconds
+
+    async def _check_node_health(self, node: GPUNode) -> NodeStatus:
+        """Check individual node health"""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"http://{node.host}:{node.port}/health", timeout=5) as response:
                     if response.status == 200:
                         data = await response.json()
-                        return {
-                            "status": "active",
-                            "gpus": data.get("local_gpus", []),
-                            "timestamp": datetime.now().isoformat()
-                        }
+                        node.current_load = data.get("gpu_utilization", 0.0)
+                        node.memory_used = data.get("memory_used", 0.0)
+                        node.performance_score = data.get("performance_score", 1.0)
+                        
+                        # Determine status based on metrics
+                        if node.current_load > 95 or node.memory_used > 95:
+                            return NodeStatus.DEGRADED
+                        elif node.current_load > 85:
+                            return NodeStatus.DEGRADED
+                        else:
+                            return NodeStatus.HEALTHY
                     else:
-                        return {"status": "error", "error": f"HTTP {response.status}"}
+                        return NodeStatus.FAILED
                         
         except Exception as e:
-            logger.error(f"Error getting GPU status from {node_name}: {e}")
-            return {"status": "error", "error": str(e)}
-    
-    async def heartbeat_check(self):
-        """Check heartbeat for all nodes and update status"""
-        while True:
-            for node_name, node in self.nodes.items():
-                if node_name == "aurora":  # Skip self
-                    continue
-                    
-                gpu_status = await self.get_gpu_status(node_name)
+            logger.error(f"❌ Health check failed for {node.node_id}: {e}")
+            return NodeStatus.FAILED
+
+    async def _load_balancer(self):
+        """Distribute tasks across healthy nodes"""
+        while self.running:
+            try:
+                # Get pending tasks
+                pending_tasks = [task for task in self.task_queue if task.status == "pending"]
                 
-                if gpu_status["status"] == "active":
-                    node["status"] = "active"
-                    node["last_heartbeat"] = datetime.now().isoformat()
-                    if node_name in self.failed_nodes:
-                        self.failed_nodes.remove(node_name)
-                        logger.info(f"✅ Node {node_name} recovered!")
-                else:
-                    if node_name not in self.failed_nodes:
-                        self.failed_nodes.add(node_name)
-                        logger.warning(f"⚠️ Node {node_name} failed: {gpu_status.get('error', 'Unknown error')}")
-                    node["status"] = "offline"
-            
-            await asyncio.sleep(self.heartbeat_interval)
-    
-    def get_available_gpus(self) -> List[Dict]:
-        """Get all available GPUs across the mesh"""
-        available_gpus = []
-        
-        for node_name, node in self.nodes.items():
-            if node["status"] == "active":
-                # Get local GPU info for Aurora
-                if node_name == "aurora":
-                    try:
-                        result = subprocess.run(
-                            ["nvidia-smi", "--query-gpu=index,name,memory.used,memory.total,utilization.gpu", 
-                             "--format=csv,noheader,nounits"],
-                            capture_output=True, text=True, timeout=5
-                        )
-                        
-                        if result.returncode == 0:
-                            for line in result.stdout.strip().split('\n'):
-                                if line:
-                                    parts = line.split(', ')
-                                    if len(parts) >= 5:
-                                        gpu_info = {
-                                            "node": node_name,
-                                            "gpu_id": int(parts[0]),
-                                            "name": parts[1],
-                                            "memory_used": int(parts[2]),
-                                            "memory_total": int(parts[3]),
-                                            "utilization": int(parts[4]),
-                                            "available": int(parts[3]) - int(parts[2]),
-                                            "priority": node["priority"]
-                                        }
-                                        available_gpus.append(gpu_info)
+                if pending_tasks:
+                    # Sort by priority (Critical first)
+                    pending_tasks.sort(key=lambda t: t.priority.value)
+                    
+                    # Assign tasks to best available nodes
+                    for task in pending_tasks:
+                        best_node = await self._find_best_node(task)
+                        if best_node:
+                            await self._assign_task(task, best_node)
+                        else:
+                            logger.warning(f"⚠️ No available nodes for task {task.task_id}")
+                
+                await asyncio.sleep(5)  # Check every 5 seconds
+                
                     except Exception as e:
-                        logger.error(f"Error getting local GPU info: {e}")
-                else:
-                    # For remote nodes, use cached data or estimate
-                    for i in range(node["gpus"]):
-                        gpu_info = {
-                            "node": node_name,
-                            "gpu_id": i,
-                            "name": f"RTX 4090 (Remote)",
-                            "memory_used": 0,  # Would need real-time data
-                            "memory_total": node["vram_total"],
-                            "utilization": 0,
-                            "available": node["vram_total"],
-                            "priority": node["priority"]
-                        }
-                        available_gpus.append(gpu_info)
+                logger.error(f"❌ Load balancer error: {e}")
+
+    async def _find_best_node(self, task: Task) -> Optional[GPUNode]:
+        """Find the best available node for a task"""
+        available_nodes = [
+            node for node in self.nodes.values()
+            if node.status == NodeStatus.HEALTHY and self._node_can_handle_task(node, task)
+        ]
         
-        return available_gpus
-    
-    def select_best_gpu(self, task_requirements: Dict) -> Optional[Dict]:
-        """Select the best GPU for a task based on requirements and availability"""
-        available_gpus = self.get_available_gpus()
-        
-        if not available_gpus:
+        if not available_nodes:
             return None
         
-        # Filter GPUs that meet requirements
-        suitable_gpus = []
-        for gpu in available_gpus:
-            if gpu["available"] >= task_requirements.get("memory_required", 0):
-                suitable_gpus.append(gpu)
+        # Score nodes based on multiple factors
+        scored_nodes = []
+        for node in available_nodes:
+            score = self._calculate_node_score(node, task)
+            scored_nodes.append((score, node))
         
-        if not suitable_gpus:
-            return None
+        # Return highest scoring node
+        scored_nodes.sort(key=lambda x: x[0], reverse=True)
+        return scored_nodes[0][1]
+
+    def _calculate_node_score(self, node: GPUNode, task: Task) -> float:
+        """Calculate node suitability score for a task"""
+        # Base score from performance
+        score = node.performance_score
         
-        # Sort by priority (lower number = higher priority) and available memory
-        suitable_gpus.sort(key=lambda x: (x["priority"], -x["available"]))
+        # Penalize high utilization
+        utilization_penalty = node.current_load * 0.5
+        memory_penalty = (node.memory_used / 100) * 0.3
         
-        return suitable_gpus[0]
-    
-    async def distribute_task(self, task: Dict) -> Dict:
-        """Distribute a task to the best available GPU"""
-        best_gpu = self.select_best_gpu(task)
+        # Bonus for business-critical tasks
+        business_bonus = 0.0
+        if "revenue" in task.task_id.lower() or "deal" in task.task_id.lower():
+            business_bonus = 0.2
         
-        if not best_gpu:
-            return {
-                "status": "failed",
-                "error": "No suitable GPU available",
-                "task_id": task.get("id")
-            }
+        # Capability matching bonus
+        capability_bonus = 0.1 if self._node_has_required_capabilities(node, task) else 0.0
         
-        # For now, simulate task distribution
-        # In a real implementation, this would send the task to the selected node
-        task_result = {
-            "status": "distributed",
-            "task_id": task.get("id"),
-            "assigned_gpu": best_gpu,
-            "estimated_completion": datetime.now().isoformat(),
-            "node": best_gpu["node"]
+        final_score = score - utilization_penalty - memory_penalty + business_bonus + capability_bonus
+        return max(0.0, final_score)
+
+    def _node_can_handle_task(self, node: GPUNode, task: Task) -> bool:
+        """Check if node can handle the task requirements"""
+        # Check GPU memory requirements
+        required_memory = task.node_requirements.get("gpu_memory", 0)
+        if required_memory > node.gpu_memory:
+            return False
+        
+        # Check capability requirements
+        required_capabilities = task.node_requirements.get("capabilities", [])
+        if not all(cap in node.capabilities for cap in required_capabilities):
+            return False
+        
+        # Check current utilization
+        if node.current_load > 90:
+            return False
+        
+        return True
+
+    def _node_has_required_capabilities(self, node: GPUNode, task: Task) -> bool:
+        """Check if node has all required capabilities"""
+        required_capabilities = task.node_requirements.get("capabilities", [])
+        return all(cap in node.capabilities for cap in required_capabilities)
+
+    async def _assign_task(self, task: Task, node: GPUNode):
+        """Assign task to a specific node"""
+        task.assigned_node = node.node_id
+        task.status = "assigned"
+        
+        # Update node load
+        estimated_load = task.estimated_duration * 0.1  # Rough estimate
+        node.current_load = min(100, node.current_load + estimated_load)
+        
+        logger.info(f"📋 Assigned task {task.task_id} to node {node.node_id}")
+        
+        # Store in Redis for persistence
+        await self._store_task_assignment(task)
+
+    async def _store_task_assignment(self, task: Task):
+        """Store task assignment in Redis"""
+        task_data = {
+            "task_id": task.task_id,
+            "assigned_node": task.assigned_node,
+            "status": task.status,
+            "assigned_at": datetime.now().isoformat()
         }
         
-        # Add to node's task list
-        self.nodes[best_gpu["node"]]["tasks"].append(task)
+        self.redis_client.hset("task_assignments", task.task_id, json.dumps(task_data))
+
+    async def _handle_node_failure(self, node_id: str):
+        """Handle node failure with automatic failover"""
+        logger.error(f"💥 Node {node_id} failed! Initiating failover...")
         
-        logger.info(f"✅ Task {task.get('id')} distributed to {best_gpu['node']} GPU {best_gpu['gpu_id']}")
+        # Reassign tasks from failed node
+        failed_tasks = [task for task in self.task_queue if task.assigned_node == node_id]
         
-        return task_result
-    
-    async def get_mesh_status(self) -> Dict:
-        """Get comprehensive mesh status"""
-        available_gpus = self.get_available_gpus()
-        total_vram = sum(gpu["memory_total"] for gpu in available_gpus)
-        used_vram = sum(gpu["memory_used"] for gpu in available_gpus)
-        available_vram = sum(gpu["available"] for gpu in available_gpus)
+        for task in failed_tasks:
+            task.status = "pending"
+            task.assigned_node = None
+            logger.info(f"🔄 Requeuing task {task.task_id} from failed node {node_id}")
         
-        return {
-            "mesh_status": "active",
-            "total_nodes": len(self.nodes),
-            "active_nodes": len([n for n in self.nodes.values() if n["status"] == "active"]),
-            "failed_nodes": list(self.failed_nodes),
-            "total_gpus": len(available_gpus),
-            "total_vram_gb": total_vram,
-            "used_vram_gb": used_vram,
-            "available_vram_gb": available_vram,
-            "utilization_percent": (used_vram / total_vram * 100) if total_vram > 0 else 0,
-            "nodes": self.nodes,
-            "available_gpus": available_gpus,
-            "fault_tolerance": "enabled",
-            "auto_failover": "enabled",
-            "load_balancing": "intelligent"
-        }
-    
-    async def start_mesh_coordinator(self):
-        """Start the GPU mesh coordinator"""
-        logger.info("🚀 Starting Aurora GPU Mesh Coordinator...")
-        logger.info("🔗 Wiring GPUs together with fault tolerance...")
+        self.metrics["failover_count"] += 1
         
-        # Start heartbeat monitoring
-        heartbeat_task = asyncio.create_task(self.heartbeat_check())
+        # Update node status
+        self.nodes[node_id].status = NodeStatus.FAILED
+
+    async def _handle_node_recovery(self, node_id: str):
+        """Handle node recovery"""
+        logger.info(f"🔄 Node {node_id} is recovering...")
         
-        # Start web server for mesh API
-        from fastapi import FastAPI
-        import uvicorn
+        # Reset node metrics
+        self.nodes[node_id].current_load = 0.0
+        self.nodes[node_id].memory_used = 0.0
+        self.nodes[node_id].status = NodeStatus.HEALTHY
         
-        app = FastAPI(title="Aurora GPU Mesh Coordinator")
+        logger.info(f"✅ Node {node_id} recovered successfully")
+
+    async def _metrics_collector(self):
+        """Collect and store performance metrics"""
+        while self.running:
+            try:
+                # Calculate current metrics
+                total_nodes = len(self.nodes)
+                healthy_nodes = len([n for n in self.nodes.values() if n.status == NodeStatus.HEALTHY])
+                avg_utilization = sum(n.current_load for n in self.nodes.values()) / total_nodes if total_nodes > 0 else 0
+                
+                self.metrics.update({
+                    "total_nodes": total_nodes,
+                    "healthy_nodes": healthy_nodes,
+                    "average_utilization": avg_utilization,
+                    "timestamp": datetime.now().isoformat()
+                })
+                
+                # Store in Redis
+                self.redis_client.hset("mesh_metrics", "current", json.dumps(self.metrics))
+                
+                await asyncio.sleep(60)  # Update every minute
+                
+            except Exception as e:
+                logger.error(f"❌ Metrics collection error: {e}")
+
+    async def submit_task(self, task_id: str, priority: TaskPriority, requirements: Dict, estimated_duration: float) -> bool:
+        """Submit a new task to the mesh"""
+        task = Task(
+            task_id=task_id,
+            priority=priority,
+            node_requirements=requirements,
+            estimated_duration=estimated_duration,
+            created_at=datetime.now()
+        )
         
-        @app.get("/mesh/status")
-        async def mesh_status():
-            return await self.get_mesh_status()
+        self.task_queue.append(task)
+        logger.info(f"📥 Submitted task {task_id} with priority {priority.name}")
         
-        @app.get("/mesh/gpus")
-        async def available_gpus():
-            return {"available_gpus": self.get_available_gpus()}
-        
-        @app.post("/mesh/distribute")
-        async def distribute_task_endpoint(task: dict):
-            return await self.distribute_task(task)
-        
-        @app.get("/mesh/health")
-        async def mesh_health():
-            status = await self.get_mesh_status()
+        return True
+
+    def get_mesh_status(self) -> Dict:
+        """Get current mesh status"""
             return {
-                "status": "healthy" if status["active_nodes"] > 0 else "degraded",
-                "active_nodes": status["active_nodes"],
-                "total_gpus": status["total_gpus"],
-                "fault_tolerance": "enabled"
-            }
+            "nodes": {node_id: asdict(node) for node_id, node in self.nodes.items()},
+            "metrics": self.metrics,
+            "task_queue_size": len([t for t in self.task_queue if t.status == "pending"]),
+            "timestamp": datetime.now().isoformat()
+        }
+
+    async def stop(self):
+        """Stop the GPU mesh coordinator"""
+        logger.info("🛑 Stopping GPU Mesh Coordinator...")
+        self.running = False
+
+# Main execution
+async def main():
+    coordinator = GPUMeshCoordinator()
+    
+    try:
+        await coordinator.start()
         
-        # Start the coordinator
-        logger.info("✅ GPU Mesh Coordinator started!")
-        logger.info("🌐 Mesh API available at http://localhost:8001")
+        # Example: Submit a business-critical task
+        await coordinator.submit_task(
+            task_id="deal_analysis_001",
+            priority=TaskPriority.CRITICAL,
+            requirements={
+                "gpu_memory": 8,
+                "capabilities": ["llm_inference", "business_processing"]
+            },
+            estimated_duration=30.0
+        )
         
-        # Run the web server
-        config = uvicorn.Config(app, host="0.0.0.0", port=8001, log_level="info")
-        server = uvicorn.Server(config)
-        await server.serve()
+        # Keep running
+        while True:
+            status = coordinator.get_mesh_status()
+            logger.info(f"📊 Mesh Status: {status['healthy_nodes']}/{status['nodes']} nodes healthy")
+            await asyncio.sleep(60)
+            
+    except KeyboardInterrupt:
+        logger.info("🛑 Received shutdown signal")
+    finally:
+        await coordinator.stop()
 
 if __name__ == "__main__":
-    coordinator = GPUMeshCoordinator()
-    asyncio.run(coordinator.start_mesh_coordinator())
+    asyncio.run(main())

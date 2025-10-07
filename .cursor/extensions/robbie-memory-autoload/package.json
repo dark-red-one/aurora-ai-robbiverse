@@ -1,0 +1,12 @@
+{
+  "name": "robbie-memory-autoload",
+  "displayName": "Robbie Memory Auto-Load",
+  "description": "Automatically starts Robbie chat memory system",
+  "version": "1.0.0",
+  "main": "extension.py",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "engines": {
+    "vscode": "^1.74.0"
+  }

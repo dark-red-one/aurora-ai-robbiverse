@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  aurora-db:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-dev-db
+    environment:
+      POSTGRES_DB: aurora_unified
+      POSTGRES_USER: aurora_user
+      POSTGRES_PASSWORD: aurora_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - aurora_data:/var/lib/postgresql/data
+      - ./scripts/create-aurora-database.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+volumes:
+  aurora_data:

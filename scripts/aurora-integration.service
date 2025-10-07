@@ -1,0 +1,14 @@
+[Unit]
+Description=Aurora AI Integration Service
+After=network.target
+
+[Service]
+Type=simple
+User=allan
+WorkingDirectory=/home/allan/aurora-ai-robbiverse
+ExecStart=/usr/bin/python3 /home/allan/aurora-ai-robbiverse/scripts/unified-llm-gateway.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
