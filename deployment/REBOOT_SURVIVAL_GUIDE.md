@@ -387,3 +387,5 @@ bash ~/aurora-ai-robbiverse/deployment/setup-auto-boot.sh
 *"Now it works. Forever. After every reboot. No more fighting with it."* 🚀
 
 
+
+

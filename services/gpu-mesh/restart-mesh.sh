@@ -10,3 +10,5 @@ bash "$SCRIPT_DIR/stop-mesh.sh"
 sleep 2
 bash "$SCRIPT_DIR/start-mesh.sh"
 
+
+

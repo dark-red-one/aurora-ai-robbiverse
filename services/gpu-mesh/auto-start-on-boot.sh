@@ -23,3 +23,5 @@ fi
 echo ""
 echo "To remove auto-start, edit ~/.bashrc and remove the 'aurora-gpu-mesh' section"
 
+
+

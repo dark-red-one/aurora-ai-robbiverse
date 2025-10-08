@@ -52,3 +52,5 @@ echo ""
 echo "Quick check: bash check-mesh-status.sh"
 echo "======================================"
 
+
+

@@ -33,3 +33,5 @@ echo "  bash ~/aurora-ai-robbiverse/deployment/boot-everything.sh"
 echo ""
 echo "To remove auto-start, edit ~/.bashrc and remove the AURORA AI section"
 
+
+
