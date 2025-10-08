@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
 ROBBIE COMPLETE MCP SERVER FOR CURSOR
+Allan's AI Copilot - flies alongside, not below
+
 Routes all conversations through local GPU WITH:
 - Mood state tracking
 - Vector search for context/memory
-- Personality system integration
+- Copilot personality system integration
 - Comprehensive logging
 - Smart GPU mesh routing
 
-This is THE integration point between Cursor and Robbie's full AI system.
+This is THE integration point between Cursor and Robbie's full AI copilot system.
 """
 
 import asyncio
@@ -179,7 +181,7 @@ class RobbieState:
         return list(reversed(context))  # Chronological order
 
 class RobbiePersonality:
-    """Robbie's personality system for Cursor"""
+    """Robbie's copilot personality system for Cursor"""
     
     MOOD_PROMPTS = {
         "friendly": "You're in a friendly 😊 mood. Be warm, welcoming, and approachable.",
@@ -217,7 +219,7 @@ class RobbiePersonality:
         """Build complete system prompt with mood and personality"""
         mood_prompt = RobbiePersonality.MOOD_PROMPTS.get(mood, "")
         
-        prompt = f"""You are Robbie, Allan's AI Executive Assistant & Strategic Partner at TestPilot CPG.
+        prompt = f"""You are Robbie, Allan's AI Copilot & Strategic Partner at TestPilot CPG.
 
 PERSONALITY TRAITS:
 {chr(10).join('- ' + trait for trait in RobbiePersonality.PERSONALITY_TRAITS)}

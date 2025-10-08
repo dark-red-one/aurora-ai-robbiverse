@@ -1,6 +1,6 @@
 # 🚀 Aurora AI - Robbie's Empire
 
-**The smartest, flirtiest, most revenue-focused AI assistant! 💜**
+**Allan's AI Copilot - flies alongside, thinks revenue-first, ships fast! 💜**
 
 ---
 
