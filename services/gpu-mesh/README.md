@@ -1,239 +1,396 @@
-# GPU Mesh Keepalive Service 🚀
+# Aurora GPU Mesh - Unified Monitoring System
 
-Resilient GPU endpoint monitoring with automatic recovery and keepalives.
+**Production-ready GPU mesh with health monitoring, keepalive, auto-recovery, and alerts**
 
-## Features
+## 🚀 Features
 
-✅ **Continuous Health Monitoring** - Checks all GPU endpoints every 30 seconds
-✅ **Automatic Recovery** - Restarts failed services automatically
-✅ **Keepalive Connections** - Maintains persistent connections to prevent timeouts
-✅ **Detailed Logging** - Full visibility into GPU mesh status
-✅ **Systemd Integration** - Run as system service with auto-start
+- ✅ **Continuous Health Monitoring** - Checks all GPU nodes every 30s
+- ✅ **Automatic Keepalive** - Maintains connections and attempts recovery
+- ✅ **Auto-Recovery** - Automatically restarts failed Ollama instances
+- ✅ **Real-time Alerts** - Warning/Error/Critical alerts with graduated severity
+- ✅ **Centralized Logging** - All activity logged to `/tmp/aurora-gpu-mesh/gpu-mesh.log`
+- ✅ **Performance Tracking** - Success rates, response times, uptime scores
+- ✅ **Live Dashboard** - Console dashboard updates every minute
+- ✅ **Systemd Service** - Runs as user service with auto-restart on failure
+- ✅ **Statistics Reports** - Detailed stats every 5 minutes
 
-## Monitored Endpoints
+## 📊 Monitored GPU Nodes
 
-1. **Local Ollama** (localhost:11434) - Primary AI engine
-2. **SSH Tunnel GPU** (localhost:8080) - Remote GPU via SSH
-3. **RunPod GPU** (localhost:8081) - RunPod instance
+1. **Local Ollama** (`localhost:11434`) - Primary local GPU
+2. **Iceland/RunPod Tunnel** (`localhost:8080`) - SSH tunnel to remote GPU
+3. _(Expandable to more nodes)_
 
-## Quick Start
+## 🔧 Installation
 
-### Option 1: Manual Start (Development)
-
-```bash
-# Start service
-./start-gpu-mesh.sh
-
-# Check status
-./status-gpu-mesh.sh
-
-# View logs
-tail -f /tmp/gpu-mesh.log
-
-# Stop service
-./stop-gpu-mesh.sh
-```
-
-### Option 2: Systemd Service (Production)
+### Quick Start
 
 ```bash
-# Install as system service
-./install-systemd.sh
+cd /home/allan/aurora-ai-robbiverse/services/gpu-mesh
 
-# Start service
-sudo systemctl start gpu-keepalive
-
-# Enable auto-start on boot
-sudo systemctl enable gpu-keepalive
-
-# Check status
-sudo systemctl status gpu-keepalive
-
-# View logs
-sudo journalctl -u gpu-keepalive -f
+# Install as systemd service
+bash install-mesh-service.sh
 ```
 
-## How It Works
+### Manual Installation
 
-### Health Checks
-- Pings `/api/tags` endpoint every 30 seconds
-- Tracks success/failure rates
-- Calculates uptime percentage
+```bash
+# 1. Install service file
+mkdir -p ~/.config/systemd/user/
+cp aurora-gpu-mesh.service ~/.config/systemd/user/
+systemctl --user daemon-reload
 
-### Automatic Recovery
-- After 3 consecutive failures, attempts recovery:
-  - **Local Ollama**: Restarts `ollama serve`
-  - **SSH Tunnels**: Logs alert (manual intervention needed)
-  - **RunPod**: Logs alert (check instance status)
+# 2. Enable and start
+systemctl --user enable aurora-gpu-mesh
+systemctl --user start aurora-gpu-mesh
 
-### Keepalive Features
-- Persistent HTTP connections with 60s keepalive timeout
-- DNS caching (5 minutes)
-- Connection pooling (max 10 connections)
-- Automatic reconnection on failure
+# 3. Set up log rotation (optional)
+bash setup-log-rotation.sh
+```
 
-### Status Reports
-- Logs detailed status every 5 minutes
-- Shows: Status, Uptime %, Failure count, Last success time
+## 📈 Monitoring & Status
 
-## Configuration
+### Quick Status Check
 
-Edit `gpu_keepalive.py` to customize:
+```bash
+bash check-mesh-status.sh
+```
+
+Output:
+```
+🎯 AURORA GPU MESH - QUICK STATUS CHECK
+========================================
+
+✅ GPU Mesh Service: RUNNING
+
+📊 GPU Node Status:
+
+🟢 Local Ollama (11434): HEALTHY - 8 models
+🟢 Iceland/RunPod (8080): HEALTHY - 12 models
+
+📝 Recent Log Activity:
+[Recent health checks and alerts]
+```
+
+### Service Status
+
+```bash
+# Check service
+systemctl --user status aurora-gpu-mesh
+
+# View live logs
+journalctl --user -u aurora-gpu-mesh -f
+
+# View mesh logs
+tail -f /tmp/aurora-gpu-mesh/gpu-mesh.log
+```
+
+### Service Control
+
+```bash
+# Start
+systemctl --user start aurora-gpu-mesh
+
+# Stop
+systemctl --user stop aurora-gpu-mesh
+
+# Restart
+systemctl --user restart aurora-gpu-mesh
+
+# Disable auto-start
+systemctl --user disable aurora-gpu-mesh
+```
+
+## 🎯 How It Works
+
+### Health Monitoring Loop (every 30s)
+
+1. Checks all GPU nodes in parallel
+2. Measures response time
+3. Fetches model list
+4. Updates node status (Healthy/Degraded/Unhealthy/Offline)
+5. Logs results
+
+### Keepalive Loop (every 60s)
+
+1. Identifies unhealthy/offline nodes
+2. Attempts automatic recovery:
+   - **Local Ollama**: Checks process, restarts if needed
+   - **Tunnels**: Logs for manual intervention
+3. Sends recovery alerts
+
+### Alert System
+
+**Alert Levels:**
+- 🟢 **INFO**: Node recovered, routine events
+- 🟡 **WARNING**: Node degraded (1-2 failures)
+- 🔴 **ERROR**: Node unhealthy (3+ failures)
+- 🚨 **CRITICAL**: Node offline (5+ failures)
+
+### Statistics Reporter (every 5 minutes)
+
+Logs comprehensive stats:
+- Node status and health scores
+- Success rates
+- Response times
+- Model counts
+- Overall mesh health percentage
+
+### Live Dashboard (every 60s)
+
+Console display showing:
+- Real-time node status
+- Response times and success rates
+- Uptime scores
+- Recent alerts (last 5 min)
+
+## 📊 Node Status States
+
+| State | Icon | Description | Action |
+|-------|------|-------------|--------|
+| **Healthy** | 🟢 | 0 failures, responding | Normal operation |
+| **Degraded** | 🟡 | 1-2 failures | Warning logged |
+| **Unhealthy** | 🔴 | 3-4 failures | Error logged, recovery attempt |
+| **Offline** | ⚫ | 5+ failures | Critical alert, recovery attempt |
+| **Unknown** | ⚪ | Not checked yet | Initial state |
+
+## 🔍 Monitoring Metrics
+
+For each node:
+- **Status**: Current health state
+- **Response Time**: API response latency (ms)
+- **Success Rate**: % of successful requests
+- **Uptime Score**: Overall health score (0-100)
+- **Models**: Number of loaded models
+- **Consecutive Failures**: Failure counter
+- **Last Check**: Timestamp of last health check
+
+## 🚨 Alert Examples
+
+```
+ℹ️ [INFO] Local Ollama: Node recovered! Response time: 45ms, Models: 8
+
+⚠️ [WARNING] Iceland/RunPod (Tunnel): Node degraded: Timeout (10s)
+
+❌ [ERROR] Local Ollama: Node UNHEALTHY: Connection error: ClientError
+
+🚨 [CRITICAL] Iceland/RunPod (Tunnel): Node OFFLINE after 5 failures: Timeout (10s)
+```
+
+## 📝 Log Files
+
+### Main Log
+`/tmp/aurora-gpu-mesh/gpu-mesh.log`
+- All health checks
+- Status changes
+- Alerts
+- Recovery attempts
+- Statistics reports
+
+### Systemd Journal
+```bash
+journalctl --user -u aurora-gpu-mesh -f
+```
+- Service start/stop
+- System-level events
+- Crash reports
+
+### Log Rotation
+After running `setup-log-rotation.sh`:
+- Rotates daily
+- Keeps 7 days of logs
+- Compresses old logs
+- Max 100MB per log file
+
+## 🔧 Configuration
+
+Edit `unified_gpu_mesh.py` to customize:
 
 ```python
+# Check intervals
 self.check_interval = 30  # Health check frequency (seconds)
-self.recovery_interval = 300  # Recovery attempt frequency (seconds)
-self.max_failures_before_recovery = 3  # Failures before recovery
+self.keepalive_interval = 60  # Keepalive frequency (seconds)
+self.stats_interval = 300  # Stats report frequency (seconds)
+
+# Alert thresholds
+self.max_consecutive_failures = 3  # Unhealthy threshold
+self.critical_failure_threshold = 5  # Offline threshold
+
+# Add more GPU nodes
+self.nodes['vengeance'] = GPUNode(
+    name='Vengeance GPU',
+    url='http://vengeance.local:11434',
+    port=11434
+)
 ```
 
-## Logs
+## 🧪 Testing
 
-### Manual Mode
+### Test Node Failure
+
 ```bash
-tail -f /tmp/gpu-mesh.log
+# Stop Ollama to trigger alerts
+pkill -f "ollama serve"
+
+# Watch mesh detect failure and attempt recovery
+tail -f /tmp/aurora-gpu-mesh/gpu-mesh.log
 ```
 
-### Systemd Mode
+Expected behavior:
+1. After 1-2 checks: **WARNING** - Node degraded
+2. After 3 checks: **ERROR** - Node unhealthy
+3. Keepalive loop attempts restart
+4. If successful: **INFO** - Node recovered
+
+### Test Full Mesh
+
 ```bash
-sudo journalctl -u gpu-keepalive -f
+# Check all nodes are healthy
+bash check-mesh-status.sh
+
+# View live dashboard
+journalctl --user -u aurora-gpu-mesh -f | grep "DASHBOARD"
 ```
 
-## Example Output
+## 🎯 Architecture
 
 ```
-2025-10-07 18:43:25 - INFO - 🚀 GPU Keepalive Service Starting...
-2025-10-07 18:43:25 - INFO - 📊 Starting health monitoring loop...
-2025-10-07 18:43:25 - INFO - 🔧 Starting recovery loop...
-============================================================
-📊 GPU MESH STATUS REPORT
-============================================================
-🟢 Local Ollama         | Status: healthy    | Uptime:  98.5% | Failures:   0 | Last OK: 18:43:25
-🟢 SSH Tunnel GPU       | Status: healthy    | Uptime:  95.2% | Failures:   0 | Last OK: 18:43:24
-🔴 RunPod GPU           | Status: unhealthy  | Uptime:   0.0% | Failures:  12 | Last OK: Never
-============================================================
+┌─────────────────────────────────────────┐
+│     Unified GPU Mesh Coordinator        │
+├─────────────────────────────────────────┤
+│                                         │
+│  ┌───────────────────────────────────┐ │
+│  │   Health Monitor Loop (30s)       │ │
+│  │   - Check all nodes in parallel   │ │
+│  │   - Update status & metrics       │ │
+│  │   - Send alerts on changes        │ │
+│  └───────────────────────────────────┘ │
+│                                         │
+│  ┌───────────────────────────────────┐ │
+│  │   Keepalive Loop (60s)            │ │
+│  │   - Identify failed nodes         │ │
+│  │   - Attempt auto-recovery         │ │
+│  │   - Restart Ollama if needed      │ │
+│  └───────────────────────────────────┘ │
+│                                         │
+│  ┌───────────────────────────────────┐ │
+│  │   Stats Reporter (5min)           │ │
+│  │   - Generate statistics           │ │
+│  │   - Log comprehensive report      │ │
+│  │   - Calculate mesh health         │ │
+│  └───────────────────────────────────┘ │
+│                                         │
+│  ┌───────────────────────────────────┐ │
+│  │   Dashboard (60s)                 │ │
+│  │   - Display live status           │ │
+│  │   - Show recent alerts            │ │
+│  │   - Update metrics                │ │
+│  └───────────────────────────────────┘ │
+│                                         │
+│  ┌───────────────────────────────────┐ │
+│  │   Alert Processor                 │ │
+│  │   - Manage alert queue            │ │
+│  │   - Log with severity levels      │ │
+│  │   - Track alert history           │ │
+│  └───────────────────────────────────┘ │
+│                                         │
+└─────────────────────────────────────────┘
+              │
+              ├─────────┬─────────┬────────
+              │         │         │
+              ▼         ▼         ▼
+         ┌────────┐ ┌────────┐ ┌────────┐
+         │ Local  │ │Tunnel  │ │Venge-  │
+         │ Ollama │ │:8080   │ │ance    │
+         └────────┘ └────────┘ └────────┘
 ```
 
-## Troubleshooting
+## 🚀 Next Steps
+
+### Expand the Mesh
+
+Add Vengeance GPU:
+```python
+# In unified_gpu_mesh.py
+self.nodes['vengeance'] = GPUNode(
+    name='Vengeance GPU',
+    url='http://10.59.98.X:11434',  # Your Vengeance Nebula IP
+    port=11434
+)
+```
+
+### Email Alerts (Optional)
+
+Add SMTP configuration for critical alerts:
+```python
+# In send_alert() method
+if level == AlertLevel.CRITICAL:
+    await self.send_email_alert(alert)
+```
+
+### Workload Distribution
+
+Integrate with your AI services to route requests to healthy nodes:
+```python
+# Get best available node
+healthy_nodes = [n for n in mesh.nodes.values() if n.status == NodeStatus.HEALTHY]
+best_node = max(healthy_nodes, key=lambda n: n.uptime_score)
+```
+
+## 📞 Troubleshooting
 
 ### Service won't start
+
 ```bash
-# Check Python dependencies
-python3 -c "import aiohttp; print('OK')"
+# Check logs
+journalctl --user -u aurora-gpu-mesh -n 50
 
-# Check if port is already in use
-netstat -tlnp | grep -E "11434|8080|8081"
-
-# Check permissions
-ls -la gpu_keepalive.py
+# Test script directly
+python3 unified_gpu_mesh.py
 ```
 
-### Endpoints always unhealthy
-```bash
-# Test manually
-curl -s http://localhost:11434/api/tags
-curl -s http://localhost:8080/api/tags
-curl -s http://localhost:8081/api/tags
+### Nodes always showing offline
 
-# Check if services are running
+```bash
+# Test node connectivity
+curl http://localhost:11434/api/tags
+curl http://localhost:8080/api/tags
+
+# Check if Ollama is running
 ps aux | grep ollama
-netstat -tlnp | grep 8080
+
+# Check SSH tunnel
+ps aux | grep "ssh.*8080"
 ```
 
-### Recovery not working
-```bash
-# Check if ollama command is in PATH
-which ollama
-
-# Test manual restart
-pkill -f "ollama serve"
-ollama serve &
-```
-
-## Integration
-
-### Use in Python Code
-
-```python
-import aiohttp
-
-async def get_best_gpu():
-    """Get the best available GPU endpoint"""
-    endpoints = [
-        "http://localhost:11434",
-        "http://localhost:8080",
-        "http://localhost:8081"
-    ]
-    
-    for url in endpoints:
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"{url}/api/tags", timeout=5) as resp:
-                    if resp.status == 200:
-                        return url
-        except:
-            continue
-    
-    return None  # All endpoints down
-```
-
-### Use in Shell Scripts
+### Logs not rotating
 
 ```bash
-#!/bin/bash
-# Check if GPU mesh is healthy
+# Test logrotate
+sudo logrotate -f /etc/logrotate.d/aurora-gpu-mesh
 
-if curl -sf http://localhost:11434/api/tags > /dev/null; then
-    echo "✅ Local GPU available"
-    GPU_URL="http://localhost:11434"
-elif curl -sf http://localhost:8080/api/tags > /dev/null; then
-    echo "✅ Tunnel GPU available"
-    GPU_URL="http://localhost:8080"
-else
-    echo "❌ No GPUs available"
-    exit 1
-fi
-
-# Use $GPU_URL for your requests
+# Check logrotate config
+cat /etc/logrotate.d/aurora-gpu-mesh
 ```
 
-## Architecture
+## 📚 Files
 
-```
-┌─────────────────────────────────────┐
-│   GPU Keepalive Service             │
-│   (Runs continuously)               │
-└───────────┬─────────────────────────┘
-            │
-            ├──► Monitor Loop (30s)
-            │    ├─► Check Local Ollama
-            │    ├─► Check SSH Tunnel
-            │    └─► Check RunPod
-            │
-            ├──► Recovery Loop (5min)
-            │    └─► Restart failed services
-            │
-            └──► Stats Loop (5min)
-                 └─► Log status report
-```
+- `unified_gpu_mesh.py` - Main mesh coordinator
+- `aurora-gpu-mesh.service` - Systemd service file
+- `install-mesh-service.sh` - Installation script
+- `check-mesh-status.sh` - Quick status checker
+- `setup-log-rotation.sh` - Log rotation setup
+- `README.md` - This file
 
-## Files
+## 🎉 Success Criteria
 
-- `gpu_keepalive.py` - Main service (full-featured)
-- `gpu_mesh_service.py` - Lightweight version
-- `gpu-keepalive.service` - Systemd unit file
-- `start-gpu-mesh.sh` - Start script
-- `stop-gpu-mesh.sh` - Stop script
-- `status-gpu-mesh.sh` - Status check
-- `install-systemd.sh` - Install as system service
-
-## Next Steps
-
-1. **Start the service**: `./start-gpu-mesh.sh`
-2. **Monitor logs**: `tail -f /tmp/gpu-mesh.log`
-3. **Check status**: `./status-gpu-mesh.sh`
-4. **Install permanently**: `./install-systemd.sh`
+✅ Service runs continuously without crashes
+✅ All healthy nodes show 🟢 status
+✅ Failed nodes trigger alerts within 2 minutes
+✅ Auto-recovery restarts failed Ollama instances
+✅ Logs track all activity
+✅ Dashboard updates every minute
+✅ Statistics reports every 5 minutes
 
 ---
 
-**Built for Allan's Aurora AI Empire** 🤖✨
-*Keeping the GPU mesh alive and kicking!*
+**Built for Allan's GPU mesh - Production ready! 🚀**

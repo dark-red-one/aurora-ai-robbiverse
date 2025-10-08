@@ -1,0 +1,28 @@
+[Unit]
+Description=Aurora AI Unified GPU Mesh System
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=allan
+WorkingDirectory=/home/allan/aurora-ai-robbiverse/services/gpu-mesh
+ExecStart=/usr/bin/python3 /home/allan/aurora-ai-robbiverse/services/gpu-mesh/unified_gpu_mesh.py
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aurora-gpu-mesh
+
+# Resource limits
+MemoryMax=512M
+CPUQuota=50%
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
+

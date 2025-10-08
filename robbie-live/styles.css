@@ -1,0 +1,722 @@
+/* Robbie Live - Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-dark: #0a0a0a;
+    --bg-card: #1a1a1a;
+    --bg-hover: #252525;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --accent: #00d9ff;
+    --accent-glow: rgba(0, 217, 255, 0.3);
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --danger: #ff4444;
+    --border: #333;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== ROBBIE'S FACE ===== */
+
+.robbie-face {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.face-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+/* Eyes */
+.eyes {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 60px;
+}
+
+.eye {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.pupil {
+    width: 30px;
+    height: 30px;
+    background: #000;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.1s ease;
+}
+
+/* Mouth */
+.mouth {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 50px;
+    border: 3px solid white;
+    border-top: none;
+    border-radius: 0 0 100px 100px;
+    transition: all 0.3s ease;
+}
+
+/* Mouth animations for different moods */
+.mood-friendly .mouth {
+    border-radius: 0 0 100px 100px;
+    height: 50px;
+}
+
+.mood-focused .mouth {
+    border-radius: 0;
+    height: 3px;
+    width: 80px;
+}
+
+.mood-playful .mouth {
+    border-radius: 0 100px 100px 0;
+    transform: translateX(-50%) rotate(-15deg);
+}
+
+.mood-bossy .mouth {
+    border-radius: 100px 100px 0 0;
+    border-top: 3px solid white;
+    border-bottom: none;
+    height: 30px;
+}
+
+.mood-surprised .mouth {
+    border-radius: 50%;
+    border: 3px solid white;
+    width: 40px;
+    height: 40px;
+}
+
+.mood-blushing .mouth {
+    border-radius: 0 0 100px 100px;
+    height: 40px;
+    width: 80px;
+}
+
+/* Face overlay */
+.face-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 10;
+}
+
+.greeting {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent-glow);
+    animation: fadeIn 0.5s ease;
+}
+
+.mood-badge {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    animation: slideDown 0.3s ease;
+}
+
+/* ===== CHAT INTERFACE ===== */
+
+.chat-container {
+    position: fixed;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border-radius: 16px 16px 0 0;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    max-height: 50vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-container.collapsed {
+    max-height: 50px;
+}
+
+.chat-header {
+    padding: 12px 20px;
+    background: var(--bg-hover);
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.chat-header:active {
+    background: var(--bg-card);
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.chat-container:not(.collapsed) .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: messageSlide 0.3s ease;
+}
+
+.message.user {
+    flex-direction: row-reverse;
+}
+
+.message .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.message .text {
+    background: var(--bg-hover);
+    padding: 12px 16px;
+    border-radius: 16px;
+    max-width: 70%;
+    line-height: 1.4;
+}
+
+.message.user .text {
+    background: var(--accent);
+    color: #000;
+}
+
+.chat-input-container {
+    padding: 16px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.chat-input {
+    flex: 1;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+}
+
+.chat-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.voice-btn, .send-btn {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.voice-btn:active, .send-btn:active {
+    transform: scale(0.95);
+    background: var(--bg-card);
+}
+
+.send-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* ===== STATS PANEL ===== */
+
+.stats-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s ease;
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.stats-panel.collapsed {
+    max-height: 50px;
+}
+
+.stats-header {
+    padding: 12px 20px;
+    background: var(--bg-hover);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.stats-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat-card {
+    background: var(--bg-hover);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.stat-card.active-node {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-detail {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.nodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.node-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: var(--bg-card);
+    border-radius: 8px;
+}
+
+.node-icon {
+    font-size: 16px;
+}
+
+.node-item .node-name {
+    flex: 1;
+    font-size: 14px;
+}
+
+.node-latency {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+}
+
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.quick-stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* ===== QUICK ACTIONS ===== */
+
+.quick-actions {
+    position: fixed;
+    right: 20px;
+    bottom: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 100;
+}
+
+.action-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn:active {
+    transform: scale(0.9);
+}
+
+.action-btn.recording {
+    background: var(--danger);
+    border-color: var(--danger);
+    animation: pulse 1s infinite;
+}
+
+.settings-btn {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 100;
+}
+
+/* ===== MODAL ===== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+}
+
+.modal-header button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 24px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+}
+
+.modal-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.setting-group {
+    margin-bottom: 20px;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.setting-group input[type="range"] {
+    width: calc(100% - 50px);
+    margin-right: 10px;
+}
+
+.setting-group select,
+.setting-group input[type="text"] {
+    width: 100%;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.setting-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #000;
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-primary:active, .btn-secondary:active {
+    transform: scale(0.95);
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 var(--danger);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+    }
+}
+
+/* Speaking animation */
+.speaking .mouth {
+    animation: speak 0.3s ease infinite;
+}
+
+@keyframes speak {
+    0%, 100% {
+        height: 50px;
+    }
+    50% {
+        height: 30px;
+    }
+}
+
+/* Eye blink */
+.blinking .eye {
+    animation: blink 0.2s ease;
+}
+
+@keyframes blink {
+    0%, 100% {
+        height: 60px;
+    }
+    50% {
+        height: 5px;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 600px) {
+    .face-container {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .eyes {
+        gap: 50px;
+    }
+    
+    .eye {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .pupil {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .chat-container {
+        bottom: 80px;
+        max-width: 100%;
+        border-radius: 0;
+    }
+    
+    .quick-actions {
+        bottom: 150px;
+        right: 12px;
+    }
+}
+

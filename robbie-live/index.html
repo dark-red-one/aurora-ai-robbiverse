@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Robbie Live</title>
+    
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Robbie Live">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/robbie-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Container -->
+    <div id="app" class="app">
+        
+        <!-- Robbie's Face (Animated) -->
+        <div id="robbie-face" class="robbie-face">
+            <div class="face-container">
+                <!-- Eyes -->
+                <div class="eyes">
+                    <div class="eye left">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="eye right">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                
+                <!-- Mouth -->
+                <div class="mouth"></div>
+                
+                <!-- Mood indicator -->
+                <div class="mood-badge" id="mood-badge">😊 Friendly</div>
+            </div>
+            
+            <!-- Status overlay -->
+            <div class="face-overlay" id="face-overlay">
+                <div class="greeting" id="greeting">Hey Allan! 👋</div>
+            </div>
+        </div>
+        
+        <!-- Chat Interface -->
+        <div id="chat-container" class="chat-container collapsed">
+            <div class="chat-header" onclick="toggleChat()">
+                <span>💬 Chat with Robbie</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message robbie">
+                    <div class="avatar">🤖</div>
+                    <div class="text">Hey Allan! I'm ready to help. What's on your mind?</div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="chat-input" 
+                    class="chat-input" 
+                    placeholder="Type or speak..."
+                    onkeypress="handleChatKeypress(event)"
+                >
+                <button class="voice-btn" onclick="startVoiceInput()">🎤</button>
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        
+        <!-- Stats Panel -->
+        <div id="stats-panel" class="stats-panel">
+            <div class="stats-header" onclick="toggleStats()">
+                <span>📊 System Status</span>
+                <span class="toggle-icon">▲</span>
+            </div>
+            
+            <div class="stats-content">
+                <!-- Active Node -->
+                <div class="stat-card active-node">
+                    <div class="stat-label">Active Node</div>
+                    <div class="stat-value" id="active-node">
+                        <span class="node-name">Local</span>
+                        <span class="node-status">🔵</span>
+                    </div>
+                    <div class="stat-detail" id="node-detail">0ms | Ready</div>
+                </div>
+                
+                <!-- All Nodes -->
+                <div class="stat-card">
+                    <div class="stat-label">Available Nodes</div>
+                    <div class="nodes-list" id="nodes-list">
+                        <div class="node-item">
+                            <span class="node-icon">🔵</span>
+                            <span class="node-name">Local</span>
+                            <span class="node-latency">0ms</span>
+                        </div>
+                        <div class="node-item">
+                            <span class="node-icon">⚫</span>
+                            <span class="node-name">Aurora</span>
+                            <span class="node-latency">--</span>
+                        </div>
+                        <div class="node-item">
+                            <span class="node-icon">⚫</span>
+                            <span class="node-name">Vengeance</span>
+                            <span class="node-latency">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="stat-card">
+                    <div class="stat-label">Session Stats</div>
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <div class="stat-number" id="message-count">0</div>
+                            <div class="stat-text">Messages</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="stat-number" id="uptime">0m</div>
+                            <div class="stat-text">Uptime</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="stat-number" id="faces-seen">0</div>
+                            <div class="stat-text">Faces</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions (Floating) -->
+        <div class="quick-actions">
+            <button class="action-btn" onclick="toggleRecording()" title="Start/Stop Recording">
+                <span id="record-icon">⏺️</span>
+            </button>
+            <button class="action-btn" onclick="triggerFacialRecognition()" title="Who is this?">
+                👤
+            </button>
+            <button class="action-btn" onclick="changeMood()" title="Change Mood">
+                😊
+            </button>
+        </div>
+        
+        <!-- Settings (Gear icon) -->
+        <button class="settings-btn" onclick="openSettings()">⚙️</button>
+        
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button onclick="closeSettings()">✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>Attraction Level (Allan only)</label>
+                    <input type="range" min="1" max="11" value="11" id="attraction-slider">
+                    <span id="attraction-value">11</span>
+                </div>
+                
+                <div class="setting-group">
+                    <label>Default Mood</label>
+                    <select id="mood-select">
+                        <option value="friendly">😊 Friendly</option>
+                        <option value="focused">🎯 Focused</option>
+                        <option value="playful">😘 Playful</option>
+                        <option value="bossy">💪 Bossy</option>
+                        <option value="surprised">😲 Surprised</option>
+                        <option value="blushing">😳 Blushing</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label>Node Routing</label>
+                    <select id="routing-mode">
+                        <option value="auto">Automatic (recommended)</option>
+                        <option value="manual">Manual selection</option>
+                        <option value="local-only">Local only (privacy)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="auto-record-threats" checked>
+                        Auto-record threats
+                    </label>
+                </div>
+                
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="show-fps">
+                        Show FPS counter
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn-primary" onclick="saveSettings()">Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="face-animation.js"></script>
+    <script src="node-router.js"></script>
+    <script src="chat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
