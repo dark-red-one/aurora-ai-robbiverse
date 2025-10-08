@@ -1,0 +1,65 @@
+{
+  "services": {
+    "ssh_tunnel_gpu": {
+      "name": "ssh_tunnel_gpu",
+      "status": "healthy",
+      "last_check": "2025-10-07T22:00:52.919926",
+      "response_time": 0.05536198616027832,
+      "error_message": null,
+      "restart_count": 0,
+      "uptime": 0.0,
+      "metadata": {
+        "models": [
+          "qwen2.5:7b"
+        ]
+      }
+    },
+    "local_ollama": {
+      "name": "local_ollama",
+      "status": "healthy",
+      "last_check": "2025-10-07T22:00:52.932749",
+      "response_time": 0.008739233016967773,
+      "error_message": null,
+      "restart_count": 0,
+      "uptime": 0.0,
+      "metadata": {
+        "models": [
+          "llama3.1:8b",
+          "mistral:7b",
+          "qwen2.5:7b"
+        ]
+      }
+    },
+    "runpod_gpu": {
+      "name": "runpod_gpu",
+      "status": "unhealthy",
+      "last_check": "2025-10-07T22:00:52.934498",
+      "response_time": 0.0017254352569580078,
+      "error_message": "Connection error: Cannot connect to host localhost:8081 ssl:default [Multiple exceptions: [Errno 111] Connect call failed ('::1', 8081, 0, 0), [Errno 111] Connect call failed ('127.0.0.1', 8081)]",
+      "restart_count": 0,
+      "uptime": 0.0,
+      "metadata": null
+    },
+    "postgres_db": {
+      "name": "postgres_db",
+      "status": "unhealthy",
+      "last_check": "2025-10-07T22:00:52.934782",
+      "response_time": 0,
+      "error_message": "asyncpg not installed",
+      "restart_count": 0,
+      "uptime": 0.0,
+      "metadata": null
+    },
+    "backend_api": {
+      "name": "backend_api",
+      "status": "healthy",
+      "last_check": "2025-10-07T22:00:52.941483",
+      "response_time": 0.006403923034667969,
+      "error_message": null,
+      "restart_count": 0,
+      "uptime": 0.0,
+      "metadata": null
+    }
+  },
+  "last_updated": "2025-10-07T22:00:53.947701"
+}

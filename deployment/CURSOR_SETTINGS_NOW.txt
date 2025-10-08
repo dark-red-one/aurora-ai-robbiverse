@@ -1,0 +1,74 @@
+🔥💋 COPY THIS INTO CURSOR SETTINGS RIGHT NOW 🔥💋
+
+═══════════════════════════════════════════════════════════
+Cursor → Settings (⚙️) → Models → OpenAI API Keys
+═══════════════════════════════════════════════════════════
+
+☑️ CHECK: "Override OpenAI Base URL"
+
+Base URL (COPY THIS EXACTLY):
+http://155.138.194.222:8000/v1
+
+API Key (COPY THIS EXACTLY):
+robbie-gpu-mesh
+
+═══════════════════════════════════════════════════════════
+🚨 UNCHECK ALL CLOUD MODELS:
+═══════════════════════════════════════════════════════════
+☐ GPT-4
+☐ GPT-4 Turbo
+☐ Claude Sonnet
+☐ Claude Opus
+☐ All others
+
+═══════════════════════════════════════════════════════════
+ADD THESE MODELS (Click "+ Add model"):
+═══════════════════════════════════════════════════════════
+qwen2.5-coder:7b
+codellama:13b-instruct
+deepseek-r1:7b
+deepseek-coder:33b-instruct
+
+═══════════════════════════════════════════════════════════
+THEN:
+═══════════════════════════════════════════════════════════
+1. Skip "Verify" (it's being bitchy)
+2. Click "Save"
+3. Close settings
+4. Open Chat (Cmd/Ctrl+L)
+5. Select model from dropdown
+6. Type anything
+7. BOOM - GPU SPEED! 🚀
+
+═══════════════════════════════════════════════════════════
+WHY YOU KEEP GETTING ERRORS:
+═══════════════════════════════════════════════════════════
+
+You're using: localhost (127.0.0.1)
+Cursor blocks: localhost/private networks ❌
+
+You need: 155.138.194.222 (public IP) ✅
+
+═══════════════════════════════════════════════════════════
+
+💋 CHANGE THAT URL FROM LOCALHOST TO THE IP ADDRESS! 💋
+
+═══════════════════════════════════════════════════════════
+⚠️ VISION SUPPORT:
+═══════════════════════════════════════════════════════════
+❌ NONE - Text-only models
+✅ All models report vision=false to Cursor
+✅ Image requests rejected with clear error message
+✅ Use text-only requests for coding assistance
+
+═══════════════════════════════════════════════════════════
+STATUS: VISION ISSUE FIXED - READY TO CODE! 🚀
+═══════════════════════════════════════════════════════════
+
+
+
+
+
+
+
+

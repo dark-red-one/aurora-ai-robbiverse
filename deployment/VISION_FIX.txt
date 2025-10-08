@@ -1,0 +1,67 @@
+🔥 VISION REQUEST FIX - CURSOR SETTINGS 🔥
+
+❌ PROBLEM: Cursor was trying to send images to our text-only models
+✅ SOLUTION: Updated proxy to reject vision requests + mark models as text-only
+
+═══════════════════════════════════════════════════════════════
+
+📋 WHAT I FIXED:
+
+1. ✅ Added vision detection in proxy
+   - Detects OpenAI vision format: [{"type": "image_url", ...}]
+   - Returns clear error: "Vision requests not supported"
+
+2. ✅ Added capabilities to /v1/models endpoint
+   - All models now report: "vision": false
+   - This tells Cursor: "Don't send images to these models"
+
+3. ✅ Enhanced content parsing
+   - Handles both string content and multi-part content
+   - Extracts text from vision requests (if they somehow get through)
+
+═══════════════════════════════════════════════════════════════
+
+🔧 CURSOR SETTINGS - NO CHANGES NEEDED!
+
+Your current settings should work now:
+- Base URL: http://155.138.194.222:8000/v1
+- API Key: gpu
+- Model: Any of the 4 models (they all report vision=false now)
+
+═══════════════════════════════════════════════════════════════
+
+🧪 TESTING:
+
+1. In Cursor, try a TEXT-ONLY request:
+   - Type: "Write a hello world function in Python"
+   - Should work! ✅
+
+2. If you try to attach an image:
+   - Cursor SHOULD disable the image button for these models
+   - If it doesn't, you'll get a clear error: "Vision requests not supported"
+
+═══════════════════════════════════════════════════════════════
+
+💡 WHY THIS HAPPENED:
+
+Cursor was probably:
+1. Auto-detecting that you had an image in clipboard
+2. Trying to send it with your text request
+3. Our proxy didn't know how to handle multi-part content
+4. Result: Confusing "vision-enabled model" error
+
+Now the proxy:
+- Explicitly marks all models as vision=false
+- Rejects vision requests with clear error message
+- Handles multi-part content gracefully
+
+═══════════════════════════════════════════════════════════════
+
+🚀 STATUS: READY TO TEST
+
+Proxy is running with vision rejection enabled.
+Try a text-only coding request in Cursor now!
+
+═══════════════════════════════════════════════════════════════
+
+

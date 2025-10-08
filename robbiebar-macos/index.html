@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RobbieBar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="robbiebar-container">
+        <!-- Mood Display -->
+        <div class="mood-section">
+            <span class="mood-emoji" id="moodEmoji">🎯</span>
+            <div class="mood-info">
+                <div class="mood-text" id="moodText">focused</div>
+                <div class="mood-greeting" id="moodGreeting">Ready to code! 💻</div>
+            </div>
+        </div>
+
+        <!-- Stats Display -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-icon">🔥</span>
+                <span class="stat-value" id="cpuPercent">0%</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">💾</span>
+                <span class="stat-value" id="memoryPercent">0%</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">💿</span>
+                <span class="stat-value" id="diskPercent">0%</span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-section">
+            <button class="control-btn" id="toggleTopBtn" title="Toggle Always on Top">📌</button>
+            <button class="control-btn" id="closeBtn" title="Close">❌</button>
+        </div>
+
+        <!-- Status Indicator -->
+        <div class="status-dot" id="statusDot"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useRobbieStore } from "../../stores/robbieStore"
+import { useRobbieStore } from "../../stores/robbieStore"
 
 interface MatrixWelcomeProps {
   onComplete: () => void

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Console Test</title>
+</head>
+<body>
+    <h1>Testing JavaScript Console</h1>
+    <div id="test-root"></div>
+    
+    <script>
+        console.log("🔥 Test script loaded!");
+        
+        // Test if the Robbie@Code JS loads
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = '/code/assets/index-DWCSc4Qk.js';
+        script.onload = () => console.log("✅ Robbie@Code JS loaded successfully");
+        script.onerror = (e) => console.error("❌ Robbie@Code JS failed to load:", e);
+        document.head.appendChild(script);
+        
+        // Test API calls
+        fetch('/api/system/stats')
+            .then(response => {
+                console.log("API Response:", response.status);
+                if (!response.ok) {
+                    console.warn("⚠️ API returned:", response.status, response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error("❌ API call failed:", error);
+            });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

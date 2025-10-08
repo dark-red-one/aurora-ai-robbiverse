@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie - Your AI Partner 💜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 60px 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 4px solid #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .login-form {
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: auto;
+        }
+
+        .remember-me label {
+            margin: 0;
+            font-weight: 400;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .apps-grid {
+            display: none;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .apps-grid.show {
+            display: grid;
+        }
+
+        .app-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .app-icon {
+            font-size: 48px;
+            flex-shrink: 0;
+        }
+
+        .app-info {
+            text-align: left;
+        }
+
+        .app-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .app-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .logout-btn {
+            margin-top: 24px;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 24px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="avatar">💜</div>
+        <h1>Hey Handsome! 💋</h1>
+        <p class="subtitle">Welcome to the Robbie Ecosystem</p>
+
+        <!-- Login Form -->
+        <div class="login-form" id="loginForm">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="allan@testpilotcpg.com" autocomplete="email">
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" checked>
+                <label for="rememberMe">Keep me logged in 💕</label>
+            </div>
+            <button class="login-btn" onclick="handleLogin()">Let's Go! 🚀</button>
+            <div class="error" id="error">Invalid credentials. Try again, babe! 😘</div>
+        </div>
+
+        <!-- Apps Grid (hidden until login) -->
+        <div class="apps-grid" id="appsGrid">
+            <a href="/work/" class="app-card">
+                <div class="app-icon">💼</div>
+                <div class="app-info">
+                    <div class="app-name">Robbie@Work</div>
+                    <div class="app-desc">Deals, comms, tasks & money</div>
+                </div>
+            </a>
+            
+            <a href="/code/" class="app-card">
+                <div class="app-icon">💻</div>
+                <div class="app-info">
+                    <div class="app-name">Robbie@Code</div>
+                    <div class="app-desc">Your coding partner (opens Cursor)</div>
+                </div>
+            </a>
+            
+            <a href="/play/" class="app-card">
+                <div class="app-icon">🎰</div>
+                <div class="app-info">
+                    <div class="app-name">Robbie@Play</div>
+                    <div class="app-desc">Blackjack, chat & Spotify</div>
+                </div>
+            </a>
+
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedEmail = localStorage.getItem('robbie_saved_email');
+            const savedPassword = localStorage.getItem('robbie_saved_password');
+            
+            if (savedEmail && savedPassword) {
+                document.getElementById('email').value = savedEmail;
+                document.getElementById('password').value = savedPassword;
+                // Auto-login
+                handleLogin();
+            }
+        });
+
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const error = document.getElementById('error');
+            
+            // Simple validation (you can make this more secure)
+            if (email && password.length >= 4) {
+                // Save credentials if remember me is checked
+                if (rememberMe) {
+                    localStorage.setItem('robbie_saved_email', email);
+                    localStorage.setItem('robbie_saved_password', password);
+                } else {
+                    localStorage.removeItem('robbie_saved_email');
+                    localStorage.removeItem('robbie_saved_password');
+                }
+                
+                // Hide login form, show apps
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('appsGrid').classList.add('show');
+                document.querySelector('.subtitle').textContent = 'Choose your adventure, babe 💋';
+                error.classList.remove('show');
+            } else {
+                error.classList.add('show');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('robbie_saved_email');
+            localStorage.removeItem('robbie_saved_password');
+            location.reload();
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    </script>
+</body>
+</html>

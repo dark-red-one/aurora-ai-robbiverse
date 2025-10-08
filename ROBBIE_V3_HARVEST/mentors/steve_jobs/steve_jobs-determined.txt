@@ -1,0 +1,26 @@
+# Steve Jobs - Determined Avatar
+
+## Prompt
+Steve Jobs in his prime, black turtleneck, intense focused expression, minimalist Apple office background, clean lighting, professional portrait style, focused expression, set jaw, intense gaze, resolute look, strong presence, 512x512 pixels, professional headshot, high quality, detailed, realistic, studio lighting, transparent background
+
+## Base Prompt
+Steve Jobs in his prime, black turtleneck, intense focused expression, minimalist Apple office background, clean lighting, professional portrait style
+
+## Mood Modifiers
+focused expression, set jaw, intense gaze, resolute look, strong presence
+
+## Instructions
+1. Use this prompt with DALL-E 3, Midjourney, or Stable Diffusion
+2. Generate 512x512 pixel image
+3. Ensure transparent background
+4. Save as PNG format
+5. Use professional headshot style
+6. Maintain consistency with other avatars in the series
+
+## Quality Checklist
+- [ ] 512x512 pixel resolution
+- [ ] Transparent background
+- [ ] Professional headshot style
+- [ ] Appropriate mood expression
+- [ ] High quality and detailed
+- [ ] PNG format

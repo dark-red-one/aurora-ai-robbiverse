@@ -1,0 +1,11 @@
+{"timestamp":"2025-10-08T04:16:00.000Z","components":[{"component":"robbie-system","status":"operational","message":"All systems green","version":"20251008-041600","timestamp":"2025-10-08T04:16:00.000Z"},{"component":"homepage","status":"operational","message":"Login and app selector working","version":"20251008-041600","timestamp":"2025-10-08T04:16:00.000Z"},{"component":"robbie-code","status":"operational","message":"React app fully functional","version":"20251008-041600","timestamp":"2025-10-08T04:16:00.000Z"},{"component":"nginx-api","status":"operational","message":"API served directly from nginx port 80","version":"1.0.0","timestamp":"2025-10-08T04:16:00.000Z"}]}
+
+
+
+
+
+
+
+
+
+

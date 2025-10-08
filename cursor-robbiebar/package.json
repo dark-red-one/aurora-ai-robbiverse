@@ -1,0 +1,60 @@
+{
+  "name": "robbiebar",
+  "displayName": "RobbieBar - Your AI Coding Companion",
+  "description": "Beautiful top bar showing Robbie's mood, system stats, and quick access to chat",
+  "version": "1.0.0",
+  "publisher": "robbie",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "robbiebar.openChat",
+        "title": "RobbieBar: Open Chat"
+      },
+      {
+        "command": "robbiebar.toggleBar",
+        "title": "RobbieBar: Toggle Bar"
+      }
+    ],
+    "configuration": {
+      "title": "RobbieBar",
+      "properties": {
+        "robbiebar.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "Backend API URL"
+        },
+        "robbiebar.chatUrl": {
+          "type": "string",
+          "default": "http://localhost:3001",
+          "description": "Robbie Chat App URL"
+        },
+        "robbiebar.updateInterval": {
+          "type": "number",
+          "default": 2000,
+          "description": "Stats update interval (ms)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.104.0",
+    "vsce": "^2.15.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

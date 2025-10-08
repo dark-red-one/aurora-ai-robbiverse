@@ -1,0 +1,21 @@
+[Unit]
+Description=GPU Mesh Keepalive Service
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=allan
+WorkingDirectory=/home/allan/aurora-ai-robbiverse/services/gpu-mesh
+ExecStart=/usr/bin/python3 /home/allan/aurora-ai-robbiverse/services/gpu-mesh/gpu_keepalive.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Keepalive settings
+KillMode=mixed
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

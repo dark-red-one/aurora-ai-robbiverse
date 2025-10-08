@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import MatrixRain from '../components/MatrixRain'
+import { useRobbieStore } from "../../stores/robbieStore"
+import { useRobbieStore } from "../../stores/robbieStore"
+import { useRobbieStore } from "../../stores/robbieStore"
 
 interface RobbieAuthProps {
   onLogin: (credentials: { email: string; password: string }) => Promise<void>

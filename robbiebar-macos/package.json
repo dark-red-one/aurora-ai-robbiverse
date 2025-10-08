@@ -1,0 +1,38 @@
+{
+  "name": "robbiebar-macos",
+  "version": "1.0.0",
+  "description": "RobbieBar - Always on top AI companion for macOS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never"
+  },
+  "keywords": ["robbie", "ai", "assistant", "macos"],
+  "author": "TestPilot CPG",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "build": {
+    "appId": "com.testpilot.robbiebar",
+    "productName": "RobbieBar",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg"
+    },
+    "files": [
+      "main.js",
+      "renderer.js",
+      "index.html",
+      "styles.css"
+    ]
+  }
+}

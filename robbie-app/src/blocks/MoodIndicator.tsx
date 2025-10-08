@@ -1,5 +1,5 @@
-import { useRobbieStore } from '../stores/robbieStore'
-import { motion } from 'framer-motion'
+import { useRobbieStore } from "../../stores/robbieStore"
+import { useRobbieStore } from "../../stores/robbieStore"
 
 const MoodIndicator = () => {
   const { currentMood, flirtMode, gandhiGenghis } = useRobbieStore()

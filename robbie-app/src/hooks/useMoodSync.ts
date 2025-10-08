@@ -2,11 +2,11 @@ import { useEffect } from 'react'
 import { useRobbieStore } from '../stores/robbieStore'
 
 export const useMoodSync = () => {
-  const { setMood, setExpression } = useRobbieStore()
+  const { setMood } = useRobbieStore()
 
   useEffect(() => {
     // Connect to WebSocket for real-time mood updates
-    const ws = new WebSocket('ws://localhost:8000/ws/mood')
+    const ws = new WebSocket(`ws://${window.location.host}/ws/mood`)
 
     ws.onopen = () => {
       console.log('✅ Mood sync WebSocket connected')

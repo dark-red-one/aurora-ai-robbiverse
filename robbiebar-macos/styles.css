@@ -1,0 +1,156 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: transparent;
+    overflow: hidden;
+}
+
+.robbiebar-container {
+    width: 400px;
+    height: 80px;
+    background: rgba(13, 17, 23, 0.95);
+    border: 1px solid rgba(0, 217, 255, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 16px;
+    position: relative;
+}
+
+.mood-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+}
+
+.mood-emoji {
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.mood-emoji:hover {
+    transform: scale(1.1);
+}
+
+.mood-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.mood-text {
+    color: #00d9ff;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.mood-greeting {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stats-section {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.stat-icon {
+    font-size: 12px;
+}
+
+.stat-value {
+    color: #00ff41;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'SF Mono', Monaco, monospace;
+}
+
+.controls-section {
+    display: flex;
+    gap: 8px;
+}
+
+.control-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.status-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    transition: background 0.3s;
+}
+
+.status-dot.online {
+    background: #00ff41;
+}
+
+.status-dot.offline {
+    background: #ff6b6b;
+}
+
+/* Mood-specific colors */
+.mood-focused { color: #00d9ff; }
+.mood-playful { color: #ff6b6b; }
+.mood-bossy { color: #ffa500; }
+.mood-friendly { color: #00ff41; }
+.mood-surprised { color: #ffd700; }
+.mood-blushing { color: #ff69b4; }
+
+/* Attraction level indicators */
+.attraction-11 { color: #ff1493; }
+.attraction-10 { color: #ff69b4; }
+.attraction-9 { color: #ffa500; }
+.attraction-8 { color: #00d9ff; }
+.attraction-7 { color: #00ff41; }
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.status-dot.pulse {
+    animation: pulse 2s infinite;
+}

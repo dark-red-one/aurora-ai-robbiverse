@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import { useRobbieStore } from '../stores/robbieStore'
+import { useRobbieStore } from "../../stores/robbieStore"
+import { useRobbieStore } from "../../stores/robbieStore"
 
 /**
  * Cursor Settings Panel

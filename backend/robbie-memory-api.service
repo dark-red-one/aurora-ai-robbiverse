@@ -1,0 +1,20 @@
+[Unit]
+Description=Robbie Memory API
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=allan
+Group=allan
+WorkingDirectory=/home/allan/aurora-ai-robbiverse/backend
+Environment="PATH=/home/allan/aurora-ai-robbiverse/backend/venv/bin"
+ExecStart=/home/allan/aurora-ai-robbiverse/backend/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8002 --workers 2
+Restart=always
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
