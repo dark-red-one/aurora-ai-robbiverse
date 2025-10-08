@@ -1,12 +1,12 @@
 {
   "name": "robbie-at-play",
   "version": "1.0.0",
-  "description": "Robbie@Play - Blackjack, Chat & Spotify with Your Sexy Dealer 🎰💋",
+  "description": "Robbie@Play - Allan's AI Coding Partner",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --base=/play/",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
+    "sqlite3": "^5.1.7",
     "zustand": "^4.5.7"
   },
   "devDependencies": {

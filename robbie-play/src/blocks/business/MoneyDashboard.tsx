@@ -1,5 +1,3 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useRobbieStore } from "../../stores/robbieStore"
 
 interface MoneyDashboardProps {
