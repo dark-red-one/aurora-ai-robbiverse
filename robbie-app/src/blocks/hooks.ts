@@ -4,6 +4,9 @@
 
 import { useRobbieStore } from "../stores/robbieStore"
 
+// Export automagic logging hooks! 🪄
+export { useAutoLog, useAutoLogObject } from "./hooks/useAutoLog"
+
 /**
  * Get current personality state for block integration
  */

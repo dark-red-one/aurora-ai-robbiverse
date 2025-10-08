@@ -66,3 +66,4 @@ Connects to Robbie's personality API for:
 - System stats (CPU, memory, disk)
 
 Perfect for keeping Robbie's status visible while coding! 🚀
+

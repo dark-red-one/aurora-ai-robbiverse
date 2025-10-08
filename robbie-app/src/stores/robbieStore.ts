@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { logPersonality, logSystem } from '../blocks/utils/robbieLogger'
 
 // 6 Core Moods - Each has a PNG avatar
 export type RobbieMood = 'friendly' | 'focused' | 'playful' | 'bossy' | 'surprised' | 'blushing'
@@ -89,9 +90,17 @@ export const useRobbieStore = create<RobbieState>()(
 
       // Personality controls
       setAttraction: (level, isAllan = false) => {
+        const { attraction: oldAttraction } = get()
+        
         // Allan can go to 11, others max at 7
         const maxLevel = isAllan ? 11 : 7
         const newLevel = Math.max(1, Math.min(maxLevel, level))
+        
+        // Automagic logging! 🪄
+        if (newLevel !== oldAttraction) {
+          logPersonality.attraction(oldAttraction, newLevel)
+        }
+        
         set({ attraction: newLevel })
         
         // Sync to database for Cursor
@@ -99,7 +108,9 @@ export const useRobbieStore = create<RobbieState>()(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ attraction: newLevel })
-        }).catch(console.error)
+        }).catch((error) => {
+          logSystem.error('Failed to sync attraction', error)
+        })
       },
 
       setGandhiGenghis: (level) => {
@@ -111,18 +122,27 @@ export const useRobbieStore = create<RobbieState>()(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ gandhi_genghis: newLevel })
-        }).catch(console.error)
+        }).catch((error) => {
+          logSystem.error('Failed to sync Gandhi-Genghis', error)
+        })
       },
 
       setMood: (mood) => {
+        const { currentMood: oldMood, isPublic } = get()
+        
         // If public, force friendly mode
-        const { isPublic } = get()
         if (isPublic) {
+          if (oldMood !== 'friendly') {
+            logPersonality.mood(oldMood, 'friendly', 'Public mode active')
+          }
           set({ currentMood: 'friendly' })
           return
         }
         
         // Otherwise set the mood (it persists!)
+        if (mood !== oldMood) {
+          logPersonality.mood(oldMood, mood)
+        }
         set({ currentMood: mood })
       },
 
@@ -130,10 +150,16 @@ export const useRobbieStore = create<RobbieState>()(
         const { currentMood, isPublic } = get()
         
         // If public, stay friendly
-        if (isPublic) return
+        if (isPublic) {
+          logSystem.event('Cannot cycle mood in public mode')
+          return
+        }
         
         const currentIndex = moodCycle.indexOf(currentMood)
         const nextMood = moodCycle[(currentIndex + 1) % moodCycle.length]
+        
+        // Automagic logging! 🪄
+        logPersonality.mood(currentMood, nextMood, 'User cycled mood')
         set({ currentMood: nextMood })
       },
 
@@ -146,7 +172,9 @@ export const useRobbieStore = create<RobbieState>()(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ genghis_gandhi_intensity: clamped }),
-        }).catch(console.error)
+        }).catch((error) => {
+          logSystem.error('Failed to sync Genghis-Gandhi intensity', error)
+        })
       },
 
       setCocktailLightningEnergy: (energy: number) => {
@@ -157,7 +185,9 @@ export const useRobbieStore = create<RobbieState>()(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cocktail_lightning_energy: clamped }),
-        }).catch(console.error)
+        }).catch((error) => {
+          logSystem.error('Failed to sync Cocktail-Lightning energy', error)
+        })
       },
 
       getAggressivenessLabel: () => {
@@ -180,13 +210,24 @@ export const useRobbieStore = create<RobbieState>()(
 
       // Multi-user management
       addUser: (username: string) => {
-        const { activeUsers } = get()
+        const { activeUsers, currentMood } = get()
         if (!activeUsers.includes(username)) {
           const newUsers = [...activeUsers, username]
+          const goingPublic = newUsers.length > 1
+          
+          logSystem.event(`User joined: ${username}`, { 
+            totalUsers: newUsers.length,
+            goingPublic 
+          })
+          
+          if (goingPublic && currentMood !== 'friendly') {
+            logPersonality.mood(currentMood, 'friendly', 'Switching to public mode')
+          }
+          
           set({ 
             activeUsers: newUsers,
-            isPublic: newUsers.length > 1,
-            currentMood: newUsers.length > 1 ? 'friendly' : get().currentMood
+            isPublic: goingPublic,
+            currentMood: goingPublic ? 'friendly' : currentMood
           })
         }
       },
@@ -194,42 +235,70 @@ export const useRobbieStore = create<RobbieState>()(
       removeUser: (username: string) => {
         const { activeUsers } = get()
         const newUsers = activeUsers.filter(u => u !== username)
+        const wasPublic = activeUsers.length > 1
+        const nowPublic = newUsers.length > 1
+        
+        logSystem.event(`User left: ${username}`, { 
+          remainingUsers: newUsers.length,
+          backToPrivate: wasPublic && !nowPublic
+        })
+        
         set({ 
           activeUsers: newUsers,
-          isPublic: newUsers.length > 1
+          isPublic: nowPublic
         })
       },
 
       setPublic: (isPublic: boolean) => {
+        const { currentMood } = get()
+        logSystem.event(isPublic ? 'Switching to public mode' : 'Switching to private mode')
+        
         set({ isPublic })
-        if (isPublic) {
+        if (isPublic && currentMood !== 'friendly') {
+          logPersonality.mood(currentMood, 'friendly', 'Public mode activated')
           set({ currentMood: 'friendly' })
         }
       },
 
       // Mood changers (special events)
       cheerUp: (method) => {
-        const { isPublic } = get()
-        if (isPublic) return  // Can't cheer up in public!
+        const { currentMood: oldMood, isPublic } = get()
+        if (isPublic) {
+          logSystem.event('Cannot cheer up in public mode')
+          return  // Can't cheer up in public!
+        }
         
+        let newMood: RobbieMood = oldMood
         if (method === 'strip_poker') {
-          set({ currentMood: 'playful' })
+          newMood = 'playful'
+          set({ currentMood: newMood })
+          logPersonality.mood(oldMood, newMood, '🃏 Strip poker time!')
         } else if (method === 'virtual_drinks') {
-          set({ currentMood: 'blushing' })
+          newMood = 'blushing'
+          set({ currentMood: newMood })
+          logPersonality.mood(oldMood, newMood, '🍹 Virtual drinks!')
         } else if (method === 'deal_won') {
-          set({ currentMood: 'surprised' })
+          newMood = 'surprised'
+          set({ currentMood: newMood })
+          logPersonality.mood(oldMood, newMood, '🎉 Deal won!')
           // Stay surprised for a bit, then go playful
-          setTimeout(() => set({ currentMood: 'playful' }), 5000)
+          setTimeout(() => {
+            logPersonality.mood('surprised', 'playful', 'Celebrating!')
+            set({ currentMood: 'playful' })
+          }, 5000)
         }
       },
 
       getBummedOut: (reason: string) => {
-        const { isPublic } = get()
-        if (isPublic) return  // Stay friendly in public
+        const { currentMood: oldMood, isPublic } = get()
+        if (isPublic) {
+          logSystem.event('Cannot get bummed in public mode')
+          return  // Stay friendly in public
+        }
         
         // Get bummed out - mood persists until cheered up!
+        logPersonality.mood(oldMood, 'focused', `😔 Bummed: ${reason}`)
         set({ currentMood: 'focused' })
-        console.log(`Robbie is bummed: ${reason}`)
       },
 
       // Response generation helpers

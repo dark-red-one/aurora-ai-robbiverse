@@ -249,3 +249,4 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO aurora_api;
 
 
 
+

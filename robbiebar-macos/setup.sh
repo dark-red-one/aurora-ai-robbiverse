@@ -43,3 +43,4 @@ echo "  npm run build"
 echo ""
 echo "RobbieBar will appear as a floating window in the top-right corner"
 echo "and stay above all other apps. Perfect for keeping Robbie visible! 🚀"
+

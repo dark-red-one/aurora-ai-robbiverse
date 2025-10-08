@@ -123,3 +123,4 @@ function setupEventListeners() {
 
 // Start the app
 init();
+

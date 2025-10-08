@@ -32,3 +32,4 @@ echo "   Test config:    echo 'fun2Gus!!!' | sudo -S nginx -t"
 echo "   Reload nginx:   echo 'fun2Gus!!!' | sudo -S systemctl reload nginx"
 echo "   View config:    echo 'fun2Gus!!!' | sudo -S cat $CONFIG_PATH"
 echo "   View logs:      echo 'fun2Gus!!!' | sudo -S tail -f /var/log/nginx/error.log"
+

@@ -41,3 +41,4 @@ INSERT INTO mood_events (
     'initial_setup',
     'Initial mood state set during system setup'
 ) ON CONFLICT DO NOTHING;
+

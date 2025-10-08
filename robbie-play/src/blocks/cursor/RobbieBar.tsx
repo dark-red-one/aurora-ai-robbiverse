@@ -1,11 +1,14 @@
 /**
  * RobbieBar - Top bar for Cursor IDE (Robbie@Play)
  * Fully integrated with RobbieBlocks - uses hooks, store, proper types
+ * Now with AUTOMAGIC logging! 🚀
  */
 import { useState, useEffect } from "react"
 import { useRobbieStore } from "../../stores/robbieStore"
 import type { RobbieMood } from "../../stores/robbieStore"
 import { useGreeting } from "../hooks"
+import { logApi, logUser, logSystem } from "../utils/robbieLogger"
+import { useAutoLog } from "../hooks/useAutoLog"
 
 interface RobbieBarProps {
   onOpenChat?: () => void
@@ -46,22 +49,36 @@ export const RobbieBar: React.FC<RobbieBarProps> = ({
   // Use RobbieBlocks hook for greeting
   const greeting = useGreeting()
   
-  const [systemStats, setSystemStats] = useState<SystemStats>({ cpu: 0, memory: 0, gpu: 0 })
-  const [isLoading, setIsLoading] = useState(true)
-  const [isReloading, setIsReloading] = useState(false)
+  // Automagic state tracking - logs all changes automatically! 🪄
+  const [systemStats, setSystemStats] = useAutoLog<SystemStats>(
+    { cpu: 0, memory: 0, gpu: 0 },
+    'RobbieBar',
+    'systemStats'
+  )
+  const [isLoading, setIsLoading] = useAutoLog(true, 'RobbieBar', 'isLoading')
+  const [isReloading, setIsReloading] = useAutoLog(false, 'RobbieBar', 'isReloading')
 
-  // Fetch system stats every 2 seconds
+  // Fetch system stats every 2 seconds - with automagic logging! 🎯
   useEffect(() => {
     const fetchStats = async () => {
+      const endpoint = 'http://localhost:8000/api/system/stats'
+      
       try {
-        const response = await fetch('http://localhost:8000/api/system/stats')
+        logApi.start(endpoint, 'GET')
+        const response = await fetch(endpoint)
+        
         if (response.ok) {
           const stats = await response.json()
+          logApi.success(endpoint, stats)
           setSystemStats(stats)
           setIsLoading(false)
+        } else {
+          throw new Error(`HTTP ${response.status}`)
         }
       } catch (error) {
-        console.error('Failed to fetch system stats:', error)
+        logApi.error(endpoint, error)
+        logSystem.event('Using mock data (API unavailable)', { reason: error })
+        
         // Use mock data if API unavailable (for dev)
         setSystemStats({
           cpu: Math.random() * 100,

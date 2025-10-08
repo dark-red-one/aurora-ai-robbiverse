@@ -60,3 +60,4 @@ npm run build
 ```
 
 **Result**: One-click DMG installer for RobbieBar! 🚀
+
