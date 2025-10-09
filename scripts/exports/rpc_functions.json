@@ -1,0 +1,50 @@
+{
+  "create_test": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.create_test without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.create_test without parameters in the schema cache"
+  },
+  "validate_test_data": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.validate_test_data without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.validate_test_data without parameters in the schema cache"
+  },
+  "get_test_export_data": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.get_test_export_data without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.get_test_export_data without parameters in the schema cache"
+  },
+  "get_competitive_insights_by_competitor": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.get_competitive_insights_by_competitor without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.get_competitive_insights_by_competitor without parameters in the schema cache"
+  },
+  "get_company_transaction_history": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.get_company_transaction_history without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.get_company_transaction_history without parameters in the schema cache"
+  },
+  "increment_company_credits": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.increment_company_credits without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.increment_company_credits without parameters in the schema cache"
+  },
+  "manage_waiting_list": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.manage_waiting_list without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.manage_waiting_list without parameters in the schema cache"
+  },
+  "manage_company_waiting_list": {
+    "code": "PGRST202",
+    "details": "Searched for the function public.manage_company_waiting_list without parameters or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+    "hint": null,
+    "message": "Could not find the function public.manage_company_waiting_list without parameters in the schema cache"
+  }
+}

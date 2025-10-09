@@ -1,0 +1,37 @@
+[
+  {
+    "id": "eb9675c1-1eb4-4aed-841c-b875d4fc0d09",
+    "company_id": "186b9eb3-0402-48b8-9185-5ffb62199f7e",
+    "credits_used": 25,
+    "test_id": "d9b2741a-b573-4024-81a7-bddeda72d3be",
+    "created_at": "2025-07-18T12:56:14.044419+00:00"
+  },
+  {
+    "id": "bc888b39-4c89-412b-97f4-09fe06616e5b",
+    "company_id": "186b9eb3-0402-48b8-9185-5ffb62199f7e",
+    "credits_used": 499,
+    "test_id": null,
+    "created_at": "2025-07-18T12:48:34.147964+00:00"
+  },
+  {
+    "id": "4e2abe55-beea-467d-998f-faa94ce0c82f",
+    "company_id": "186b9eb3-0402-48b8-9185-5ffb62199f7e",
+    "credits_used": 10,
+    "test_id": "62ea49d7-6a68-4867-a384-2b653caed69c",
+    "created_at": "2025-09-23T19:08:47.924817+00:00"
+  },
+  {
+    "id": "6ca5a3e9-99fa-44e1-90c1-52806e2b265d",
+    "company_id": "186b9eb3-0402-48b8-9185-5ffb62199f7e",
+    "credits_used": 10,
+    "test_id": "efe24ce1-411c-4542-be0e-6b9374bd355b",
+    "created_at": "2025-09-23T22:16:01.86607+00:00"
+  },
+  {
+    "id": "d3638bcd-12eb-482b-ad73-945a9c6fd7e3",
+    "company_id": "186b9eb3-0402-48b8-9185-5ffb62199f7e",
+    "credits_used": 10,
+    "test_id": "17db4faf-fa37-4e79-90eb-2a82b893b844",
+    "created_at": "2025-09-24T17:01:13.494775+00:00"
+  }
+]

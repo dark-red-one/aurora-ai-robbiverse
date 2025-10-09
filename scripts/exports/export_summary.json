@@ -1,0 +1,157 @@
+{
+  "export_date": "2025-10-09T15:20:16.656Z",
+  "supabase_project": "hykelmayopljuguuueme",
+  "tables_exported": [
+    {
+      "table": "companies",
+      "row_count": 40
+    },
+    {
+      "table": "profiles",
+      "row_count": 39
+    },
+    {
+      "table": "invites",
+      "row_count": 7
+    },
+    {
+      "table": "tests",
+      "row_count": 34
+    },
+    {
+      "table": "test_variations",
+      "row_count": 69
+    },
+    {
+      "table": "test_demographics",
+      "row_count": 34
+    },
+    {
+      "table": "test_survey_questions",
+      "row_count": 15
+    },
+    {
+      "table": "test_competitors",
+      "row_count": 371
+    },
+    {
+      "table": "testers_session",
+      "row_count": 1000
+    },
+    {
+      "table": "test_times",
+      "row_count": 1000
+    },
+    {
+      "table": "products",
+      "row_count": 68
+    },
+    {
+      "table": "competitor_products",
+      "row_count": 1000
+    },
+    {
+      "table": "amazon_products",
+      "row_count": 1000
+    },
+    {
+      "table": "walmart_products",
+      "row_count": 760
+    },
+    {
+      "table": "responses_surveys",
+      "row_count": 206
+    },
+    {
+      "table": "responses_comparisons",
+      "row_count": 1000
+    },
+    {
+      "table": "responses_comparisons_walmart",
+      "row_count": 92
+    },
+    {
+      "table": "feedback",
+      "row_count": 1000
+    },
+    {
+      "table": "ia_insights",
+      "row_count": 25
+    },
+    {
+      "table": "ia_insights_backup",
+      "row_count": 13
+    },
+    {
+      "table": "ia_insights_backup_20241226",
+      "row_count": 26
+    },
+    {
+      "table": "insight_status",
+      "row_count": 487
+    },
+    {
+      "table": "purchase_drivers",
+      "row_count": 57
+    },
+    {
+      "table": "competitive_insights",
+      "row_count": 451
+    },
+    {
+      "table": "competitive_insights_analysis",
+      "row_count": 0
+    },
+    {
+      "table": "competitive_insights_walmart",
+      "row_count": 209
+    },
+    {
+      "table": "summary",
+      "row_count": 60
+    },
+    {
+      "table": "custom_screening",
+      "row_count": 12
+    },
+    {
+      "table": "shopper_demographic",
+      "row_count": 1000
+    },
+    {
+      "table": "company_credits",
+      "row_count": 8
+    },
+    {
+      "table": "credit_usage",
+      "row_count": 5
+    },
+    {
+      "table": "credit_payments",
+      "row_count": 48
+    },
+    {
+      "table": "events",
+      "row_count": 1000
+    },
+    {
+      "table": "wrappers_fdw_stats",
+      "row_count": 0
+    }
+  ],
+  "total_rows": 11136,
+  "key_findings": {
+    "total_companies": 40,
+    "total_tests": 34,
+    "test_statuses": {
+      "complete": 25,
+      "draft": 2,
+      "incomplete": 1,
+      "active": 6
+    },
+    "ai_insights_count": 25,
+    "latest_ai_insight": "2025-09-23T21:52:46.985922+00:00",
+    "total_payments": 48,
+    "total_revenue_cents": 28996109
+  }
+}

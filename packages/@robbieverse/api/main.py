@@ -16,6 +16,7 @@ Integrates:
 
 import os
 import logging
+from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -26,7 +27,8 @@ from src.routes import (
     daily_brief,
     mood_routes,
     sticky_notes,
-    touch_ready
+    touch_ready,
+    sync_routes
 )
 
 # Import services for initialization
@@ -121,6 +123,7 @@ app.include_router(daily_brief.router, prefix="/api", tags=["briefs"])
 app.include_router(mood_routes.router, prefix="/api", tags=["personality"])
 app.include_router(sticky_notes.router, prefix="/api", tags=["memory"])
 app.include_router(touch_ready.router, prefix="/api", tags=["outreach"])
+app.include_router(sync_routes, prefix="/api/sync", tags=["sync"])
 
 # WebSocket endpoint for real-time chat
 @app.websocket("/ws/chat")

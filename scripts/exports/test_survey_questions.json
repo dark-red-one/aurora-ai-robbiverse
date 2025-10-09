@@ -1,0 +1,197 @@
+[
+  {
+    "id": "6af7f709-adfc-4628-97c6-6220362c4b4b",
+    "test_id": "a9f3f4cf-597f-4543-a119-5c1fda48f2ed",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-15T13:55:11.671719+00:00",
+    "updated_at": "2025-09-15T13:55:11.671719+00:00"
+  },
+  {
+    "id": "81669999-d078-495a-b13c-c6701c7a5a79",
+    "test_id": "92577a3f-a79d-4841-9ef8-989992f86d38",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-15T18:26:32.807027+00:00",
+    "updated_at": "2025-09-15T18:26:32.807027+00:00"
+  },
+  {
+    "id": "22b6ffe0-5901-4d8b-8e8a-43288f8179f1",
+    "test_id": "34bd520c-e947-4808-b3a2-85124ae5f256",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-15T19:15:31.123559+00:00",
+    "updated_at": "2025-09-15T19:15:31.123559+00:00"
+  },
+  {
+    "id": "50c1bb38-f26f-47a3-b240-fa45cc4477ab",
+    "test_id": "ecf92863-aaa6-488d-b072-aaa2d7e39e99",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "brand",
+      "convenience",
+      "novelty"
+    ],
+    "created_at": "2025-09-15T19:43:06.907453+00:00",
+    "updated_at": "2025-09-15T19:43:06.907453+00:00"
+  },
+  {
+    "id": "48d6fdd7-7811-41dc-bd8c-261eb5f3787b",
+    "test_id": "8283960d-3999-41ea-9ae9-71665a0a2ac0",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "brand",
+      "convenience",
+      "novelty"
+    ],
+    "created_at": "2025-09-15T20:08:20.844132+00:00",
+    "updated_at": "2025-09-15T20:08:20.844132+00:00"
+  },
+  {
+    "id": "71700782-500e-494b-be9d-fcf85219a8c8",
+    "test_id": "baecdd6b-c3ef-4296-8374-ef4c0e49fae9",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-16T16:17:04.475413+00:00",
+    "updated_at": "2025-09-16T16:17:04.475413+00:00"
+  },
+  {
+    "id": "43fec59d-b7e2-4e6e-b619-c21ecff4f43f",
+    "test_id": "9609d0da-9e02-4a79-97d9-c3485c5cc5d4",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-16T16:56:02.378873+00:00",
+    "updated_at": "2025-09-16T16:56:02.378873+00:00"
+  },
+  {
+    "id": "af1ad945-8124-40d9-ab20-4ff283ff96a8",
+    "test_id": "98b27731-5b44-4fff-af3a-558540ef0092",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-18T14:53:12.889605+00:00",
+    "updated_at": "2025-09-18T14:53:12.889605+00:00"
+  },
+  {
+    "id": "f0dfa442-015f-4e8d-b950-2d8c6f61a1b2",
+    "test_id": "ce79cf17-3a35-4994-989c-1218327b2172",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-23T11:20:22.961923+00:00",
+    "updated_at": "2025-09-23T11:20:22.961923+00:00"
+  },
+  {
+    "id": "54998960-bc58-4ac5-863a-3d92ffdb51b3",
+    "test_id": "36ba0265-4464-4a63-909e-73b3997272f3",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-08-26T01:27:29.444938+00:00",
+    "updated_at": "2025-08-26T01:27:29.444938+00:00"
+  },
+  {
+    "id": "f7e9ea7f-39dc-4ef1-b7d5-b80fe54c789b",
+    "test_id": "62ea49d7-6a68-4867-a384-2b653caed69c",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-23T19:07:14.433984+00:00",
+    "updated_at": "2025-09-23T19:07:14.433984+00:00"
+  },
+  {
+    "id": "e20fd856-e761-4ffe-b245-cb758208ae54",
+    "test_id": "efe24ce1-411c-4542-be0e-6b9374bd355b",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-23T22:14:26.245915+00:00",
+    "updated_at": "2025-09-23T22:14:26.245915+00:00"
+  },
+  {
+    "id": "51f404dd-1079-4161-9f3e-cca5bf29752d",
+    "test_id": "17db4faf-fa37-4e79-90eb-2a82b893b844",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-24T16:56:26.977988+00:00",
+    "updated_at": "2025-09-24T16:56:26.977988+00:00"
+  },
+  {
+    "id": "bc7d04a4-aa36-44bd-af55-87ed6af76d8e",
+    "test_id": "e04fef0b-d9d4-431a-8c79-12d5aa4addca",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "confidence",
+      "brand",
+      "convenience"
+    ],
+    "created_at": "2025-09-25T17:03:41.049747+00:00",
+    "updated_at": "2025-09-25T17:03:41.049747+00:00"
+  },
+  {
+    "id": "2c9039d9-543c-4d35-84c6-9eb4def37488",
+    "test_id": "34fc2940-d5d4-49f4-ace2-e3490a1eac17",
+    "selected_questions": [
+      "value",
+      "appearance",
+      "brand",
+      "appetizing",
+      "novelty"
+    ],
+    "created_at": "2025-10-07T16:51:17.496304+00:00",
+    "updated_at": "2025-10-07T16:51:17.496304+00:00"
+  }
+]
