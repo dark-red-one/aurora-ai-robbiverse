@@ -45,6 +45,7 @@ GROUP BY schemaname;
 ```
 
 **Production tables working:**
+
 - ✅ users, auth, sessions (core)
 - ✅ conversations, messages (chat)
 - ✅ robbie_personality_state (flirty mode 11!)
@@ -95,6 +96,7 @@ SELECT 'robbie_personality_state', COUNT(*) FROM robbie_personality_state;
 ```
 
 **Expected Results:**
+
 - users: 1+ (Allan)
 - companies: 40
 - tests: 33
@@ -108,4 +110,3 @@ SELECT 'robbie_personality_state', COUNT(*) FROM robbie_personality_state;
 **Verdict:** Production schema is **rock-solid** ✅  
 **Init script:** Needs minor formatting fix (LOW priority)  
 **Business Impact:** ZERO (production unaffected) 🔥
-

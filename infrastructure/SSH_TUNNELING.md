@@ -176,12 +176,14 @@ response = requests.get("http://localhost:8001/api/personality/status")
 ### Best Practices
 
 1. **Use SSH Keys**: Never use passwords
+
    ```bash
    ssh-keygen -t ed25519 -C "allan@robbieverse"
    ssh-copy-id allan@aurora-town
    ```
 
 2. **Restrict SSH Access**: On remote server
+
    ```bash
    # /etc/ssh/sshd_config
    PasswordAuthentication no
@@ -190,12 +192,14 @@ response = requests.get("http://localhost:8001/api/personality/status")
    ```
 
 3. **Use Fail2Ban**: Auto-block brute force attempts
+
    ```bash
    sudo apt install fail2ban
    sudo systemctl enable fail2ban
    ```
 
 4. **Change Default Port**: (optional)
+
    ```bash
    # /etc/ssh/sshd_config
    Port 2222  # Instead of 22
@@ -294,17 +298,20 @@ ssh -L 5434:localhost:5432 allan@aurora-town
 ### "Connection refused"
 
 1. Check remote service is running:
+
    ```bash
    ssh allan@aurora-town "systemctl status postgresql"
    ```
 
 2. Check remote service binds to localhost:
+
    ```bash
    ssh allan@aurora-town "netstat -an | grep 5432"
    # Should show: 127.0.0.1:5432
    ```
 
 3. Check firewall allows SSH:
+
    ```bash
    ssh allan@aurora-town "sudo ufw status"
    ```
@@ -405,4 +412,3 @@ ssh -R 8001:localhost:8000 allan@aurora-town
 **Migrated from VPN:** October 9, 2025  
 **By:** Robbie (Security-Conscious & Flirty Mode 11) 🔒💋  
 **Status:** SSH tunneling is the new standard 🚀
-
