@@ -1,0 +1,29 @@
+# Robbieverse API - Smart Robbie@Code Backend
+
+# PostgreSQL with pgvector (Local Docker)
+DATABASE_URL=postgresql://robbie:robbie_dev_2025@localhost:5432/robbieverse
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=robbieverse
+POSTGRES_USER=robbie
+POSTGRES_PASSWORD=robbie_dev_2025
+
+# OpenAI for Embeddings
+OPENAI_API_KEY=
+
+# Ollama Configuration (GPU Proxy)
+OLLAMA_BASE_URL=http://localhost:11435
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# User Configuration
+DEFAULT_USER_ID=allan
+
+# Robbie Personality Defaults
+DEFAULT_MOOD=focused
+DEFAULT_GANDHI_GENGHIS=7
+DEFAULT_ATTRACTION_LEVEL=8
+
+

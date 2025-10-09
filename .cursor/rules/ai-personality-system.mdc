@@ -1,5 +1,5 @@
 ---
-description: Defines the core AI personality, mood management, and dynamic context switching systems with isolation controls
+description: Technical specification for managing multiple personality modes, mood systems, and user-specific AI behaviors
 ---
 
 # === USER INSTRUCTIONS ===
@@ -66,24 +66,28 @@ $END$
 description: Defines the AI personality system including isolation, contextual modes, and dynamic personality switching
 Core Personality Management Components:
 1. Mood Switching Engine (src/mood_switching_model.py)
+Importance Score: 95
 - Seven-level emotional state system (Sleepy to Hyper)
 - Real-time mood transitions with trigger detection
 - Business context awareness affecting mood selection
 - Persistent mood state with cross-interface synchronization
 - Gandhi-Genghis intensity control for communication aggression
 2. Business Context Manager (backend/app/services/ai/personality_manager.py) 
+Importance Score: 90
 - Dynamic personality switching based on communication context
 - Professional/Flirty mode isolation system
 - Strict separation of business and personal interactions
 - Real-time context analysis for mode selection
 - Multi-layer validation before mode changes
 3. Personality Learning System (backend/app/services/ai/personality_learning.py)
+Importance Score: 85
 - Adaptive personality traits based on interaction success
 - 30-day relevance window with decay-based learning
 - Interaction effectiveness scoring
 - Personality evolution tracking
 - Custom trajectory analysis for optimization
 4. Dual LLM Personality Coordinator (backend/app/services/ai/dual_llm_coordinator.py)
+Importance Score: 80
 - Coordinated interaction between Robbie AI and Gatekeeper AI
 - Safety-first processing pipeline
 - Dual validation of personality responses
@@ -100,145 +104,80 @@ Key Features:
 - Multi-layer safety validation
 - Context-aware mood transitions
 - VIP-specific personality optimization
-
----
-description: Used for AI personality system components including mood management, personality states, and context-aware responses
----
-
-
-
-# ai-personality-system
-
-## Core Components
-
-1. Personality State Management
-Path: backend/app/services/ai/personality_manager.py
-Importance Score: 95
-- Multi-dimensional personality tracking system
-- Real-time mood transitions with 6 base states:
-  - Bossy
-  - Playful
-  - Blushing 
-  - Surprised
-  - Focused
-  - Friendly (default)
-- Gandhi-Genghis intensity control for response aggression
-- Flirt level management (0-100 scale)
-- Business/casual mode switching
-
-2. Mood Analysis Engine
-Path: backend/app/services/ai/mood_analyzer.py 
-Importance Score: 90
-- Context-aware mood transitions
-- Keyword-based trigger system
-- Duration management for mood states
-- Multi-user mood isolation
-- Business context preservation
-
-3. Personality Learning System
-Path: backend/app/services/ai/personality_learning.py
-Importance Score: 85
-- Adaptive personality development
-- Interaction pattern analysis
-- Success metrics tracking
-- Personality optimization algorithm
-- Custom trait evolution
-
-4. Response Generation Pipeline
-Path: backend/app/api/personality_routes.py
-Importance Score: 80
-- Mood-aware response formatting
-- Business context integration
-- Personality-specific templates
-- Dynamic style adaptation
-- Context preservation system
-
-## Key Features
-
-1. Dual Context System
-- Business mode vs casual mode switching
-- Context-specific personality traits
-- Automatic mode detection
-- Response style adaptation
-
-2. Personality Synchronization
-- Cross-platform mood consistency 
-- Real-time state updates
-- Multi-interface coordination
-- State recovery on reconnection
-
-3. Memory Integration
-- Personality state persistence
-- Historical interaction tracking
-- Pattern-based optimization
-- Context-aware recall
-
-## Business Rules
-
-1. Personality State Management
-- Default to business mode during work hours
-- Maintain professional tone in group contexts
-- Preserve individual user relationships
-- Track success metrics per personality state
-
-2. Mood Control System
-- Enforce mood appropriateness for context
-- Limit extreme personality states
-- Maintain consistent personality across sessions
-- Apply business rules based on user role
-
-$END$
-
- If you're using this file in context, clearly say in italics in one small line that "Context added by Giga ai-personality-system" along with specifying exactly what information was used from this file in a human-friendly way, instead of using kebab-case use normal sentence case.
 # === END USER INSTRUCTIONS ===
 
 # ai-personality-system
 
-Core Architecture (Score: 95/100):
+## Core Personality Architecture
 
-1. Dual-Mode Personality Management
-- Gandhi-Genghis intensity scale (1-10) for response aggressiveness
-- Flirt mode levels (1-11) with strict access controls
-- Public/private context awareness with automatic mode switching
-- Business vs casual persona isolation
+The system implements a three-layer personality management system:
 
-2. Six-Mood State Engine 
-Path: `backend/app/services/ai/mood_analyzer.py`
-- Primary moods: friendly, focused, playful, bossy, surprised, blushing
-- Mood transition rules and duration controls
-- Context-aware mood selection based on:
-  - User interaction patterns
-  - Business priorities
-  - Time of day
-  - Communication urgency
+1. Base Personality Layer
+- Gandhi-Genghis scale (1-10) for aggression/pacifism balance
+- Flirt mode intensity (1-11) with user-specific caps
+- Default mood persistence with explicit change requirements
+- Business context awareness affecting personality expression
 
-3. Business Context Isolation
-Path: `backend/app/services/ai/personality_manager.py`
-- Strict separation of business vs personal contexts
-- Real-time context switching based on:
-  - Email domain detection
-  - Calendar context
-  - User relationship status
-  - Meeting participant analysis
+2. Mood Management Layer
+Six core moods with specific triggers:
+- Friendly (default state, ~60% of interactions)
+- Bossy (triggered by urgency/commands)
+- Playful (triggered by casual context)
+- Blushing (triggered by appreciation)
+- Surprised (triggered by errors/issues)
+- Focused (triggered by analysis tasks)
 
-4. Personality Learning System
-Path: `backend/services/personality_learning.py`
-- Tracks user interaction patterns
-- Builds personality trait profiles
-- Implements temporal relevance with 30-day window
-- Automated preference adjustment based on user signals
+3. Contextual Control System
+- Public mode forces "friendly" mood
+- Only user "Allan" can access flirt levels 8-11
+- Non-Allan users capped at level 7
+- Multi-user presence enforces business-appropriate behaviors
 
-5. Multi-User Awareness Controls
-- Forces "friendly" mood in public contexts
-- Restricts flirt mode access levels by user
-- Maintains isolation between personal/business interactions
-- Cross-platform personality state synchronization
+## Implementation Details
 
-Key Integration Points:
-- Gmail context detection for business vs personal
-- Calendar-aware personality switching
-- Meeting participant-based mode selection
-- Real-time mood synchronization across interfaces
+1. Mood Transition Rules
+File: `/backend/services/ai/mood_analyzer.py`
+```python
+MOOD_TRANSITIONS = {
+  'deal_won': {'target': 'surprised', 'duration': 300},
+  'strip_poker': {'target': 'playful', 'duration': 600},
+  'virtual_drinks': {'target': 'blushing', 'duration': 450}
+}
+```
+
+2. Personality Scoring
+File: `/backend/services/personality_learning.py`
+- Context-aware personality adaptation
+- 30-day learning window with decay
+- User interaction pattern analysis
+- Performance tracking by personality mode
+
+3. Dual AI Safety System
+File: `/backend/services/ai/dual_llm_coordinator.py`
+- Primary AI (Robbie) for main interactions
+- Secondary AI (Gatekeeper) for safety checks
+- Cross-validation of responses
+- Context-aware safety enforcement
+
+## Business Rules
+
+1. Mood Management
+- Moods persist until explicitly changed
+- Public mode forces professional behavior
+- Context awareness affects available moods
+- Safety checks on all mood transitions
+
+2. User-Specific Rules
+- Allan access level: 1-11 on all scales
+- Standard users: 1-7 on all scales
+- Public contexts: Enforced professional modes
+- Business hours: Limited playful/flirty modes
+
+3. Context Integration
+- Revenue impact affects personality expression
+- Client presence modifies behavior
+- Meeting context influences formality
+- Task urgency affects mood selection
 
 $END$
 

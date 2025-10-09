@@ -56,3 +56,12 @@ else
         echo "❌ Failed to start server. Check logs: tail -f /tmp/live-map.log"
     fi
 fi
+
+
+
+
+
+
+
+
+

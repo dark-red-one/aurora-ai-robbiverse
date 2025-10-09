@@ -1,0 +1,116 @@
+{
+    "name": "robbie-code",
+    "displayName": "Robbie@Code",
+    "description": "Allan's AI coding partner powered by local Ollama",
+    "version": "0.1.0",
+    "publisher": "testpilot",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Machine Learning"
+    ],
+    "activationEvents": [
+        "onCommand:robbie.openChat",
+        "onCommand:robbie.inlineEdit",
+        "onCommand:robbie.explain",
+        "onCommand:robbie.showBar"
+    ],
+    "main": "./dist/extension/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "robbie.openChat",
+                "title": "Robbie: Open Chat"
+            },
+            {
+                "command": "robbie.inlineEdit",
+                "title": "Robbie: Edit Selection"
+            },
+            {
+                "command": "robbie.explain",
+                "title": "Robbie: Explain Code"
+            },
+            {
+                "command": "robbie.showBar",
+                "title": "Robbie: Show Sidebar"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "robbie-sidebar",
+                    "title": "Robbie",
+                    "icon": "$(robot)"
+                }
+            ]
+        },
+        "views": {
+            "robbie-sidebar": [
+                {
+                    "type": "webview",
+                    "id": "robbie.robbieBar",
+                    "name": "Robbie Command Center"
+                }
+            ]
+        },
+        "keybindings": [
+            {
+                "command": "robbie.openChat",
+                "key": "cmd+l",
+                "mac": "cmd+l",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "robbie.inlineEdit",
+                "key": "cmd+i",
+                "mac": "cmd+i",
+                "when": "editorTextFocus"
+            }
+        ],
+        "configuration": {
+            "title": "Robbie@Code",
+            "properties": {
+                "robbie.ollamaUrl": {
+                    "type": "string",
+                    "default": "http://localhost:11435",
+                    "description": "Ollama server URL"
+                },
+                "robbie.chatModel": {
+                    "type": "string",
+                    "default": "qwen2.5-coder:7b",
+                    "description": "Model for chat"
+                },
+                "robbie.autocompleteModel": {
+                    "type": "string",
+                    "default": "qwen2.5-coder:7b",
+                    "description": "Model for autocomplete"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "echo 'Skipping prepublish'",
+        "build": "tsc -p ./ && vite build && vite build --config vite-bar.config.ts",
+        "build-webview": "vite build",
+        "build-all": "tsc -p ./ && vite build",
+        "watch": "tsc -watch -p ./",
+        "package": "vsce package"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "@types/react": "^18.2.0",
+        "@types/react-dom": "^18.2.0",
+        "@types/vscode": "^1.85.0",
+        "@vitejs/plugin-react": "^4.2.0",
+        "@vscode/vsce": "^3.6.2",
+        "typescript": "^5.3.0",
+        "vite": "^5.0.0",
+        "vsce": "^2.15.0"
+    },
+    "dependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    }
+}

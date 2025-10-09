@@ -1,0 +1,20 @@
+# Include dist files
+!dist/
+!dist/extension/
+!dist/extension/extension.js
+!dist/webview/
+!dist/personality/
+
+# Exclude source files
+src/
+*.ts
+*.tsx
+!*.js
+
+# Exclude build files
+node_modules/
+*.map
+vite.config.*
+tsconfig.json
+package-lock.json
+

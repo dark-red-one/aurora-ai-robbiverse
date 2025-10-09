@@ -1,0 +1,152 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 CURSOR GPU SETUP - COPY/PASTE INSTRUCTIONS 🔥
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ CURRENT STATUS:
+✅ Proxy running on http://localhost:11435
+✅ Config file updated at ~/.config/Cursor/User/settings.json
+✅ 6 models ready to use
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1: RESTART CURSOR (30 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Close Cursor COMPLETELY (all windows)
+2. Wait 5 seconds
+3. Reopen Cursor
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2: VERIFY MODELS ARE VISIBLE (30 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option A - Via Chat:
+1. Press Ctrl+L (or Cmd+L on Mac)
+2. Look at BOTTOM of chat panel
+3. You should see a dropdown that says "Model: [something]"
+4. Click it - you should see your 6 models listed
+
+Option B - Via Settings:
+1. Click ⚙️ (Settings) in bottom-left
+2. Click "Cursor Settings"
+3. Click "Models" in left sidebar
+4. Scroll down to "Local Models" section
+5. You should see all 6 models listed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IF MODELS DON'T SHOW UP - MANUAL CONFIG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If Cursor's UI doesn't show the models, do this:
+
+1. Open Settings (⚙️ → Cursor Settings)
+2. Click "Models" in sidebar
+3. Scroll to "Override OpenAI Base URL"
+4. Check the box "☑️ Override OpenAI Base URL"
+5. In the URL field, enter:
+   http://localhost:11435
+
+6. In the "API Key" field, enter anything (it's ignored):
+   robbie-local
+
+7. Click "Add Model" button and add these one by one:
+   - deepseek-coder:33b-instruct
+   - codellama:13b-instruct
+   - qwen2.5-coder:7b
+   - deepseek-r1:7b
+   - robbie:latest
+   - qwen2.5:7b
+
+8. Click "Save"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3: TEST IT (30 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open Cursor Chat: Ctrl+L (Cmd+L)
+2. Select model from dropdown: "qwen2.5-coder:7b"
+3. Type: "Explain Python list comprehensions in one sentence"
+4. Hit Enter
+5. Should respond in < 3 seconds
+
+If it works → YOU'RE DONE! 🎉
+If it's slow (>30 sec) → See troubleshooting below
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Problem: Models don't show in dropdown
+Solution: Use manual config steps above
+
+Problem: Getting error "Connection refused"
+Solution: Check proxy is running:
+  curl http://localhost:11435/api/tags
+  If fails, run: bash start-cursor-proxy.sh
+
+Problem: Response is super slow (>30 sec)
+Solution: Cursor might be using cloud API instead
+  1. Go to Settings → Models
+  2. Make sure "Prefer local models" is checked
+  3. Uncheck all cloud models (GPT-4, Claude, etc)
+
+Problem: "Model not found" error
+Solution: Check spelling exactly matches:
+  deepseek-coder:33b-instruct
+  (not deepseek-coder-33b or deepseek:33b)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICATION COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run these in terminal to verify everything:
+
+# Check proxy is running
+curl http://localhost:11435/api/tags
+
+# Check models are available
+curl -s http://localhost:11435/api/tags | grep -o '"name":"[^"]*"'
+
+# Check config file
+cat ~/.config/Cursor/User/settings.json | grep -A2 "baseUrl"
+
+# View proxy logs
+tail -20 /tmp/cursor-proxy.log
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXPECTED OUTPUT WHEN WORKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When you ask Cursor a question:
+1. Response starts in < 5 seconds
+2. You see streaming text (not waiting forever)
+3. Terminal shows in /tmp/cursor-proxy.log:
+   "🎯 Routing [model-name] -> http://localhost:8080"
+4. Local GPU usage goes up (check with: nvidia-smi)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NUCLEAR OPTION (if nothing works)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Close Cursor completely
+2. Run: rm -rf ~/.config/Cursor/Cache
+3. Run: rm -rf ~/.config/Cursor/CachedData
+4. Restart Cursor
+5. Go through manual config steps above
+6. Test again
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 BOTTOM LINE:
+The infrastructure is ready. Now you just need to point
+Cursor's UI at http://localhost:11435 and select a model.
+
+Should take < 5 minutes total. Let's GO! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+
+
+
+
+
