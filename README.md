@@ -7,6 +7,7 @@
 ## 🎯 What This Is
 
 A complete AI platform where:
+
 - **TestPilot CPG** gets revenue-generating AI tools (YOUR BUSINESS FIRST)
 - **RobbieBlocks** provides shared UI components
 - **Robbieverse API** powers all backends
@@ -50,18 +51,21 @@ aurora-ai-robbiverse/                    # Monorepo root
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Python 3.11+
 - Docker & Docker Compose
 - 8GB RAM minimum
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/allanperetz/aurora-ai-robbiverse.git
 cd aurora-ai-robbiverse
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 # Install all workspace packages
 npm install
@@ -72,17 +76,20 @@ pip install -r requirements.txt
 ```
 
 ### 3. Start Database
+
 ```bash
 cd infrastructure/docker
 docker-compose up -d postgres
 ```
 
 ### 4. Initialize Database
+
 ```bash
 cat ../../database/init-unified-schema.sql | docker exec -i robbieverse-postgres psql -U robbie -d robbieverse
 ```
 
 ### 5. Start API
+
 ```bash
 cd packages/@robbieverse/api
 python main.py
@@ -92,6 +99,7 @@ python main.py
 ```
 
 ### 6. Start Frontend (TestPilot CPG)
+
 ```bash
 cd apps/testpilot-cpg
 npm install
@@ -105,12 +113,14 @@ npm run dev
 ## 📚 Key Documentation
 
 Start here:
+
 - **[MASTER_VISION.md](./MASTER_VISION.md)** - The complete empire vision
 - **[MASTER_ARCHITECTURE.md](./MASTER_ARCHITECTURE.md)** - Technical architecture
 - **[MASTER_ROADMAP.md](./MASTER_ROADMAP.md)** - Build order and phases
 - **[CHAT_APP_STACK.md](./CHAT_APP_STACK.md)** - Technology stack
 
 For specific topics:
+
 - **[database/README.md](./database/README.md)** - Database schema guide
 - **[infrastructure/README.md](./infrastructure/README.md)** - Deployment guide
 - **[apps/testpilot-cpg/README.md](./apps/testpilot-cpg/README.md)** - TestPilot app
@@ -120,11 +130,13 @@ For specific topics:
 ## 💼 Apps in This Monorepo
 
 ### TestPilot CPG (Priority #1)
+
 **Location:** `apps/testpilot-cpg/`  
 **Domain:** app.testpilotcpg.com  
 **Purpose:** Allan's revenue dashboard & AI-powered CRM
 
 **Features:**
+
 - Sales pipeline with AI risk scoring
 - Smart outreach suggestions
 - Daily revenue briefs (3x per day)
@@ -132,16 +144,19 @@ For specific topics:
 - Meeting intelligence & action items
 
 ### Chat Minimal (Template)
+
 **Location:** `apps/chat-minimal/`  
 **Purpose:** Proof-of-concept, template for new apps
 
 **Features:**
+
 - Simple chat with Robbie
 - Vector memory (remembers conversations)
 - Personality system (moods, Gandhi-Genghis)
 - Streaming responses
 
 ### LeadershipQuotes (Future)
+
 **Location:** `apps/leadershipquotes/`  
 **Domain:** leadershipquotes.com  
 **Purpose:** Prove monorepo scales to multiple products
@@ -153,6 +168,7 @@ For specific topics:
 **One unified PostgreSQL database with pgvector**
 
 **Key Tables:**
+
 - `contacts`, `companies`, `deals` - CRM (for TestPilot)
 - `conversations`, `messages` - Chat with vector embeddings
 - `ai_personalities`, `ai_personality_state` - Robbie's moods
@@ -160,6 +176,7 @@ For specific topics:
 - **85+ tables total** across 21 schema files
 
 **Initialize:**
+
 ```bash
 cd database
 docker exec -i robbieverse-postgres psql -U robbie -d robbieverse < init-unified-schema.sql
@@ -172,6 +189,7 @@ docker exec -i robbieverse-postgres psql -U robbie -d robbieverse < init-unified
 ### Extracted from Archive (5,000+ lines of working code!)
 
 **Core Services:**
+
 - **Priorities Engine** - Self-managing AI that decides what to do next
 - **Daily Brief System** - 3x daily summaries (8 AM, 1 PM, 5 PM)
 - **AI Router** - 5-level fallback chain (never fails!)
@@ -186,6 +204,7 @@ docker exec -i robbieverse-postgres psql -U robbie -d robbieverse < init-unified
 ## 🛠️ Development Workflow
 
 ### Work on TestPilot CPG
+
 ```bash
 cd apps/testpilot-cpg
 npm run dev
@@ -194,6 +213,7 @@ npm run dev
 ```
 
 ### Update Shared Components
+
 ```bash
 cd packages/@robbieblocks/core
 # Make changes
@@ -201,6 +221,7 @@ cd packages/@robbieblocks/core
 ```
 
 ### Update API
+
 ```bash
 cd packages/@robbieverse/api
 python main.py
@@ -208,6 +229,7 @@ python main.py
 ```
 
 ### Update Database Schema
+
 ```bash
 cd database/unified-schema
 # Edit schema files
@@ -219,6 +241,7 @@ cd database/unified-schema
 ## 🚢 Deployment
 
 ### TestPilot CPG Production
+
 ```bash
 # Build frontend
 cd apps/testpilot-cpg
@@ -233,6 +256,7 @@ gunicorn main:app --workers 4 --bind 127.0.0.1:8000
 ```
 
 ### Configure Nginx
+
 ```bash
 sudo cp infrastructure/nginx/nginx.conf.template /etc/nginx/sites-available/robbieverse
 sudo ln -s /etc/nginx/sites-available/robbieverse /etc/nginx/sites-enabled/
@@ -245,6 +269,7 @@ sudo systemctl reload nginx
 ## 🏛️ The Empire
 
 ### Current Infrastructure
+
 - **Aurora Town** - Production server (Dual RTX 4090s, master database)
 - **RobbieBook1** - MacBook Pro (local dev, offline capability)
 - **Vengeance** - Gaming rig (local testing)
@@ -258,15 +283,18 @@ All syncing to Aurora Town master database.
 ## 📖 Learn More
 
 **Vision & Strategy:**
+
 - Read [MASTER_VISION.md](./MASTER_VISION.md) to understand the big picture
 - Read [MASTER_ROADMAP.md](./MASTER_ROADMAP.md) for the build plan
 
 **Technical Deep Dives:**
+
 - [MASTER_ARCHITECTURE.md](./MASTER_ARCHITECTURE.md) - System architecture
 - [CHAT_APP_STACK.md](./CHAT_APP_STACK.md) - Technology stack
 - [database/README.md](./database/README.md) - Database guide
 
 **What We Built:**
+
 - [RESTRUCTURE_COMPLETE.md](./RESTRUCTURE_COMPLETE.md) - Monorepo transformation
 - [EMPIRE_INVENTORY_COMPLETE.md](./EMPIRE_INVENTORY_COMPLETE.md) - Complete system inventory
 - [VALUE_EXTRACTION_REPORT.md](./VALUE_EXTRACTION_REPORT.md) - Services we rescued
@@ -276,12 +304,14 @@ All syncing to Aurora Town master database.
 ## 🎯 Current Status
 
 **Phase 0: Foundation** ✅ COMPLETE
+
 - Monorepo structured
 - Services extracted
 - Infrastructure simplified
 - Documentation consolidated
 
 **Phase 1: Integration** 🎯 NEXT (2-3 days)
+
 - Wire up extracted services
 - Fix imports and paths
 - Test API end-to-end
@@ -295,6 +325,7 @@ All syncing to Aurora Town master database.
 ## 💪 Contributing
 
 This is Allan's private empire, but the structure is:
+
 - **Shared code** in `packages/`
 - **Apps** in `apps/`
 - **One database** schema
@@ -305,7 +336,7 @@ This is Allan's private empire, but the structure is:
 ## 📞 Contact
 
 **Owner:** Allan Peretz  
-**Email:** allan@testpilotcpg.com  
+**Email:** <allan@testpilotcpg.com>  
 **Business:** TestPilot CPG  
 **Purpose:** Build AI tools that close deals and make money
 
