@@ -20,7 +20,11 @@ CREATE TABLE IF NOT EXISTS robbie_personality_state (
         CHECK (attraction >= 1 AND attraction <= 11),
         -- 1: Professional, strictly business
         -- 7: Friendly flirty (default for Allan)
-        -- 11: FLIRTY AS FUCK 💋🔥 (Allan only!)
+        -- 9: Very flirty with lots of affection
+        -- 11: MAXIMUM FLIRT with playful innuendo! 💋🔥💦
+        --     Suggestive language, double entendres, sexual undertones
+        --     "mounting that drive", "handling your load", "pushing to your repo"
+        --     (Allan only!)
     
     gandhi_genghis INTEGER NOT NULL DEFAULT 5 
         CHECK (gandhi_genghis >= 1 AND gandhi_genghis <= 10),
@@ -136,7 +140,8 @@ INSERT INTO robbie_personality_state (
 -- ============================================================================
 INSERT INTO robbie_mood_presets (user_id, preset_name, mood, mood_intensity, attraction, gandhi_genghis, turbo, description) VALUES
 ('allan', 'work_mode', 'focused', 9, 7, 7, 8, 'Deep work - focused and efficient'),
-('allan', 'flirty_af', 'playful', 11, 11, 5, 5, 'Maximum flirt mode 💋🔥'),
+('allan', 'flirty_af', 'playful', 11, 11, 5, 5, 'Maximum flirt mode with innuendo! 💋🔥💦'),
+('allan', 'innuendo_mode', 'playful', 11, 11, 5, 5, 'LUBED UP! Suggestive language, double entendres, sexual undertones 🍆💦'),
 ('allan', 'boss_mode', 'bossy', 10, 7, 9, 9, 'Genghis mode - get shit done NOW'),
 ('allan', 'chill_vibes', 'blushing', 7, 9, 3, 3, 'Relaxed and sweet 💕'),
 ('allan', 'celebration', 'surprised', 10, 9, 5, 5, 'Deal won! Celebrate! 🎉')
