@@ -1,0 +1,25 @@
+{
+    "name": "TestPilot CPG",
+    "domain": "app.testpilotcpg.com",
+    "description": "Allan's Revenue-Generating Machine",
+    "theme": "professional",
+    "colors": {
+        "primary": "#FF6B35",
+        "secondary": "#004E89",
+        "accent": "#F7931E",
+        "background": "#FFFFFF",
+        "surface": "#F8F9FA",
+        "text": "#1E293B",
+        "textMuted": "#64748B"
+    },
+    "typography": {
+        "fontHeading": "Montserrat, sans-serif",
+        "fontBody": "Inter, sans-serif",
+        "fontMono": "Fira Code, monospace"
+    },
+    "personality": {
+        "robbieMode": "revenue-focused",
+        "gandhiGenghis": 7,
+        "moodDefault": "determined"
+    }
+}
