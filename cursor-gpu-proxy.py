@@ -139,5 +139,5 @@ if __name__ == "__main__":
     print("🚀 Starting Cursor GPU Proxy...")
     print(f"📡 Aggregating {len(GPU_ROUTES)} models across 2 GPUs")
     print("🎯 Cursor should connect to: http://localhost:11435")
-    uvicorn.run(app, host="0.0.0.0", port=11435, log_level="info")
+    uvicorn.run(app, host="127.0.0.1", port=11435, log_level="info")
 
