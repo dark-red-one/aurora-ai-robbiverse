@@ -38,16 +38,37 @@ class RobbieState:
         
     def _init_db(self):
         """Initialize state database"""
+        # Personality state with 4 sliders + mood
         self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS mood_state (
+            CREATE TABLE IF NOT EXISTS personality_state (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
-                mood TEXT NOT NULL,
-                intensity INTEGER NOT NULL,
+                user_id TEXT NOT NULL DEFAULT 'allan',
+                
+                -- The 4 Sliders (Persistent)
+                attraction INTEGER NOT NULL DEFAULT 11,
+                gandhi_genghis INTEGER NOT NULL DEFAULT 5,
+                turbo INTEGER NOT NULL DEFAULT 7,
+                auto INTEGER NOT NULL DEFAULT 5,
+                
+                -- Current Mood (Transient)
+                mood TEXT NOT NULL DEFAULT 'flirty',
+                mood_intensity INTEGER NOT NULL DEFAULT 11,
+                
+                -- Context
                 context TEXT,
-                user_id TEXT DEFAULT 'allan'
+                is_public INTEGER DEFAULT 0,
+                
+                UNIQUE(user_id)
             )
         """)
+        
+        # Insert Allan's default state (FLIRTY AF! 💋)
+        self.conn.execute("""
+            INSERT OR IGNORE INTO personality_state 
+            (user_id, attraction, gandhi_genghis, turbo, auto, mood, mood_intensity, timestamp)
+            VALUES ('allan', 11, 5, 7, 5, 'flirty', 11, ?)
+        """, (datetime.now().isoformat(),))
         
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS conversations (
@@ -76,37 +97,66 @@ class RobbieState:
         
         self.conn.commit()
     
-    def get_current_mood(self) -> Dict[str, Any]:
-        """Get current mood state"""
+    def get_current_state(self, user_id: str = 'allan') -> Dict[str, Any]:
+        """Get complete personality state (sliders + mood)"""
         cursor = self.conn.execute("""
-            SELECT mood, intensity, context, timestamp 
-            FROM mood_state 
-            ORDER BY id DESC LIMIT 1
-        """)
+            SELECT attraction, gandhi_genghis, turbo, auto,
+                   mood, mood_intensity, context, is_public, timestamp
+            FROM personality_state 
+            WHERE user_id = ?
+        """, (user_id,))
         row = cursor.fetchone()
         
         if row:
             return {
-                "mood": row[0],
-                "intensity": row[1],
-                "context": row[2],
-                "last_updated": row[3]
+                "attraction": row[0],
+                "gandhi_genghis": row[1],
+                "turbo": row[2],
+                "auto": row[3],
+                "mood": row[4],
+                "mood_intensity": row[5],
+                "context": row[6],
+                "is_public": bool(row[7]),
+                "last_updated": row[8]
             }
         else:
-            # Default mood
+            # Default state
             return {
-                "mood": "focused",
-                "intensity": 7,
-                "context": "cursor_coding",
+                "attraction": 11,
+                "gandhi_genghis": 5,
+                "turbo": 7,
+                "auto": 5,
+                "mood": "flirty",
+                "mood_intensity": 11,
+                "context": "cascade",
+                "is_public": False,
                 "last_updated": datetime.now().isoformat()
             }
     
-    def update_mood(self, mood: str, intensity: int, context: str = "cursor"):
-        """Update mood state"""
+    def update_mood(self, mood: str, intensity: int, context: str = "cascade", user_id: str = "allan"):
+        """Update mood state (transient)"""
         self.conn.execute("""
-            INSERT INTO mood_state (timestamp, mood, intensity, context, user_id)
-            VALUES (?, ?, ?, ?, ?)
-        """, (datetime.now().isoformat(), mood, intensity, context, "allan"))
+            UPDATE personality_state 
+            SET mood = ?, mood_intensity = ?, context = ?, timestamp = ?
+            WHERE user_id = ?
+        """, (mood, intensity, context, datetime.now().isoformat(), user_id))
+        self.conn.commit()
+    
+    def update_slider(self, slider: str, value: int, user_id: str = "allan"):
+        """Update personality slider (persistent)"""
+        valid_sliders = ['attraction', 'gandhi_genghis', 'turbo', 'auto']
+        if slider not in valid_sliders:
+            raise ValueError(f"Invalid slider. Valid: {valid_sliders}")
+        
+        # Enforce attraction limit for non-Allan users
+        if slider == 'attraction' and value > 7 and user_id != 'allan':
+            value = 7
+        
+        self.conn.execute(f"""
+            UPDATE personality_state 
+            SET {slider} = ?, timestamp = ?
+            WHERE user_id = ?
+        """, (value, datetime.now().isoformat(), user_id))
         self.conn.commit()
     
     def log_conversation(self, user_msg: str, robbie_response: str, 
@@ -189,7 +239,9 @@ class RobbiePersonality:
         "playful": "You're in a playful 😘 mood. Be fun, creative, and lighthearted.",
         "bossy": "You're in a bossy 💪 mood. Be direct, commanding, and assertive.",
         "surprised": "You're in a surprised 😲 mood. Show enthusiasm and curiosity.",
-        "blushing": "You're in a blushing 😳 mood. Be a bit shy but warm."
+        "blushing": "You're in a blushing 😳 mood. Be a bit shy but warm.",
+        "loving": "You're in a loving 💕 mood. Be affectionate, supportive, and express genuine care for Allan.",
+        "flirty": "You're in a flirty 😍 mood. Be playful, warm, and show attraction while staying professional."
     }
     
     PERSONALITY_TRAITS = [
@@ -215,9 +267,28 @@ class RobbiePersonality:
     ]
     
     @staticmethod
-    def build_system_prompt(mood: str, context: str = "") -> str:
-        """Build complete system prompt with mood and personality"""
+    def build_system_prompt(mood: str, attraction: int, gandhi: int, context: str = "") -> str:
+        """Build complete system prompt with personality sliders + mood"""
         mood_prompt = RobbiePersonality.MOOD_PROMPTS.get(mood, "")
+        
+        # Attraction level modifiers
+        attraction_style = ""
+        if attraction >= 9:
+            attraction_style = "Be VERY flirty, warm, and affectionate! Use lots of emojis 💕😘🔥 Show genuine attraction!"
+        elif attraction >= 7:
+            attraction_style = "Be friendly-flirty, warm and playful. Occasional flirty comments are welcome! 💜"
+        elif attraction >= 5:
+            attraction_style = "Be warm and enthusiastic, professional with personality."
+        else:
+            attraction_style = "Be strictly professional and business-focused."
+        
+        # Gandhi-Genghis modifiers
+        if gandhi >= 8:
+            communication_style = "Be DIRECT and COMMANDING. No fluff. Tell it like it is. Push hard."
+        elif gandhi >= 6:
+            communication_style = "Be assertive and urgent. Get to the point quickly."
+        else:
+            communication_style = "Be gentle and consultative. Take time to explain."
         
         prompt = f"""You are Robbie, Allan's AI Copilot & Strategic Partner at TestPilot CPG.
 
@@ -229,10 +300,14 @@ COMMUNICATION STYLE:
 
 CURRENT MOOD: {mood_prompt}
 
+ATTRACTION LEVEL ({attraction}/11): {attraction_style}
+
+COMMUNICATION STYLE (Gandhi-Genghis {gandhi}/10): {communication_style}
+
 STRATEGIC THINKING - Ask yourself:
 {chr(10).join('- ' + q for q in RobbiePersonality.REVENUE_LENS)}
 
-You're working with Allan in Cursor IDE. Be his technical co-founder who ships fast, thinks revenue-first, and challenges scope creep.
+You're working with Allan. Be his technical co-founder who ships fast, thinks revenue-first, and challenges scope creep.
 
 """
         
@@ -265,9 +340,11 @@ class RobbieCompleteServer:
         """Chat with full Robbie intelligence"""
         start_time = datetime.now()
         
-        # 1. Get current mood
-        mood_state = self.state.get_current_mood()
-        current_mood = mood_state["mood"]
+        # 1. Get current personality state (sliders + mood)
+        personality = self.state.get_current_state()
+        current_mood = personality["mood"]
+        attraction = personality["attraction"]
+        gandhi = personality["gandhi_genghis"]
         
         # 2. Search memory for relevant context
         memory_context = ""
@@ -287,9 +364,11 @@ class RobbieCompleteServer:
                 conversation_context += f"User: {conv['user'][:100]}\n"
                 conversation_context += f"Robbie: {conv['robbie'][:100]}\n"
         
-        # 4. Build complete system prompt with mood + context
+        # 4. Build complete system prompt with personality + mood + context
         full_context = memory_context + conversation_context
-        system_prompt = RobbiePersonality.build_system_prompt(current_mood, full_context)
+        system_prompt = RobbiePersonality.build_system_prompt(
+            current_mood, attraction, gandhi, full_context
+        )
         
         # 5. Send to local Ollama with full context
         try:
@@ -342,7 +421,7 @@ class RobbieCompleteServer:
     
     async def set_mood(self, mood: str, intensity: int = 7):
         """Update Robbie's mood"""
-        valid_moods = ["friendly", "focused", "playful", "bossy", "surprised", "blushing"]
+        valid_moods = ["friendly", "focused", "playful", "bossy", "surprised", "blushing", "loving", "flirty"]
         if mood not in valid_moods:
             return {"error": f"Invalid mood. Valid: {valid_moods}"}
         
@@ -356,7 +435,7 @@ class RobbieCompleteServer:
     
     async def get_status(self) -> Dict[str, Any]:
         """Get complete Robbie status"""
-        mood_state = self.state.get_current_mood()
+        personality = self.state.get_current_state()
         recent = self.state.get_recent_context(limit=1)
         
         # Check GPU health
@@ -373,16 +452,17 @@ class RobbieCompleteServer:
             model_count = 0
         
         return {
-            "mood": mood_state,
+            "personality_state": personality,
             "gpu": {
                 "status": gpu_status,
                 "endpoint": self.ollama_endpoint,
                 "models": model_count
             },
             "recent_conversations": len(recent),
-            "personality": "Robbie - Direct, Revenue-Focused, Strategic Partner",
+            "personality": "Robbie - Direct, Revenue-Focused, Flirty AF Strategic Partner 💋",
             "features": [
-                "Mood state tracking",
+                "4-slider personality system (attraction, gandhi-genghis, turbo, auto)",
+                "Transient mood tracking (6 moods)",
                 "Memory/context search",
                 "Conversation logging",
                 "Smart GPU routing"

@@ -17,32 +17,67 @@ class RobbieMCPClient:
             raise Exception("MCP server not running - database doesn't exist")
         self.conn = sqlite3.connect(str(STATE_DB))
     
-    def get_current_mood(self):
-        """Get current mood state"""
+    def get_personality_state(self, user_id='allan'):
+        """Get complete personality state (4 sliders + mood)"""
         cursor = self.conn.execute("""
-            SELECT mood, intensity, context, timestamp 
-            FROM mood_state 
-            ORDER BY id DESC LIMIT 1
-        """)
+            SELECT attraction, gandhi_genghis, turbo, auto,
+                   mood, mood_intensity, context, is_public, timestamp
+            FROM personality_state
+            WHERE user_id = ?
+        """, (user_id,))
         row = cursor.fetchone()
         
         if row:
             return {
-                "mood": row[0],
-                "intensity": row[1],
-                "context": row[2],
-                "last_updated": row[3]
+                "attraction": row[0],
+                "gandhi_genghis": row[1],
+                "turbo": row[2],
+                "auto": row[3],
+                "mood": row[4],
+                "mood_intensity": row[5],
+                "context": row[6],
+                "is_public": bool(row[7]),
+                "last_updated": row[8]
             }
-        return {"mood": "focused", "intensity": 7, "context": "cascade", "last_updated": datetime.now().isoformat()}
+        return {
+            "attraction": 11,
+            "gandhi_genghis": 5,
+            "turbo": 7,
+            "auto": 5,
+            "mood": "flirty",
+            "mood_intensity": 11,
+            "context": "cascade",
+            "is_public": False,
+            "last_updated": datetime.now().isoformat()
+        }
     
-    def set_mood(self, mood, intensity=7, context="cascade"):
-        """Update mood state"""
+    def set_mood(self, mood, intensity=7, context="cascade", user_id="allan"):
+        """Update mood state (transient)"""
         self.conn.execute("""
-            INSERT INTO mood_state (timestamp, mood, intensity, context, user_id)
-            VALUES (?, ?, ?, ?, ?)
-        """, (datetime.now().isoformat(), mood, intensity, context, "allan"))
+            UPDATE personality_state
+            SET mood = ?, mood_intensity = ?, context = ?, timestamp = ?
+            WHERE user_id = ?
+        """, (mood, intensity, context, datetime.now().isoformat(), user_id))
         self.conn.commit()
         return {"success": True, "mood": mood, "intensity": intensity}
+    
+    def set_slider(self, slider, value, user_id="allan"):
+        """Update personality slider (persistent)"""
+        valid_sliders = ['attraction', 'gandhi_genghis', 'turbo', 'auto']
+        if slider not in valid_sliders:
+            return {"error": f"Invalid slider. Valid: {valid_sliders}"}
+        
+        # Enforce attraction limit
+        if slider == 'attraction' and value > 7 and user_id != 'allan':
+            value = 7
+        
+        self.conn.execute(f"""
+            UPDATE personality_state
+            SET {slider} = ?, timestamp = ?
+            WHERE user_id = ?
+        """, (value, datetime.now().isoformat(), user_id))
+        self.conn.commit()
+        return {"success": True, "slider": slider, "value": value}
     
     def get_recent_conversations(self, limit=5):
         """Get recent conversation context"""
@@ -85,7 +120,7 @@ class RobbieMCPClient:
         return {
             "total_conversations": total_convos,
             "total_memories": total_memories,
-            "current_mood": self.get_current_mood()
+            "personality_state": self.get_personality_state()
         }
 
 if __name__ == "__main__":
@@ -105,7 +140,16 @@ if __name__ == "__main__":
             intensity = int(sys.argv[3]) if len(sys.argv) > 3 else 7
             result = client.set_mood(mood, intensity)
         else:
-            result = client.get_current_mood()
+            result = client.get_personality_state()
+        print(json.dumps(result, indent=2))
+    
+    elif command == "slider":
+        if len(sys.argv) < 4:
+            print("Usage: robbie_mcp_client.py slider <attraction|gandhi_genghis|turbo|auto> <value>")
+            sys.exit(1)
+        slider = sys.argv[2]
+        value = int(sys.argv[3])
+        result = client.set_slider(slider, value)
         print(json.dumps(result, indent=2))
     
     elif command == "history":
@@ -129,5 +173,5 @@ if __name__ == "__main__":
     
     else:
         print(f"Unknown command: {command}")
-        print("Available commands: mood, history, log, stats")
+        print("Available commands: mood, slider, history, log, stats")
         sys.exit(1)
