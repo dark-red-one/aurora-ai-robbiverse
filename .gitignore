@@ -23,7 +23,12 @@ node_modules/
 npm-debug.log*
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/sql-queries/
+.vscode/.sqltoolsrc
+.vscode/sql-queries/results/
+*.session.sql
 .idea/
 
 # OS
