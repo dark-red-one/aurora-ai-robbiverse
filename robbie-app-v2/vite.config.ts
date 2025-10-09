@@ -4,6 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/aurora-ai-robbiverse/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -12,5 +13,9 @@ export default defineConfig({
   server: {
     port: 80,
     host: true,
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
   },
 })
