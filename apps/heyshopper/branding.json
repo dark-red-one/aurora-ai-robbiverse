@@ -1,0 +1,33 @@
+{
+  "name": "HeyShopper",
+  "domain": "heyshopper.com",
+  "description": "TestPilot Shopper Panel Platform - Replace Respondent.io",
+  "theme": "consumer-friendly",
+  "colors": {
+    "primary": "#FF6B6B",
+    "secondary": "#4ECDC4",
+    "accent": "#FFE66D",
+    "background": "#FFFFFF",
+    "surface": "#F7F7F7",
+    "text": "#2C3E50",
+    "textMuted": "#7F8C8D"
+  },
+  "typography": {
+    "fontHeading": "Poppins, sans-serif",
+    "fontBody": "Open Sans, sans-serif",
+    "fontMono": "Fira Code, monospace"
+  },
+  "personality": {
+    "robbieMode": "friendly-helpful",
+    "gandhiGenghis": 3,
+    "moodDefault": "playful"
+  },
+  "features": {
+    "shopperRecr uitment": true,
+    "studyManagement": true,
+    "payments": true,
+    "analytics": true,
+    "aiMatching": true
+  }
+}
+
