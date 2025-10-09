@@ -9,10 +9,10 @@
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "@types/node": "^24.7.0",
     "@types/react": "^19.2.2",
@@ -28,5 +28,8 @@
     "typescript": "^5.9.3",
     "vite": "^7.1.9",
     "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.14"
   }
 }

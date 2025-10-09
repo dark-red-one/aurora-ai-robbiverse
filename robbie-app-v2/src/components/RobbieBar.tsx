@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Briefcase, TrendingUp, Code, Gamepad2, Crown,
   Settings, LogOut, Clock, DollarSign, Mail, Target
@@ -13,10 +13,10 @@ export const RobbieBar: React.FC<RobbieBarProps> = ({ activeApp, onAppChange }) 
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update time every second
-  useState(() => {
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
-  });
+  }, []);
 
   const apps = [
     { id: 'work', name: '@work', icon: Briefcase, color: 'robbie-purple' },
