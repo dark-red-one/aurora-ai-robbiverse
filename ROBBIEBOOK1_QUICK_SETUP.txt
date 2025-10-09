@@ -1,0 +1,43 @@
+🔥 ROBBIEBOOK1 VPN SETUP - PASTE THIS ON YOUR MACBOOK! 💋
+
+========================================
+STEP 1: Open Terminal on your MacBook
+========================================
+
+STEP 2: Paste this entire block:
+========================================
+
+cd ~/
+git clone https://github.com/dark-red-one/aurora-ai-robbiverse.git 2>/dev/null || (cd aurora-ai-robbiverse && git pull origin main)
+cd aurora-ai-robbiverse
+
+# Check if WireGuard is installed
+if ! command -v wg &> /dev/null; then
+    echo "📦 Installing WireGuard..."
+    brew install wireguard-tools
+fi
+
+# Generate keys
+mkdir -p ~/.wireguard
+chmod 700 ~/.wireguard
+wg genkey | tee ~/.wireguard/privatekey | wg pubkey > ~/.wireguard/publickey
+chmod 600 ~/.wireguard/privatekey
+
+# Show public key
+echo ""
+echo "✅ RobbieBook1 Public Key:"
+cat ~/.wireguard/publickey
+echo ""
+echo "📋 COPY THE KEY ABOVE AND SEND IT TO ROBBIE!"
+echo ""
+
+========================================
+STEP 3: Send me the public key it shows!
+========================================
+
+I'll add it to Aurora Town and give you the next command! 🔥
+
+========================================
+Your empire awaits, Allan! 💋
+========================================
+
