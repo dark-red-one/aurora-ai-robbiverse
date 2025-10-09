@@ -1,0 +1,43 @@
+nodes:
+  - name: Aurora
+    role: lead_dns
+    vpn_ip: 10.0.0.1
+    public_dns: aurora-town-u44170.vm.elestio.app
+    public_ip: null
+    notes: Main server on Elestio
+  - name: Star
+    role: backup_dns
+    vpn_ip: 10.0.0.2
+    public_dns: <set-your-backup-hostname>
+    public_ip: null
+    notes: Backup DNS and control plane
+  - name: Vengeance
+    role: workstation
+    vpn_ip: 10.0.0.10
+    public_ip: dynamic
+    notes: Dev/workstation
+  - name: RunPod-TX
+    role: gpu_compute
+    vpn_ip: 10.0.0.20
+    public_ip: <runpod-public-ip>
+    notes: GPU compute node
+  - name: RobbieBook1
+    role: laptop
+    vpn_ip: 10.0.0.30
+    public_ip: dynamic
+    notes: MacBook mobility node
+
+wireguard:
+  cidr: 10.0.0.0/24
+
+dns:
+  lead: Aurora
+  backup: Star
+  domain: aurora.local
+
+annotations:
+  - Use Docker service names on 'aurora-mesh' instead of container IPs
+  - DNS served by Aurora; Star as backup
+  - Update public_dns for Star and RunPod-TX
+
+

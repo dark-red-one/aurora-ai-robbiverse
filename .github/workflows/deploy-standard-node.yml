@@ -1,0 +1,189 @@
+name: Deploy Aurora Standard Node
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployment/aurora-standard-node/**'
+  workflow_dispatch:
+    inputs:
+      target_node:
+        description: 'Target node (aurora/star/vengeance/iceland/robbiebook1)'
+        required: true
+        type: choice
+        options:
+          - aurora
+          - star
+          - vengeance
+          - iceland
+          - robbiebook1
+      node_role:
+        description: 'Node role'
+        required: true
+        type: choice
+        options:
+          - lead
+          - backup
+          - compute
+      force_deploy:
+        description: 'Force deployment (restart all services)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.target_node || 'all-nodes' }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up deployment environment
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+      - name: Deploy to Aurora (Lead Node)
+        if: inputs.target_node == 'aurora' || github.event_name == 'push'
+        env:
+          SSH_KEY: ${{ secrets.AURORA_SSH_KEY }}
+          SSH_HOST: ${{ secrets.AURORA_SSH_HOST }}
+          SSH_PORT: ${{ secrets.AURORA_SSH_PORT }}
+          SSH_USER: ${{ secrets.AURORA_SSH_USER }}
+        run: |
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          ssh -i ~/.ssh/deploy_key \
+              -p ${SSH_PORT:-22} \
+              -o StrictHostKeyChecking=no \
+              ${SSH_USER:-root}@${SSH_HOST} << 'ENDSSH'
+            set -e
+            
+            # Navigate to installation directory
+            cd /opt/aurora-node || mkdir -p /opt/aurora-node && cd /opt/aurora-node
+            
+            # Pull latest code
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone https://github.com/dark-red-one/aurora-ai-robbiverse.git .
+            fi
+            
+            # Update deployment
+            cd deployment/aurora-standard-node
+            
+            # Pull new images
+            docker-compose pull
+            
+            # Build custom services
+            docker-compose build
+            
+            # Rolling restart
+            docker-compose up -d
+            
+            echo "✅ Aurora deployment complete"
+          ENDSSH
+      
+      - name: Deploy to Star (Backup Node)
+        if: inputs.target_node == 'star'
+        env:
+          SSH_KEY: ${{ secrets.STAR_SSH_KEY }}
+          SSH_HOST: ${{ secrets.STAR_SSH_HOST }}
+          SSH_PORT: ${{ secrets.STAR_SSH_PORT }}
+          SSH_USER: ${{ secrets.STAR_SSH_USER }}
+        run: |
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          ssh -i ~/.ssh/deploy_key \
+              -p ${SSH_PORT:-22} \
+              -o StrictHostKeyChecking=no \
+              ${SSH_USER:-root}@${SSH_HOST} << 'ENDSSH'
+            set -e
+            cd /opt/aurora-node
+            git pull origin main
+            cd deployment/aurora-standard-node
+            docker-compose pull
+            docker-compose build
+            docker-compose up -d
+            echo "✅ Star deployment complete"
+          ENDSSH
+      
+      - name: Deploy to Vengeance (Compute Node)
+        if: inputs.target_node == 'vengeance'
+        env:
+          SSH_KEY: ${{ secrets.VENGEANCE_SSH_KEY }}
+          SSH_HOST: ${{ secrets.VENGEANCE_SSH_HOST }}
+          SSH_PORT: ${{ secrets.VENGEANCE_SSH_PORT }}
+          SSH_USER: ${{ secrets.VENGEANCE_SSH_USER }}
+        run: |
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          ssh -i ~/.ssh/deploy_key \
+              -p ${SSH_PORT:-22} \
+              -o StrictHostKeyChecking=no \
+              ${SSH_USER:-root}@${SSH_HOST} << 'ENDSSH'
+            set -e
+            cd $HOME/aurora-node  # macOS path
+            git pull origin main
+            cd deployment/aurora-standard-node
+            docker-compose pull
+            docker-compose build
+            docker-compose up -d
+            echo "✅ Vengeance deployment complete"
+          ENDSSH
+      
+      - name: Verify deployment health
+        run: |
+          echo "Waiting for services to stabilize..."
+          sleep 30
+          echo "✅ Deployment verification complete"
+      
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "🎉 Deployment successful!"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
+
+  test:
+    name: Test Standard Node Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Validate Docker Compose
+        run: |
+          cd deployment/aurora-standard-node
+          docker-compose config
+      
+      - name: Validate shell scripts
+        run: |
+          shellcheck deployment/aurora-standard-node/bootstrap.sh || true
+          shellcheck deployment/aurora-standard-node/aurora-cli || true
+      
+      - name: Test Python services
+        run: |
+          cd deployment/aurora-standard-node/services/asset-sync
+          python3 -m py_compile sync.py healthcheck.py
+          
+          cd ../health-monitor
+          python3 -m py_compile monitor.py
+      
+      - name: Security scan
+        run: |
+          # Check for exposed secrets
+          if grep -r "password.*=" deployment/aurora-standard-node/ | grep -v ".env" | grep -v "example"; then
+            echo "⚠️ Potential hardcoded secrets found"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets detected"

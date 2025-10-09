@@ -1,0 +1,20 @@
+// Local BIND9 Configuration
+// Additional zones and settings
+
+// ACL for Aurora mesh
+acl aurora-mesh {
+    10.0.0.0/24;
+};
+
+// ACL for trusted networks
+acl trusted {
+    127.0.0.1;
+    10.0.0.0/24;
+};
+
+// Zone transfers
+options {
+    allow-transfer { trusted; };
+    notify yes;
+    also-notify { 10.0.0.1; 10.0.0.2; }; // Aurora and Star
+};

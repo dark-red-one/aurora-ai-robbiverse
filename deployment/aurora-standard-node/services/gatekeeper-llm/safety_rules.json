@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "rules": {
+    "pii": {
+      "enabled": true,
+      "action": "block",
+      "patterns": [
+        "SSN",
+        "Credit Card",
+        "Bank Account",
+        "Driver License"
+      ]
+    },
+    "brand_safety": {
+      "enabled": true,
+      "action": "warn",
+      "keywords": [
+        "profanity",
+        "offensive_language"
+      ]
+    },
+    "financial": {
+      "enabled": true,
+      "high_value_threshold": 100000,
+      "wire_threshold": 10000
+    },
+    "reputation": {
+      "enabled": true,
+      "action": "warn",
+      "keywords": [
+        "lawsuit",
+        "legal_action",
+        "discrimination"
+      ]
+    }
+  }
+}

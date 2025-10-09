@@ -1,0 +1,240 @@
+version: '3.8'
+
+# Simplified Aurora Architecture - Hub-Spoke Model
+# Aurora = Hub (all services), Others = Spokes (Ollama + proxy only)
+# Reduces from 23 services to 8 services
+
+services:
+  # ============================================================================
+  # 1. WireGuard VPN - Auto-connects to mesh network
+  # ============================================================================
+  wireguard:
+    image: linuxserver/wireguard:latest
+    container_name: aurora-wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - SERVERURL=${PUBLIC_IP:-auto}
+      - SERVERPORT=51820
+      - PEERS=${VPN_PEERS:-star,vengeance,runpod-tx,robbiebook1}
+      - PEERDNS=10.0.0.1
+      - ALLOWEDIPS=10.0.0.0/24
+    volumes:
+      - wireguard_config:/config
+      - /lib/modules:/lib/modules:ro
+    ports:
+      - "51820:51820/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv4.ip_forward=1
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: 10.0.0.1  # Aurora is always 10.0.0.1
+
+  # ============================================================================
+  # 2. PostgreSQL - Primary database (Aurora only)
+  # ============================================================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/unified-schema:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: 172.20.0.10
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aurora_app -d aurora_unified"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # 3. Redis - Caching, session management, and event bus
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: aurora-redis
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: 172.20.0.11
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================================
+  # 4. Web Frontend - Nginx + UI (Aurora only)
+  # ============================================================================
+  web-frontend:
+    image: nginx:alpine
+    container_name: aurora-web-frontend
+    ports:
+      - "3000:80"
+      - "443:443"
+    volumes:
+      - ./services/web-frontend/html:/usr/share/nginx/html
+      - ./services/web-frontend/nginx.conf:/etc/nginx/nginx.conf
+      - ./services/web-frontend/ssl:/etc/nginx/ssl
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+
+  # ============================================================================
+  # 5. Auth Service - JWT + Sessions (Aurora only)
+  # ============================================================================
+  auth-service:
+    build: ./services/auth-service
+    container_name: aurora-auth-service
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET:-robbie-2025-secret}
+    ports:
+      - "8008:8008"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+
+  # ============================================================================
+  # 6. Chat Backend - Conversations (Aurora only)
+  # ============================================================================
+  chat-backend:
+    build: ./services/chat-backend
+    container_name: aurora-chat-backend
+    environment:
+      - NODE_NAME=aurora
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - API_KEY=${API_KEY:-robbie-2025}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+
+  # ============================================================================
+  # 7. Agent Router - Smart routing (Aurora only)
+  # ============================================================================
+  agent-router:
+    build: ./services/agent-router
+    container_name: aurora-agent-router
+    environment:
+      - NODE_NAME=aurora
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - NODE_REGISTRY_URL=http://node-registry:9999
+      - API_KEY=${API_KEY:-robbie-2025}
+    ports:
+      - "8007:8007"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - redis
+
+  # ============================================================================
+  # 8. Ollama - Local LLM (Aurora only, but can be on GPU nodes too)
+  # ============================================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: aurora-ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 9. HAProxy Load Balancer (Optional - for production)
+  # ============================================================================
+  haproxy:
+    image: haproxy:2.8
+    container_name: aurora-haproxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - web-frontend
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+  wireguard_config:
+
+networks:
+  aurora-mesh:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

@@ -1,0 +1,1307 @@
+
+# Aurora Standard Node Stack
+# Universal deployment for all nodes - auto-configures based on NODE_ROLE
+# Works on macOS (Docker Desktop) and Ubuntu (native Docker)
+
+services:
+  # ============================================================================
+  # 1. WireGuard VPN - Auto-connects to mesh network
+  # ============================================================================
+  wireguard:
+    image: linuxserver/wireguard:latest
+    container_name: aurora-wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - SERVERURL=${PUBLIC_IP:-auto}
+      - SERVERPORT=51820
+      - PEERS=${VPN_PEERS:-aurora,star}
+      - PEERDNS=10.0.0.1
+      - ALLOWEDIPS=10.0.0.0/24
+    volumes:
+      - wireguard_config:/config
+      - /lib/modules:/lib/modules:ro
+    ports:
+      - "51820:51820/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv4.ip_forward=1
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: ${VPN_IP:-10.0.0.10}
+    healthcheck:
+      test: ["CMD", "wg", "show"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 2. PostgreSQL - Auto-configures as primary or replica based on NODE_ROLE
+  # ============================================================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aurora-postgres
+    environment:
+      - POSTGRES_USER=robbie
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=aurora
+      - POSTGRES_INITDB_ARGS=${DB_INITDB_ARGS:--data-checksums}
+      # Replication settings
+      - POSTGRES_REPLICATION_MODE=${DB_MODE:-replica}
+      - POSTGRES_REPLICATION_USER=replicator
+      - POSTGRES_REPLICATION_PASSWORD=${DB_REPLICATION_PASSWORD}
+      - POSTGRES_PRIMARY_HOST=${DB_PRIMARY_HOST:-10.0.0.1}
+      - POSTGRES_PRIMARY_PORT=5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    ports:
+      - "5432:5432"
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U robbie -d aurora"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: ${DB_MEMORY_LIMIT:-4G}
+        reservations:
+          memory: ${DB_MEMORY_RESERVATION:-2G}
+
+  # ============================================================================
+  # 3. Redis - Caching, session management, and event bus
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: aurora-redis
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        # Static IP for easier cross-node access
+        ipv4_address: ${REDIS_IP:-172.20.0.10}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================================
+  # 3b. Redis Sentinel - Prevents split-brain scenarios (Aurora Primary)
+  # ============================================================================
+  redis-sentinel-aurora:
+    image: redis:7-alpine
+    container_name: aurora-redis-sentinel-aurora
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./config/sentinel-aurora.conf:/etc/redis/sentinel.conf
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: 172.20.0.11
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================================
+  # 3c. Redis Sentinel - Star (Backup)
+  # ============================================================================
+  redis-sentinel-star:
+    image: redis:7-alpine
+    container_name: aurora-redis-sentinel-star
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./config/sentinel-star.conf:/etc/redis/sentinel.conf
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: 172.20.0.12
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================================
+  # 3d. Redis Sentinel - Vengeance (Workstation)
+  # ============================================================================
+  redis-sentinel-vengeance:
+    image: redis:7-alpine
+    container_name: aurora-redis-sentinel-vengeance
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26381:26379"
+    volumes:
+      - ./config/sentinel-vengeance.conf:/etc/redis/sentinel.conf
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: 172.20.0.13
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================================
+  # 3b. Event Bus - Distributed event system using Redis Pub/Sub
+  # ============================================================================
+  event-bus:
+    build: ./services/event-bus
+    container_name: aurora-event-bus
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - NODE_ROLE=${NODE_ROLE}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 4. Chat Backend - Distributed chat API (runs on all nodes)
+  # ============================================================================
+  chat-backend:
+    build: ./services/chat-backend
+    container_name: aurora-chat-backend
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - NODE_ROLE=${NODE_ROLE}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
+      - MESH_COORDINATOR_URL=${MESH_COORDINATOR_URL:-http://10.0.0.1:8001}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - redis
+      - event-bus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 5. Asset Sync Service - Syncs static files from origin
+  # ============================================================================
+  asset-sync:
+    build: ./services/asset-sync
+    container_name: aurora-asset-sync
+    environment:
+      - ORIGIN_URL=${ASSET_ORIGIN:-http://10.0.0.1:9000}
+      - ORIGIN_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - ORIGIN_SECRET_KEY=${MINIO_SECRET_KEY}
+      - LOCAL_PATH=/assets
+      - SYNC_INTERVAL=${ASSET_SYNC_INTERVAL:-300}
+      - NODE_NAME=${NODE_NAME}
+    volumes:
+      - aurora_assets:/assets
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - wireguard
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import sys; sys.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 5. Monitoring - Prometheus & Node Exporter
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aurora-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aurora-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-robbie2025}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://${NODE_NAME}.aurora.local:3000
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./config/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: aurora-node-exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    pid: host
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: aurora-cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+
+  # ============================================================================
+  # 6. CoreDNS - Only runs if NODE_ROLE=lead or backup
+  # ============================================================================
+  coredns:
+    image: coredns/coredns:latest
+    container_name: aurora-coredns
+    command: -conf /etc/coredns/Corefile
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - ./config/Corefile:/etc/coredns/Corefile
+      - ./config/zones:/etc/coredns/zones
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: ${DNS_IP:-10.0.0.1}
+    profiles:
+      - dns
+    healthcheck:
+      test: ["CMD", "dig", "@127.0.0.1", "aurora.local", "+short"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 7. GPU Mesh Coordinator - Lead node only
+  # ============================================================================
+  gpu-coordinator:
+    build: ./services/gpu-coordinator
+    container_name: aurora-gpu-coordinator
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - NODE_ROLE=${NODE_ROLE}
+    command: python coordinator.py
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    profiles:
+      - coordinator
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 8. GPU Mesh Client - GPU compute nodes
+  # ============================================================================
+  gpu-client:
+    build: ./services/gpu-coordinator
+    container_name: aurora-gpu-client
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - NODE_ROLE=${NODE_ROLE}
+      - MESH_COORDINATOR_URL=${MESH_COORDINATOR_URL:-ws://10.0.0.1:8001}
+    command: python client.py
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    profiles:
+      - gpu
+    depends_on:
+      - wireguard
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ============================================================================
+  # 9. Node Registry - Dynamic node discovery (lead node only)
+  # ============================================================================
+  node-registry:
+    build: ./services/node-registry
+    container_name: aurora-node-registry
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - NODE_ROLE=${NODE_ROLE}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "9999:9999"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - redis
+      - event-bus
+    profiles:
+      - coordinator
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 10. Node Health Monitor - Reports to lead node
+  # ============================================================================
+  health-monitor:
+    build: ./services/health-monitor
+    container_name: aurora-health-monitor
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - NODE_ROLE=${NODE_ROLE}
+      - LEAD_NODE_URL=${LEAD_NODE_URL:-http://10.0.0.1:9091}
+      - REPORT_INTERVAL=${HEALTH_REPORT_INTERVAL:-30}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - wireguard
+      - postgres
+      - redis
+
+  # ============================================================================
+  # 11. Integration Sync Engine - Bidirectional sync with HubSpot, Google, etc.
+  # ============================================================================
+  integration-sync:
+    build: ./services/integration-sync
+    container_name: aurora-integration-sync
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - HUBSPOT_API_KEY=${HUBSPOT_API_KEY}
+      - GOOGLE_CREDENTIALS_PATH=/secrets/google-credentials.json
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-robbie@testpilotcpg.com}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME:-Robbie AI}
+      - SYNC_INTERVAL=${SYNC_INTERVAL:-300}
+    volumes:
+      - ${SECRETS_PATH:-./secrets}:/secrets:ro
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+      - event-bus
+    profiles:
+      - lead
+      - backup
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11b. Slack Integration - Bot and webhook handler
+  # ============================================================================
+  slack-integration:
+    build: ./services/slack-integration
+    container_name: aurora-slack-integration
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - CHAT_BACKEND_URL=http://chat-backend:8000
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+      - API_KEY=${API_KEY:-robbie-2025}
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+      - chat-backend
+    profiles:
+      - lead
+      - backup
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11c. GitHub Integration - PR reviews and issue management
+  # ============================================================================
+  github-integration:
+    build: ./services/github-integration
+    container_name: aurora-github-integration
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - PRIORITY_ENGINE_URL=http://priority-surface:8002
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO:-allanperetz/aurora-ai-robbiverse}
+      - API_KEY=${API_KEY:-robbie-2025}
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+      - priority-surface
+    profiles:
+      - lead
+      - backup
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11d. Fireflies Integration - Meeting transcript sync
+  # ============================================================================
+  fireflies-integration:
+    build: ./services/fireflies-integration
+    container_name: aurora-fireflies-integration
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - PRIORITY_ENGINE_URL=http://priority-surface:8002
+      - FIREFLIES_API_KEY=${FIREFLIES_API_KEY}
+      - API_KEY=${API_KEY:-robbie-2025}
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+      - priority-surface
+    profiles:
+      - lead
+      - backup
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11e. Offline Queue - Queue requests when services are down
+  # ============================================================================
+  offline-queue:
+    build: ./services/offline-queue
+    container_name: aurora-offline-queue
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - offline_queue_data:/data
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11f. Mood & Action Processor - Core intelligence (20s mood, 1m actions)
+  # ============================================================================
+  mood-action-processor:
+    build: ./services/mood-action-processor
+    container_name: aurora-mood-action-processor
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - PRIORITY_ENGINE_URL=http://priority-surface:8002
+      - CHAT_BACKEND_URL=http://chat-backend:8000
+      - API_KEY=${API_KEY:-robbie-2025}
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+      - priority-surface
+      - chat-backend
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11g. Fact Extractor - SQL-based intelligence gathering
+  # ============================================================================
+  fact-extractor:
+    build: ./services/fact-extractor
+    container_name: aurora-fact-extractor
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - API_KEY=${API_KEY:-robbie-2025}
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 11h. Allan Maverick Trainer - Continuous fine-tuning of Allan's digital twin
+  # ============================================================================
+  allan-maverick-trainer:
+    build: ./services/allan-maverick-trainer
+    container_name: aurora-allan-maverick-trainer
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - BASE_MODEL=meta-llama/Llama-2-7b-chat-hf
+      - TRAINING_DATA_DIR=/data/training
+      - MODEL_OUTPUT_DIR=/models/allan-maverick
+    ports:
+      - "8011:8011"
+    volumes:
+      - training_data:/data/training
+      - models:/models
+
+  # ============================================================================
+  # 24. Data Enrichment Service - Clay, Apollo, Clearbit integration
+  # ============================================================================
+  data-enrichment:
+    build: ./services/data-enrichment
+    container_name: aurora-data-enrichment
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - CLAY_API_KEY=${CLAY_API_KEY}
+      - APOLLO_API_KEY=${APOLLO_API_KEY}
+      - CLEARBIT_API_KEY=${CLEARBIT_API_KEY}
+    ports:
+      - "8010:8010"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+
+  # ============================================================================
+  # 25. LinkedIn Integration Service - VIP tracking and activity monitoring
+  # ============================================================================
+  linkedin-integration:
+    build: ./services/linkedin-integration
+    container_name: aurora-linkedin-integration
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - LINKEDIN_EMAIL=${LINKEDIN_EMAIL}
+      - LINKEDIN_PASSWORD=${LINKEDIN_PASSWORD}
+      - LINKEDIN_API_KEY=${LINKEDIN_API_KEY}
+    ports:
+      - "8012:8012"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    volumes:
+      - /dev/shm:/dev/shm  # For Chrome headless
+
+  # ============================================================================
+  # 26. Embedding Queue Service - Manages embedding generation and re-embeddings
+  # ============================================================================
+  embedding-queue:
+    build: ./services/embedding-queue
+    container_name: aurora-embedding-queue
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8013:8013"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+
+  # ============================================================================
+  # 11i. AI Coordinator - MCP-like protocol for AI services
+  # ============================================================================
+  ai-coordinator:
+    build: ./services/ai-coordinator
+    container_name: aurora-ai-coordinator
+    environment:
+      - NODE_NAME=${NODE_NAME}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - API_KEY=${API_KEY:-robbie-2025}
+    ports:
+      - "3010:3010"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 12. Priority Surface Engine - Top 10 priorities (Eisenhower Matrix)
+  # ============================================================================
+  priority-surface:
+    build: ./services/priority-surface
+    container_name: aurora-priority-surface
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8002:8002"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 13. Secrets Manager - Distributed credential management with overrides
+  # ============================================================================
+  secrets-manager:
+    build: ./services/secrets-manager
+    container_name: aurora-secrets-manager
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    profiles:
+      - lead
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 14. Ollama - Local LLM serving (GPU nodes only)
+  # ============================================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: aurora-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    profiles:
+      - gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 15. Squid Caching Proxy - API response caching
+  # ============================================================================
+  squid-proxy:
+    image: ubuntu/squid:latest
+    container_name: aurora-squid-proxy
+    ports:
+      - "3128:3128"
+    volumes:
+      - ./config/squid.conf:/etc/squid/squid.conf
+      - squid_cache:/var/spool/squid
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    profiles:
+      - lead
+    healthcheck:
+      test: ["CMD", "squidclient", "-h", "localhost", "-p", "3128", "mgr:info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 16. Tor Caching Proxy - Anonymous requests
+  # ============================================================================
+  tor-proxy:
+    image: dperson/torproxy
+    container_name: aurora-tor-proxy
+    ports:
+      - "9050:9050"  # SOCKS5
+      - "9051:9051"  # Control port
+    environment:
+      - TOR_CACHE=true
+      - TOR_BANDWIDTH=10MB
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    profiles:
+      - lead
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--socks5", "localhost:9050", "http://check.torproject.org/"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+
+  # ============================================================================
+  # 17. RobbieBlocks API - Widget marketplace
+  # ============================================================================
+  robbieblocks-api:
+    build: ./services/robbieblocks-api
+    container_name: aurora-robbieblocks-api
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8009:8009"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    profiles:
+      - lead
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8009/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 18. Training Scheduler - Distributed fine-tuning
+  # ============================================================================
+  training-scheduler:
+    build: ./services/training-scheduler
+    container_name: aurora-training-scheduler
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-aurora_unified}
+      - POSTGRES_USER=${POSTGRES_USER:-aurora_app}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - GPU_NODES=runpod-tx,vengeance
+    ports:
+      - "8010:8010"
+    volumes:
+      - training_data:/data
+      - models:/models
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - postgres
+      - redis
+    profiles:
+      - gpu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # 19. Web Frontend - Robbie Unified Interface
+  # ============================================================================
+  web-frontend:
+    build: ./services/web-frontend
+    container_name: aurora-web-frontend
+    environment:
+      - BACKEND_URL=http://chat-backend:8000
+      - GPU_API_URL=http://gpu-coordinator:8001
+      - NODE_API_URL=http://node-registry:9999
+      - PRIORITY_API_URL=http://priority-surface:8002
+      - SECRETS_API_URL=http://secrets-manager:8003
+      - ROBBIEBLOCKS_API_URL=http://robbieblocks-api:8009
+    ports:
+      - "${WEB_PORT:-3000}:80"
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    depends_on:
+      - chat-backend
+      - priority-surface
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================================================
+  # 20. Google Keep & Tasks Sync Service
+  # ============================================================================
+  google-keep-tasks:
+    build: ./services/google-keep-tasks
+    container_name: aurora-google-keep-tasks
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+      - GOOGLE_CREDENTIALS_JSON=${GOOGLE_CREDENTIALS_JSON}
+    ports:
+      - "8014:8014"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 21. DNS Manager Service
+  # ============================================================================
+  dns-manager:
+    build: ./services/dns-manager
+    container_name: aurora-dns-manager
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "8015:8015"
+    healthcheck:
+      test: ["CMD", "python3", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 22. Interactions Tracker Service
+  # ============================================================================
+  interactions-tracker:
+    build: ./services/interactions-tracker
+    container_name: aurora-interactions-tracker
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+    ports:
+      - "8016:8016"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 23. Clay Automation Service
+  # ============================================================================
+  clay-automation:
+    build: ./services/clay-automation
+    container_name: aurora-clay-automation
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+      - CLAY_API_KEY=${CLAY_API_KEY}
+    ports:
+      - "8017:8017"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 24. Robbie Agent - Probabilistic Decision Maker
+  # ============================================================================
+  robbie-agent:
+    build: ./services/robbie-agent
+    container_name: aurora-robbie-agent
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+    ports:
+      - "8018:8018"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 25. Skill Manager - Easy Service Addition
+  # ============================================================================
+  skill-manager:
+    build: ./services/skill-manager
+    container_name: aurora-skill-manager
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+      - ROBBIE_AGENT_URL=http://robbie-agent:8018
+    ports:
+      - "8019:8019"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 26. Dungeon Master - Narrative Event Generator
+  # ============================================================================
+  dungeon-master:
+    build: ./services/dungeon-master
+    container_name: aurora-dungeon-master
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+      - ROBBIE_AGENT_URL=http://robbie-agent:8018
+    ports:
+      - "8020:8020"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 27. Presidential Privilege - Elevated Access Control
+  # ============================================================================
+  presidential-privilege:
+    build: ./services/presidential-privilege
+    container_name: aurora-presidential-privilege
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+    ports:
+      - "8021:8021"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # ============================================================================
+  # 28. Mayor Governance - Democratic Town Management
+  # ============================================================================
+  mayor-governance:
+    build: ./services/mayor-governance
+    container_name: aurora-mayor-governance
+    restart: unless-stopped
+    networks:
+      - aurora-mesh
+    environment:
+      - POSTGRES_URL=postgresql://aurora_app:aurora_password@aurora-postgres:5432/aurora_unified
+      - REDIS_URL=redis://:aurora_password@redis-sentinel-aurora:26379
+    ports:
+      - "8022:8022"
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  wireguard_config:
+    name: aurora-wireguard-${NODE_NAME:-node}
+  postgres_data:
+    name: aurora-postgres-${NODE_NAME:-node}
+  redis_data:
+    name: aurora-redis-${NODE_NAME:-node}
+  aurora_assets:
+    name: aurora-assets-${NODE_NAME:-node}
+  prometheus_data:
+    name: aurora-prometheus-${NODE_NAME:-node}
+  grafana_data:
+    name: aurora-grafana-${NODE_NAME:-node}
+  ollama_data:
+    name: aurora-ollama-${NODE_NAME:-node}
+  squid_cache:
+    name: aurora-squid-cache-${NODE_NAME:-node}
+  training_data:
+    name: aurora-training-data-${NODE_NAME:-node}
+  models:
+    name: aurora-models-${NODE_NAME:-node}
+  offline_queue_data:
+    name: aurora-offline-queue-${NODE_NAME:-node}
+
+networks:
+  aurora-mesh:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

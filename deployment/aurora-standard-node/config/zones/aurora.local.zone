@@ -1,0 +1,46 @@
+; Aurora AI Empire DNS Zone
+; Auto-generated - edit carefully
+$ORIGIN aurora.local.
+$TTL 300
+
+; SOA Record
+@   IN  SOA ns1.aurora.local. admin.aurora.local. (
+        2025100601 ; serial (YYYYMMDDNN)
+        3600       ; refresh (1 hour)
+        1800       ; retry (30 minutes)
+        604800     ; expire (1 week)
+        300 )      ; minimum TTL (5 minutes)
+
+; Name Servers
+@           IN  NS  ns1.aurora.local.
+@           IN  NS  ns2.aurora.local.
+
+; A Records for Name Servers
+ns1         IN  A   10.0.0.1  ; Aurora (lead)
+ns2         IN  A   10.0.0.2  ; Star (backup)
+
+; Node Records
+aurora      IN  A   10.0.0.1  ; Lead node (Elestio EPYX)
+runpod-tx   IN  A   10.0.0.3  ; RunPod Texas (2x RTX 4090)
+vengeance   IN  A   10.0.0.4  ; Gaming/dev workstation (1x RTX 4090)
+robbiebook1 IN  A   10.0.0.5  ; MacBook M3 Max
+
+; Service Records
+db                  IN  A   10.0.0.1  ; Primary database (Elestio)
+db-replica-runpod   IN  A   10.0.0.3  ; RunPod TX replica
+db-replica-vengeance IN  A  10.0.0.4  ; Vengeance replica
+
+minio               IN  A   10.0.0.1  ; Asset storage (primary)
+grafana             IN  A   10.0.0.1  ; Monitoring dashboard
+prometheus          IN  A   10.0.0.1  ; Metrics
+
+; CNAME Records for convenience
+www         IN  CNAME aurora.local.
+api         IN  CNAME aurora.local.
+admin       IN  CNAME aurora.local.
+monitor     IN  CNAME grafana.aurora.local.
+
+; SRV Records for service discovery
+_postgresql._tcp    IN  SRV 0 5 5432 db.aurora.local.
+_http._tcp          IN  SRV 0 5 80 aurora.local.
+_grafana._tcp       IN  SRV 0 5 3000 grafana.aurora.local.

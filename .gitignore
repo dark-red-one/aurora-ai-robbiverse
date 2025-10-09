@@ -69,3 +69,20 @@ Thumbs.db
 google-credentials.json
 .credentials/
 infrastructure/docker/data/
+
+# Installer files (download locally, don't commit)
+*.dmg
+*.pkg
+openvpn-*.tar.gz
+
+# Logs
+logs/
+
+# Python virtual environments
+gigamind/venv/
+venv/
+.venv/
+
+# Temporary files
+*~
+.DS_Store

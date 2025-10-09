@@ -1,0 +1,59 @@
+version: '3.8'
+
+# Redis Replicas for Non-Aurora Nodes
+# This runs on Star, Vengeance, RunPod-TX, RobbieBook1
+
+services:
+  # ============================================================================
+  # Redis Replica - Connects to Aurora Redis via Sentinel
+  # ============================================================================
+  redis-replica:
+    image: redis:7-alpine
+    container_name: aurora-redis-replica
+    command: redis-server --replicaof 172.20.0.10 6379 --masterauth ${REDIS_PASSWORD} --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - redis_replica_data:/data
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: ${REDIS_REPLICA_IP:-172.20.0.20}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================================
+  # Redis Sentinel - Local sentinel for this node
+  # ============================================================================
+  redis-sentinel-local:
+    image: redis:7-alpine
+    container_name: aurora-redis-sentinel-local
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./config/sentinel-${NODE_NAME:-unknown}.conf:/etc/redis/sentinel.conf
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - NODE_NAME=${NODE_NAME}
+    restart: unless-stopped
+    networks:
+      aurora-mesh:
+        ipv4_address: ${SENTINEL_IP:-172.20.0.21}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  redis_replica_data:
+
+networks:
+  aurora-mesh:
+    external: true

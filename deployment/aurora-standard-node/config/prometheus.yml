@@ -1,0 +1,75 @@
+# Aurora Prometheus Configuration
+# Scrapes metrics from all mesh nodes
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'aurora-mesh'
+    node: '${NODE_NAME:-unknown}'
+
+# Alert manager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['10.0.0.1:9093']
+
+# Rule files
+rule_files:
+  # - '/etc/prometheus/rules/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  
+  # Node exporter (system metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: '${NODE_NAME:-local}'
+  
+  # cAdvisor (container metrics)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          instance: '${NODE_NAME:-local}'
+  
+  # PostgreSQL exporter (if available)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          instance: '${NODE_NAME:-local}'
+  
+  # Redis exporter (if available)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          instance: '${NODE_NAME:-local}'
+  
+  # WireGuard exporter (if available)
+  - job_name: 'wireguard'
+    static_configs:
+      - targets: ['wireguard-exporter:9586']
+        labels:
+          instance: '${NODE_NAME:-local}'
+  
+  # Scrape other mesh nodes (federation)
+  - job_name: 'mesh-nodes'
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job=~".*"}'
+    static_configs:
+      - targets:
+          - '10.0.0.1:9090'  # Aurora (Elestio)
+          - '10.0.0.3:9090'  # RunPod TX
+          - '10.0.0.4:9090'  # Vengeance
+          - '10.0.0.5:9090'  # RobbieBook1

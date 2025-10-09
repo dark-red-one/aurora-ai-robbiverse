@@ -1,0 +1,32 @@
+# Aurora CoreDNS Configuration
+# Serves aurora.local domain with automatic node discovery
+
+aurora.local:53 {
+    # Serve zone file
+    file /etc/coredns/zones/aurora.local.zone
+    
+    # Enable zone transfers to backup DNS
+    transfer {
+        to * 10.0.0.2
+    }
+    
+    # Enable query logging for debugging
+    log
+    
+    # Enable errors logging
+    errors
+    
+    # Enable prometheus metrics
+    prometheus :9153
+    
+    # Cache responses
+    cache 30
+}
+
+# Forward all other queries to upstream DNS
+. {
+    forward . 8.8.8.8 8.8.4.4 1.1.1.1
+    log
+    errors
+    cache 300
+}
