@@ -129,7 +129,7 @@
 **File:** `FOUNDER_ADOPTION_STRATEGY_UNDER_10M.md`
 
 **The Apple Strategy:**
-- **Position as premium**: "The iPhone of AI assistants"
+- **Position as premium**: "The iPhone of AI copilots"
 - **Quality over quantity**: Fewer, better integrations
 - **Seamless experience**: Everything works perfectly together
 - **Market education**: Help founders understand value

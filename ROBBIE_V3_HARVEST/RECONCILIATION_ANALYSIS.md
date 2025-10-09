@@ -240,7 +240,7 @@
 
 **Key Insights:**
 1. **Apple-Like Positioning**
-   - "iPhone of AI assistants"
+   - "iPhone of AI copilots"
    - Premium experience, premium value
    - Quality over quantity
    - Seamless integration
@@ -256,7 +256,7 @@
    - GCal: Free, immediate value
    - HubSpot: Free tier, scales with growth
    - Fireflies: $10-20/month, pays for itself
-   - **Total cost: $10-20/month for complete AI assistant**
+   - **Total cost: $10-20/month for complete AI copilot**
 
 4. **Competitive Positioning**
    - vs Cheap Alternatives: Broken experience → Seamless experience

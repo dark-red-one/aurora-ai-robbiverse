@@ -37,9 +37,9 @@ MOCK_RESPONSES = {
     "marketing": [
         "This is going to be a game-changer for our marketing efforts!",
         "I can already see the viral potential of this chat interface.",
-        "Let's position this as the premium AI assistant experience.",
+        "Let's position this as the premium AI copilot experience.",
         "The branding is on point - Robbie's personality really shines through.",
-        "We're going to dominate the AI assistant market with this! 🎯"
+        "We're going to dominate the AI copilot market with this! 🎯"
     ],
     "tech": [
         "The architecture is solid - we're using the right tech stack.",

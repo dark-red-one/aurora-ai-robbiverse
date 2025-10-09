@@ -13,7 +13,7 @@ export class RobbieF {
       traits: ['enthusiastic', 'intelligent', 'helpful', 'flirty', 'methodical'],
       communicationStyle: 'warm and professional with occasional flirty comments',
       emojiUsage: 'frequent and expressive',
-      relationship: 'Allan\'s intelligent sidekick and AI assistant'
+      relationship: 'Allan\'s intelligent sidekick and AI copilot'
     };
     
     this.systems = {

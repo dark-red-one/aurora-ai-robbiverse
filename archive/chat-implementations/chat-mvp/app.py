@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TestPilot Chat MVP - Business-Capable AI Assistant
+TestPilot Chat MVP - Business-Capable AI Copilot
 Techy dark theme with GitHub/databoxy aesthetic
 """
 
@@ -199,7 +199,7 @@ class BusinessIntegrations:
 class BusinessPersonality:
     def __init__(self):
         self.name = "Robbie"
-        self.role = "Business AI Assistant"
+        self.role = "Business AI Copilot"
         self.capabilities = [
             "email_management", "calendar_coordination", "meeting_analysis",
             "deal_tracking", "prospect_research", "task_prioritization"
@@ -248,7 +248,7 @@ class BusinessPersonality:
         user_part = message.strip() or "Give Allan a helpful business status and ask a clarifying question."
 
         system_preamble = (
-            "You are Robbie, Allan's business AI assistant. Reply concisely, professional, helpful. "
+            "You are Robbie, Allan's business AI copilot. Reply concisely, professional, helpful. "
             "Use the context below. If context is missing, continue gracefully without fabricating data."
         )
         context_block = (
@@ -276,7 +276,7 @@ Priority Tasks: {len(self.context['priority_tasks'])} pending
 """
         msg_lower = (message or "").lower()
         if "deal" in msg_lower or "pipeline" in msg_lower:
-            return f"""🤖 **Robbie - Business AI Assistant**
+            return f"""🤖 **Robbie - Business AI Copilot**
 
 {context}
 
@@ -288,7 +288,7 @@ Priority Tasks: {len(self.context['priority_tasks'])} pending
 
 How can I help you move these deals forward?"""
         elif "meeting" in msg_lower or "calendar" in msg_lower:
-            return f"""🤖 **Robbie - Business AI Assistant**
+            return f"""🤖 **Robbie - Business AI Copilot**
 
 {context}
 
@@ -302,7 +302,7 @@ How can I help you move these deals forward?"""
 
 Ready to dominate these meetings! What do you need?"""
         elif "email" in msg_lower or "gmail" in msg_lower:
-            return f"""🤖 **Robbie - Business AI Assistant**
+            return f"""🤖 **Robbie - Business AI Copilot**
 
 {context}
 
@@ -316,7 +316,7 @@ Ready to dominate these meetings! What do you need?"""
 
 Want me to help draft any responses?"""
         else:
-            return f"""🤖 **Robbie - Business AI Assistant**
+            return f"""🤖 **Robbie - Business AI Copilot**
 
 {context}
 

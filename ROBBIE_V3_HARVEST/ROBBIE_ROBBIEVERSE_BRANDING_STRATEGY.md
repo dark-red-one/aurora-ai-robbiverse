@@ -6,14 +6,14 @@
 
 ## **CORE BRAND IDENTITY** 🎯
 
-### **Robbie - The AI Assistant**
+### **Robbie - The AI Copilot**
 **"Robbie delivers productivity"**
 
 #### **Brand Positioning**
 - **Primary Function**: AI-powered productivity assistant
 - **Core Value**: Individual productivity enhancement
 - **Target User**: Individual users, founders, professionals
-- **Key Message**: "Your AI assistant for maximum productivity"
+- **Key Message**: "Your AI copilot for maximum productivity"
 
 #### **Brand Attributes**
 - **Intelligent**: Advanced AI capabilities
@@ -113,7 +113,7 @@
 - **Style**: Clean, modern, professional
 - **Imagery**: Technology-focused, individual productivity
 - **Typography**: Clean, readable, modern
-- **Logo**: Robbie AI assistant icon
+- **Logo**: Robbie AI copilot icon
 
 ### **RobbieVerse Visual Identity**
 - **Colors**: Blue (trust), Gold (community), Silver (collaboration)
@@ -219,11 +219,11 @@
 ## **BRAND CONSISTENCY GUIDELINES** ✅
 
 ### **Always Use Correct Branding**
-- ✅ **Robbie** for AI assistant features
+- ✅ **Robbie** for AI copilot features
 - ✅ **RobbieVerse** for community features
 - ❌ Never mix the two brands
 - ❌ Never use "Robbie" for community features
-- ❌ Never use "RobbieVerse" for AI assistant features
+- ❌ Never use "RobbieVerse" for AI copilot features
 
 ### **Context-Appropriate Messaging**
 - **Individual Productivity**: Always mention Robbie

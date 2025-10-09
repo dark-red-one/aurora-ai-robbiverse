@@ -95,7 +95,7 @@ export class BBSInterface {
       },
       'robbie': {
         name: 'Robbie',
-        description: 'AI assistant and automation discussions',
+        description: 'AI copilot and automation discussions',
         hashtags: ['#ai', '#automation', '#efficiency', '#data-driven', '#optimization']
       }
     };

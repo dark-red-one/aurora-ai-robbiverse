@@ -3,7 +3,7 @@
     "publishingInformation": {
       "locales": {
         "en-US": {
-          "summary": "Your personal AI business assistant",
+          "summary": "Your personal AI business copilot",
           "examplePhrases": [
             "Alexa, ask Robbie about my deal pipeline",
             "Alexa, ask Robbie for today's calendar",
@@ -18,8 +18,8 @@
             "CRM",
             "productivity"
           ],
-          "name": "Robbie Business Assistant",
-          "description": "Robbie is your AI-powered business assistant that connects to your CRM, calendar, email, and smart home devices. Get real-time business intelligence, manage your schedule, and control your environment with natural voice commands.",
+          "name": "Robbie Business Copilot",
+          "description": "Robbie is your AI-powered business copilot that connects to your CRM, calendar, email, and smart home devices. Get real-time business intelligence, manage your schedule, and control your environment with natural voice commands.",
           "largeIconUri": "https://aurora-town.robbieverse.com/assets/robbie-icon-512.png",
           "smallIconUri": "https://aurora-town.robbieverse.com/assets/robbie-icon-108.png"
         }

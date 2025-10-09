@@ -313,11 +313,11 @@ From Robbie V3 harvest + Aurora foundation:
 4. **FOCUSES ON REVENUE** - Prioritizes by $ impact
 5. **SAVES TIME** - Tracks and reports time saved
 
-**Result:** Allan has an AI assistant that gets more valuable every single day. 🚀
+**Result:** Allan has an AI copilot that gets more valuable every single day. 🚀
 
 ---
 
-*"The best AI assistant isn't the one that's perfect on day 1. It's the one that's 10x better by day 100."*
+*"The best AI copilot isn't the one that's perfect on day 1. It's the one that's 10x better by day 100."*
 
 **Status: LIVE & LEARNING** 🧠✨
 

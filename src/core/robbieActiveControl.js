@@ -1,5 +1,5 @@
 // Robbie Active Control System
-// Eyes + Hands = Real AI Assistant with Safeguards
+// Eyes + Hands = Real AI Copilot with Safeguards
 // Controls calendar, email, HubSpot deals with GATEKEEPER approval
 
 class RobbieActiveControl {

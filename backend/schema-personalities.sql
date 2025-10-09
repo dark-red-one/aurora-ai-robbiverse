@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS personality_categories (
 
 -- Seed categories
 INSERT INTO personality_categories (name, description, display_order) VALUES
-('Robbie', 'Robbie variants - Core AI assistant personalities', 1),
+('Robbie', 'Robbie variants - Core AI copilot personalities', 1),
 ('Mentors', 'Expert mentors - Steve Jobs, industry leaders', 2),
 ('Pros', 'Professional specialists - AllanBot, Kristina, etc', 3)
 ON CONFLICT (name) DO NOTHING;

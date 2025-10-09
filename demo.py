@@ -19,7 +19,7 @@ async def main():
     # Demo 1: Smart Chat
     print('\n1. SMART CHAT (with learning & circuit breaker)')
     print('-'*70)
-    response = await service.chat('What makes a great AI assistant?')
+    response = await service.chat('What makes a great AI copilot?')
     print(f'Response: {response["content"][:200]}...')
     print(f'Model: {response["model"]} ({response["tier"]})')
     print(f'Time: {response["response_time"]:.2f}s')

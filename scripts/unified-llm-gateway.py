@@ -162,7 +162,7 @@ async def test_gateway():
     # Test generation
     if status["recommended"] != "none":
         print("\n🔧 Testing generation...")
-        result = await gateway.generate("Hello, I am Robbie, your AI assistant. Tell me about your capabilities.")
+        result = await gateway.generate("Hello, I am Robbie, your AI copilot. Tell me about your capabilities.")
         print(f"Result: {json.dumps(result, indent=2)}")
     else:
         print("❌ No LLM endpoints available")

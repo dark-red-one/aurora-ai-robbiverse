@@ -65,7 +65,7 @@ def create_sample_data(cur):
         ) VALUES 
         ('test-001', 'TestPilot Simulations HQ', 'testpilot.ai', 'AI/Software', 'aurora'),
         ('test-002', 'Aurora Intelligence Corp', 'aurora-ai.com', 'AI/Analytics', 'aurora'),
-        ('test-003', 'Robbie Ventures', 'robbie.ai', 'AI Assistant', 'aurora')
+        ('test-003', 'Robbie Ventures', 'robbie.ai', 'AI Copilot', 'aurora')
         ON CONFLICT (hubspot_id) DO NOTHING
     """)
     
@@ -75,7 +75,7 @@ def create_sample_data(cur):
             hubspot_id, first_name, last_name, email, job_title, owner_id
         ) VALUES 
         ('contact-test-001', 'Allan', 'CEO', 'allan@testpilot.ai', 'Chief Executive', 'aurora'),
-        ('contact-test-002', 'Robbie', 'AI', 'robbie@testpilot.ai', 'AI Assistant', 'aurora'),
+        ('contact-test-002', 'Robbie', 'AI', 'robbie@testpilot.ai', 'AI Copilot', 'aurora'),
         ('contact-test-003', 'Aurora', 'System', 'aurora@testpilot.ai', 'AI Empire', 'aurora')
         ON CONFLICT (hubspot_id) DO NOTHING
     """)

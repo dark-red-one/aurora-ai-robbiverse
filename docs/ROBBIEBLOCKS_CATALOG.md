@@ -13,7 +13,7 @@
 Build the RobbieBlocks ecosystem: **5 interconnected sites powered by ~26 reusable widgets.**
 
 ### The Sites
-- **AskRobbie.ai** - Chat-first AI assistant
+- **AskRobbie.ai** - Chat-first AI copilot
 - **RobbieBlocks.com** - Widget marketplace & showcase
 - **LeadershipQuotes.com** - SEO content hub
 - **TestPilot.ai** - Enterprise trust builder
@@ -58,7 +58,7 @@ interface VistaHeroConfig {
 #### 2. ChatWidget
 **Purpose:** Real-time chat interface with AI integration  
 **Location:** `/src/widgets/ChatWidget/`  
-**Use Cases:** Customer support, AI assistants, live chat  
+**Use Cases:** Customer support, AI copilots, live chat  
 **Key Features:**
 - WebSocket/REST API support
 - Message history

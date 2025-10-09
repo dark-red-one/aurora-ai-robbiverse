@@ -169,7 +169,7 @@ class RobbieSkillHandler {
 
   // Launch handler
   handleLaunch(handlerInput) {
-    const speakOutput = `Hello! I'm Robbie, your AI business assistant. You can ask me about your deals, calendar, emails, or say "show dashboard" to see your business metrics. What would you like to know?`;
+    const speakOutput = `Hello! I'm Robbie, your AI business copilot. You can ask me about your deals, calendar, emails, or say "show dashboard" to see your business metrics. What would you like to know?`;
     
     return handlerInput.responseBuilder
       .speak(speakOutput)

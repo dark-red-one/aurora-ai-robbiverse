@@ -29,7 +29,7 @@
 ### **📱 PERSONAL DEVICE NETWORK (Robbie Everywhere!)**
 ```
 📱 RobbiePhone (Samsung Remote)
-├── Mobile AI assistant
+├── Mobile AI copilot
 ├── Always-on communication
 └── Remote empire control
 

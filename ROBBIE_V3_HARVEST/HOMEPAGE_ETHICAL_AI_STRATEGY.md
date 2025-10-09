@@ -182,7 +182,7 @@ CPG Innovation, eCommerce, Retail Media Expert
 #### **AI Agents (With Satisfaction Scores)**
 ```
 🤖 Our AI Team
-- Robbie M - Your Personal AI Assistant (94% satisfaction)
+- Robbie M - Your Personal AI Copilot (94% satisfaction)
 - Robbie F - Community & Relationship Manager (91% satisfaction)
 - Librarian - Research & Data Intelligence (89% satisfaction)
 - Bookkeeper - Financial Management (96% satisfaction)

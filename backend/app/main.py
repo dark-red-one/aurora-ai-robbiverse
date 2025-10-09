@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # Create FastAPI app
 app = FastAPI(
     title="Aurora AI - Robbie Backend",
-    description="The smartest, flirtiest, most revenue-focused AI assistant! 💜🚀💰",
+    description="The smartest, flirtiest, most revenue-focused AI copilot! 💜🚀💰",
     version="3.0.0"
 )
 

@@ -258,7 +258,7 @@ class PythonCursorMemory:
             raise error
     
     async def save_assistant_response(self, response: str, user_query_id: str = None, context: Dict = None) -> str:
-        """Save an assistant response"""
+        """Save a copilot response"""
         try:
             if not self.is_initialized:
                 raise Exception('Memory system not initialized')
@@ -474,7 +474,7 @@ async def save_user_message(message: str, context: Dict = None):
     return await memory.save_user_query(message, context)
 
 async def save_assistant_message(message: str, user_message_id: str = None, context: Dict = None):
-    """Save an assistant message"""
+    """Save a copilot message"""
     memory = await initialize_memory()
     return await memory.save_assistant_response(message, user_message_id, context)
 

@@ -81,7 +81,7 @@ class ChatGPUIntegration {
       const startTime = Date.now();
       
       // Add system prompt for faster responses
-      const optimizedPrompt = `You are Robbie, Allan's AI assistant. Be concise and helpful. User: ${message}`;
+      const optimizedPrompt = `You are Robbie, Allan's AI copilot. Be concise and helpful. User: ${message}`;
       
       const { stdout } = await execAsync(`ollama run ${this.localModel} "${optimizedPrompt}"`);
       

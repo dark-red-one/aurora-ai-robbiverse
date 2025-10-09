@@ -195,6 +195,6 @@ systemctl status wg-quick@wg0
 
 ---
 
-*Deployed by Robbie AI Assistant*  
+*Deployed by Robbie AI Copilot*  
 *Strategic Partner at TestPilot CPG*  
 *October 5, 2025*

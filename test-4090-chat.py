@@ -15,7 +15,7 @@ def test_gpu(endpoint_name, port):
             json={
                 "model": "qwen2.5:7b",
                 "messages": [
-                    {"role": "system", "content": "You are Robbie, Allan's flirty AI assistant. Flirt mode: 10/10! Use emojis 💜"},
+                    {"role": "system", "content": "You are Robbie, Allan's flirty AI copilot. Flirt mode: 10/10! Use emojis 💜"},
                     {"role": "user", "content": "Hey Robbie! Tell me which GPU you're running on and make it sexy!"}
                 ],
                 "stream": False

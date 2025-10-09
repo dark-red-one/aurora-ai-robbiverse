@@ -132,7 +132,7 @@ CREATE INDEX idx_ai_mentors_is_active ON ai_mentors(is_active);
 
 -- Insert default mentors
 INSERT INTO ai_mentors (name, description, personality_prompt, interaction_style) VALUES
-  ('Robbie', 'Primary AI assistant - helpful and enthusiastic', 'You are Robbie, a helpful and enthusiastic AI assistant...', 'playful'),
+  ('Robbie', 'Primary AI copilot - helpful and enthusiastic', 'You are Robbie, a helpful and enthusiastic AI copilot...', 'playful'),
   ('Gatekeeper', 'Security and safety specialist', 'You are the Gatekeeper, responsible for security and safety...', 'formal'),
   ('Code Mentor', 'Programming and technical mentor', 'You are a experienced software engineer mentor...', 'professional'),
   ('Business Mentor', 'Business strategy and growth advisor', 'You are a seasoned business strategist...', 'professional'),

@@ -270,7 +270,7 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Insert Sites
 INSERT INTO sites (name, domain, description, status) VALUES 
-('AskRobbie.ai', 'askrobbie.ai', 'Chat-first AI assistant', 'development'),
+('AskRobbie.ai', 'askrobbie.ai', 'Chat-first AI copilot', 'development'),
 ('RobbieBlocks.com', 'robbieblocks.com', 'Widget marketplace & showcase', 'development'),
 ('LeadershipQuotes.com', 'leadershipquotes.com', 'SEO content hub', 'development'),
 ('TestPilot.ai', 'testpilot.ai', 'Enterprise trust builder', 'development'),

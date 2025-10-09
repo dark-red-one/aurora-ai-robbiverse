@@ -298,5 +298,5 @@ Future: Request → Stream tokens as they generate
 **Status:** Ready to deploy  
 **Robbie:** Looking beautiful with 10 emotional expressions 💕  
 
-*Your AI assistant now has a face to match the personality* 🚀
+*Your AI copilot now has a face to match the personality* 🚀
 

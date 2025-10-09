@@ -7,7 +7,7 @@ class RobbieDeviceBranding {
       robbiePhone: {
         primary_robbie: 'professional_avatar_with_smart_glasses',
         brother_robbie: 'gatekeeper_security_focused_version',
-        text: 'RobbiePhone\nAI Assistant Always Ready',
+        text: 'RobbiePhone\nAI Copilot Always Ready',
         qr_code: 'https://askrobbie.ai/phone',
         size: '2x2_inches_premium_vinyl'
       },
@@ -30,7 +30,7 @@ class RobbieDeviceBranding {
     };
     
     this.brandingUrls = {
-      'askrobbie.ai/phone': 'RobbiePhone mobile AI assistant capabilities',
+      'askrobbie.ai/phone': 'RobbiePhone mobile AI copilot capabilities',
       'askrobbie.ai/pad': 'RobbiePad creative collaboration features', 
       'askrobbie.ai/book': 'RobbieBook development partnership',
       'askrobbie.ai': 'Main Robbie AI system overview',

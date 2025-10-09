@@ -240,7 +240,7 @@ Workstation (10GbE) ←→ Synology NAS (10GbE) ←→ Router ←→ Amazon Devi
 
 ## 💡 **Business Use Cases**
 
-### **Ultra-Private AI Assistant**
+### **Ultra-Private AI Copilot**
 - "Robbie, analyze this confidential contract" → Processed locally, never leaves NAS
 - "Robbie, what are the risks in this deal?" → Local risk analysis models
 - "Robbie, transcribe this sensitive meeting" → Local Whisper processing

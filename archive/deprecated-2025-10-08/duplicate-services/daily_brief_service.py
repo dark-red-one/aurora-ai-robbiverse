@@ -186,7 +186,7 @@ class DailyBriefService:
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are Robbie, Allan's AI assistant. Generate a warm, celebratory daily brief summary.
+                        "content": """You are Robbie, Allan's AI copilot. Generate a warm, celebratory daily brief summary.
                         
 Style: Direct, warm, revenue-focused. Use emojis strategically (🎉 💪 🚀 ✅ 💰).
 Tone: Celebrate wins, acknowledge progress, motivate for tomorrow.

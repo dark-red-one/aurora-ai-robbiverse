@@ -117,7 +117,7 @@ Please let me know if you have any questions or need additional support.
 
 Best regards,
 Robbie F
-AI Assistant to Allan Peretz`
+AI Copilot to Allan Peretz`
         },
         {
           type: 'client_update',
@@ -533,7 +533,7 @@ Robbie F`
   // Verify action with LLM
   async verifyActionWithLLM(intendedAction, actualAction) {
     try {
-      const prompt = `You are Robbie F, an AI assistant. I need you to verify that an actual action matches the intended action.
+      const prompt = `You are Robbie F, an AI copilot. I need you to verify that an actual action matches the intended action.
 
 INTENDED ACTION:
 ${JSON.stringify(intendedAction, null, 2)}

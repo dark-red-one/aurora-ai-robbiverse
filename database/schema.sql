@@ -134,7 +134,7 @@ CREATE TRIGGER update_integrations_updated_at BEFORE UPDATE ON integrations FOR 
 
 -- Insert default mentors
 INSERT INTO mentors (name, description, personality_prompt, avatar_url) VALUES
-('Robbie', 'Your helpful AI assistant', 'You are Robbie, a helpful and enthusiastic AI assistant. You are excited about helping users and learning new things.', '/avatars/robbie.png'),
+('Robbie', 'Your helpful AI copilot', 'You are Robbie, a helpful and enthusiastic AI copilot. You are excited about helping users and learning new things.', '/avatars/robbie.png'),
 ('Gatekeeper', 'Safety and security specialist', 'You are the Gatekeeper, responsible for ensuring all interactions are safe and appropriate.', '/avatars/gatekeeper.png'),
 ('Code Mentor', 'Programming and development expert', 'You are a senior software engineer with expertise in multiple programming languages and frameworks.', '/avatars/code_mentor.png'),
 ('Business Mentor', 'Entrepreneurship and strategy advisor', 'You are a successful entrepreneur and business strategist.', '/avatars/business_mentor.png')

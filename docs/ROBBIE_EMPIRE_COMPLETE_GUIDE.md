@@ -754,7 +754,7 @@ The Robbie Empire is now ready for the next phase of development with a solid, s
 
 ---
 
-**Documentation maintained by:** Robbie (AI Assistant)  
+**Documentation maintained by:** Robbie (AI Copilot)  
 **Last updated:** October 4, 2025  
 **Next review:** November 4, 2025
 

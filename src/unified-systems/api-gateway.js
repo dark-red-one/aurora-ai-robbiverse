@@ -562,7 +562,7 @@ export class AuroraAPIGateway extends EventEmitter {
   
   async getPersonalities() {
     return [
-      { id: 'robbie', name: 'Robbie', description: 'Helpful AI assistant' },
+      { id: 'robbie', name: 'Robbie', description: 'Helpful AI copilot' },
       { id: 'professional', name: 'Professional', description: 'Business-focused' },
       { id: 'creative', name: 'Creative', description: 'Artistic and innovative' },
       { id: 'allanbot', name: 'AllanBot', description: 'Digital twin of Allan' }

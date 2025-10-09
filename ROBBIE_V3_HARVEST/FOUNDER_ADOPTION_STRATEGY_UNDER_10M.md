@@ -12,7 +12,7 @@
 - **Reality**: These are actually the "popular" and "high quality" apps that enable Apple-like experience
 
 ### **The Strategy**
-- **Position as premium**: We are the iPhone of AI assistants
+- **Position as premium**: We are the iPhone of AI copilots
 - **Quality over quantity**: Better to have fewer, better integrations
 - **Apple-like experience**: Seamless, intuitive, high-quality
 - **Market education**: Help founders understand the value
@@ -84,7 +84,7 @@
 - **GCal**: Free, immediate value
 - **HubSpot**: Free tier, scales with growth
 - **Fireflies**: $10-20/month, pays for itself in time saved
-- **Total cost**: $10-20/month for complete AI assistant
+- **Total cost**: $10-20/month for complete AI copilot
 
 ---
 
@@ -216,4 +216,4 @@
 - **Scalable growth**: Grows with business, not against it
 - **Market leadership**: Premium experience, premium value
 
-**These partnership choices actually HELP adoption with founders under $10M by providing familiar, high-quality tools that work immediately and scale with their business. We are indeed the iPhone of AI assistants - premium experience, premium value, market leadership!**
+**These partnership choices actually HELP adoption with founders under $10M by providing familiar, high-quality tools that work immediately and scale with their business. We are indeed the iPhone of AI copilots - premium experience, premium value, market leadership!**

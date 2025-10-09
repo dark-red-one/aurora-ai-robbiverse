@@ -54,4 +54,4 @@ ssh allan@10.0.0.4        # Test RobbieBook1
 
 ---
 
-*Last Updated: October 5, 2025 - Robbie AI Assistant*
+*Last Updated: October 5, 2025 - Robbie AI Copilot*

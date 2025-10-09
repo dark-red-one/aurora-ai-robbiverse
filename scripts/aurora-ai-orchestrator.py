@@ -250,7 +250,7 @@ async def test_orchestrator():
     # Test generation
     if orchestrator.components['vengeance_4090']['status'] or orchestrator.components['local_robbie']['status']:
         print("\n🔧 Testing MAX generation...")
-        result = await orchestrator.generate_max_response("Hello, I am Robbie, your AI assistant. Tell me about your capabilities.")
+        result = await orchestrator.generate_max_response("Hello, I am Robbie, your AI copilot. Tell me about your capabilities.")
         print(f"Result: {json.dumps(result, indent=2)}")
     else:
         print("❌ No Aurora AI components available")

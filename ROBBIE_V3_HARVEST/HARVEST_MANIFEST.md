@@ -17,7 +17,7 @@
 
 2. **FOUNDER_ADOPTION_STRATEGY_UNDER_10M.md**
    - Apple-like positioning strategy
-   - "iPhone of AI assistants"
+   - "iPhone of AI copilots"
    - Premium experience, premium value
    - Start free, scale with growth
    - ROI story: $10-20/month total cost

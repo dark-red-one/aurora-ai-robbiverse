@@ -179,7 +179,7 @@ class MasterImporter:
                         hubspot_id, first_name, last_name, email, job_title, owner_id
                     ) VALUES 
                     ('contact-001', 'Allan', 'TestPilot', 'allan@testpilot.ai', 'CEO', 'aurora'),
-                    ('contact-002', 'Robbie', 'AI', 'robbie@testpilot.ai', 'AI Assistant', 'aurora'),
+                    ('contact-002', 'Robbie', 'AI', 'robbie@testpilot.ai', 'AI Copilot', 'aurora'),
                     ('contact-003', 'Test', 'Contact', 'test@example.com', 'Developer', 'aurora')
                     ON CONFLICT (hubspot_id) DO NOTHING
                 """)

@@ -190,7 +190,7 @@ async def test_dual_4090():
     # Test generation
     if status["recommended"] != "none":
         print("\n🔧 Testing dual 4090 generation...")
-        result = await orchestrator.generate_dual_4090("Hello, I am Robbie, your AI assistant. Tell me about your capabilities.")
+        result = await orchestrator.generate_dual_4090("Hello, I am Robbie, your AI copilot. Tell me about your capabilities.")
         print(f"Result: {json.dumps(result, indent=2)}")
     else:
         print("❌ No RTX 4090s available")

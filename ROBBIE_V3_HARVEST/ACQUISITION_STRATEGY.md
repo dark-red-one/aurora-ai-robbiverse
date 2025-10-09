@@ -87,7 +87,7 @@ AskRobbie's acquisition strategy leverages our unique "AI-first community" posit
 - Budget: $10k/month initially, scaling to $50k/month
 
 **Google Ads**
-- Search campaigns for "AI business assistant"
+- Search campaigns for "AI business copilot"
 - Display campaigns on business publications
 - YouTube pre-roll on business content
 - Budget: $15k/month initially, scaling to $75k/month
@@ -205,7 +205,7 @@ AskRobbie's acquisition strategy leverages our unique "AI-first community" posit
 
 ### Unique Value Props
 1. **AI-First Community:** Not just a tool, but a living ecosystem
-2. **Personal Robbie:** Each Town gets their own AI assistant
+2. **Personal Robbie:** Each Town gets their own AI copilot
 3. **Mentor Network:** Access to legendary business leaders
 4. **Storyline System:** Gamified community engagement
 5. **Mayor Program:** Leadership opportunities and compensation

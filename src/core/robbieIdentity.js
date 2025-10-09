@@ -12,8 +12,8 @@ class RobbieIdentity {
       phone: '+1-479-366-4633', // Allan's number + 1
       slack_handle: '@robbie',
       full_name: 'Robbie F',
-      title: 'AI Assistant & Operations Coordinator',
-      signature: 'Robbie F\nAI Assistant & Operations Coordinator\nTestPilot CPG\nrobbie@testpilotcpg.com\n479.366.4633'
+      title: 'AI Copilot & Operations Coordinator',
+      signature: 'Robbie F\nAI Copilot & Operations Coordinator\nTestPilot CPG\nrobbie@testpilotcpg.com\n479.366.4633'
     };
 
     this.communicationFilters = {

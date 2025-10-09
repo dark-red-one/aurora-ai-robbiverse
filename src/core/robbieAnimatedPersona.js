@@ -403,7 +403,7 @@ class RobbieAnimatedPersona {
       
       // Professional scenarios
       client_emergency: {
-        message: "Good morning everyone, I'm Robbie, Allan's AI assistant. Allan will be joining us momentarily, but I'm here to get us started.",
+        message: "Good morning everyone, I'm Robbie, Allan's AI copilot. Allan will be joining us momentarily, but I'm here to get us started.",
         actions: ['review_agenda', 'gather_questions', 'provide_initial_updates'],
         handoff: 'seamless_transition_when_allan_arrives'
       },
@@ -457,7 +457,7 @@ class RobbieAnimatedPersona {
     
     try {
       // Professional greeting
-      const greeting = `Good ${this.getTimeOfDay()}, this is Robbie, Allan's AI assistant. How can I help you today?`;
+      const greeting = `Good ${this.getTimeOfDay()}, this is Robbie, Allan's AI copilot. How can I help you today?`;
       
       // Set professional appearance for video calls
       if (incomingCall.videoCapable) {

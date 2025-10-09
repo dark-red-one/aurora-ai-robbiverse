@@ -252,7 +252,7 @@ export class LisaAccessControl {
   // Analyze with LLM
   async analyzeWithLLM(query, context) {
     try {
-      const prompt = `You are Robbie F, an AI assistant. I need you to analyze if a query from Lisa (Allan's wife) contains sensitive information that should be redacted.
+      const prompt = `You are Robbie F, an AI copilot. I need you to analyze if a query from Lisa (Allan's wife) contains sensitive information that should be redacted.
 
 QUERY: "${query}"
 CONTEXT: ${JSON.stringify(context, null, 2)}
@@ -309,7 +309,7 @@ Be conservative - if there's any doubt, recommend redaction.`;
   // Redact content with LLM
   async redactContentWithLLM(content, user) {
     try {
-      const prompt = `You are Robbie F, an AI assistant. I need you to redact sensitive information from content while making it still sound natural and helpful.
+      const prompt = `You are Robbie F, an AI copilot. I need you to redact sensitive information from content while making it still sound natural and helpful.
 
 CONTENT: "${content}"
 USER: ${user}

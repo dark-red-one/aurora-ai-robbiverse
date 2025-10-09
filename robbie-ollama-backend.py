@@ -167,7 +167,7 @@ class RobbieOllamaBackend:
         try:
             payload = {
                 "model": model,
-                "prompt": f"You are Robbie, Allan's AI assistant. You're helpful, intelligent, and have access to the Aurora AI Empire. Respond as Robbie: {message}",
+                "prompt": f"You are Robbie, Allan's AI copilot. You're helpful, intelligent, and have access to the Aurora AI Empire. Respond as Robbie: {message}",
                 "stream": False
             }
             

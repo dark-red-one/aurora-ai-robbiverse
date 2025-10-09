@@ -83,7 +83,7 @@ class TouchReadyService:
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are Allan's AI assistant helping draft follow-up messages.
+                        "content": """You are Allan's AI copilot helping draft follow-up messages.
                         
 Allan is the founder of TestPilot CPG, helping CPG brands optimize retail execution.
 His personality: Direct, authentic, revenue-focused, builds trust fast.
