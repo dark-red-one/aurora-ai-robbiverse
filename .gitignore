@@ -91,3 +91,4 @@ venv/
 # Temporary files
 *~
 .DS_Store
+secrets/
