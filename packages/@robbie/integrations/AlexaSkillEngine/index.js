@@ -28,20 +28,41 @@ class RobbieSkillHandler {
     const deviceId = requestEnvelope.context.System.device.deviceId;
 
     try {
-      // Send command to Aurora backend
-      const response = await this.auroraClient.post('/voice/command', {
-        command,
-        user_id: userId,
-        device_id: deviceId,
-        device_type: 'alexa',
-        timestamp: new Date().toISOString(),
-        context: {
+      // Route through universal input API
+      const response = await axios.post('http://aurora-town:8000/api/v2/universal/request', {
+        source: 'alexa',
+        source_metadata: {
+          device: deviceId,
+          platform: 'alexa',
           session_id: requestEnvelope.session.sessionId,
           application_id: requestEnvelope.session.application.applicationId
-        }
+        },
+        ai_service: 'chat',
+        payload: {
+          input: command,
+          parameters: {
+            temperature: 0.7,
+            max_tokens: 500
+          }
+        },
+        user_id: 'allan',  // Alexa is Allan's device
+        fetch_context: true
       });
 
-      const { message, display_data, should_end_session } = response.data;
+      const data = response.data;
+      
+      if (data.status === 'approved') {
+        const robbieResponse = data.robbie_response.message;
+        const mood = data.robbie_response.mood;
+        
+        // Build Alexa response
+        const message = robbieResponse;
+        const display_data = {
+          title: `Robbie (${mood})`,
+          text: robbieResponse,
+          image_url: null
+        };
+        const should_end_session = false;
 
       // Build response
       let builder = responseBuilder.speak(message);
@@ -60,10 +81,19 @@ class RobbieSkillHandler {
         builder = builder.reprompt('Anything else I can help with?');
       }
 
-      return builder.getResponse();
+        return builder.getResponse();
+      } else {
+        // Request was rejected by gatekeeper
+        console.error('Request rejected:', data.gatekeeper_review?.reasoning);
+        
+        return responseBuilder
+          .speak('Sorry, I can\'t help with that right now.')
+          .reprompt('You can ask me about your business, calendar, or deals.')
+          .getResponse();
+      }
 
     } catch (error) {
-      console.error('Aurora API error:', error);
+      console.error('Universal Input API error:', error);
       
       return responseBuilder
         .speak('Sorry, I had trouble connecting to my brain. Please try again in a moment.')

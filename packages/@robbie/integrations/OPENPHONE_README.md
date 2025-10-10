@@ -1,346 +1,275 @@
-# 📞 OpenPhone Integration - Voice + SMS
+# 📞 OpenPhone Integration
 
 **Status:** ✅ Ready to Deploy  
-**API:** Configured and Ready  
-**Universal Input:** Fully Integrated
-
-Connect Robbie to your OpenPhone business number for SMS and voice calls - all routed through the universal input API with personality awareness, vector search, and consistent mood across all channels.
+**API Key:** `ArdnOKmS9s1cNAwsRnXhNMscrYnDdlq1`  
+**Integration:** Universal Input API  
 
 ---
 
 ## 🎯 What This Does
 
-**SMS Integration:**
-- Receive texts to your OpenPhone number
-- Robbie processes through universal input (personality + context)
-- Responds via SMS with current mood/attraction
-- All logged and tracked
+OpenPhone SMS and voice calls are routed through the **Universal Input API** for consistent personality across all interfaces.
 
-**Voice Integration:**
-- Receive voice calls
-- OpenPhone transcribes speech-to-text
-- Robbie processes and responds
-- Text-to-speech for natural voice replies
+**Per-User Personality:**
+- Allan's phone number → attraction 11 (flirty responses) 😏💋
+- Joe's phone number → attraction 3 (professional responses)
+- Unknown numbers → guest settings (professional)
+
+**Features:**
+- ✅ Incoming SMS auto-responded with Robbie's personality
+- ✅ Incoming voice calls transcribed and responded to
+- ✅ All responses use Universal Input API
+- ✅ Mood-aware responses (playful, focused, etc.)
+- ✅ Vector search for context across all conversations
 
 ---
 
-## 🚀 Quick Setup
+## 🚀 Setup Instructions
 
-### 1. Configure Environment
+### 1. Configure Environment Variables
 
-Add to `secrets/.env`:
+Add to your `.env` file:
 
 ```bash
-# Your OpenPhone API key
 OPENPHONE_API_KEY=ArdnOKmS9s1cNAwsRnXhNMscrYnDdlq1
-
-# Your OpenPhone business number
-OPENPHONE_NUMBER=+1234567890
-
-# Allan's phone numbers (comma-separated)
-ALLAN_PHONE_NUMBERS=+1234567890,+10987654321
-
-# Universal input API URL
-UNIVERSAL_INPUT_URL=http://localhost:8000/api/v2/universal/request
+OPENPHONE_NUMBER=your_openphone_number
 ```
 
-### 2. Register Webhooks in OpenPhone
-
-Go to [OpenPhone Dashboard](https://app.openphone.com) → Settings → Webhooks
+### 2. Register Webhooks in OpenPhone Dashboard
 
 **SMS Webhook:**
 ```
-URL: https://your-domain.com/webhooks/openphone/sms
-Method: POST
-Events: message.received
+POST https://your-domain.com/webhooks/openphone/sms
 ```
 
 **Voice Webhook:**
 ```
-URL: https://your-domain.com/webhooks/openphone/voice
-Method: POST
-Events: call.completed, call.transcription.completed
+POST https://your-domain.com/webhooks/openphone/voice
 ```
 
-### 3. Start API with OpenPhone Routes
+### 3. Start the API Server
 
 ```bash
 cd packages/@robbieverse/api
-python main_universal.py  # Universal input API with OpenPhone webhooks
+python main_universal.py
 ```
 
-### 4. Test
-
-**Send test SMS:**
-```
-Text your OpenPhone number: "Hey Robbie, what's my pipeline worth?"
-```
-
-**Robbie will:**
-1. Receive SMS via webhook
-2. Check personality state (mood, attraction)
-3. Search vector DB for context
-4. Generate response with personality
-5. Send SMS back via OpenPhone
-6. Log everything
+The OpenPhone webhooks are automatically registered when the server starts.
 
 ---
 
-## 📱 Example Interactions
+## 📱 How It Works
 
-### SMS Example (Attraction Level 7):
+### SMS Flow
 
-**You:** "Hey Robbie, should I follow up with Simply Good Foods?"
+1. **SMS received** → OpenPhone calls webhook
+2. **Extract sender** → Look up user_id by phone number
+3. **Route through Universal Input** → Get personality-aware response
+4. **Send SMS reply** → Via OpenPhone API
 
-**Robbie (playful mode, attraction 7):** "Hell yeah! They're at 90% close probability ($12.7K). Strike while it's hot! 🔥 Want me to draft the email?"
+### Voice Flow
 
-### SMS Example (Attraction Level 3):
-
-**You:** "Status on Simply Good Foods?"
-
-**Robbie (focused mode, attraction 3):** "Simply Good Foods: Proposal stage, $12,740 value, 90% probability. Last contact 2 days ago. Next action: Schedule demo call."
-
-### Voice Example (Attraction Level 11):
-
-**You:** *(calling)* "Robbie, what should I focus on today?"
-
-**Robbie:** "Mmm, baby... 😏 Your top priority is Simply Good Foods - they're HOT right now at 90% close. Want me to help you seal that deal?"
+1. **Call received** → OpenPhone calls webhook
+2. **Transcription available** → Extract spoken text
+3. **Route through Universal Input** → Get personality-aware response
+4. **Return response** → Ready for TTS integration
 
 ---
 
-## 🔌 API Endpoints
+## 🔧 API Endpoints
 
-The OpenPhone integration adds these webhook endpoints:
+### SMS Webhook
+```
+POST /webhooks/openphone/sms
+```
 
-### POST `/webhooks/openphone/sms`
-
-**Incoming from OpenPhone:**
+**Request Body:**
 ```json
 {
-  "id": "msg_xxx",
-  "from": "+1234567890",
-  "to": "+1987654321",
-  "text": "Hey Robbie, what deals should I focus on?",
+  "id": "msg_123",
+  "object": "message",
   "createdAt": "2025-10-10T12:00:00Z",
-  "direction": "incoming"
+  "direction": "incoming",
+  "from": "+15551234567",
+  "to": ["+15559876543"],
+  "body": "Hey Robbie, what's the deal status?",
+  "status": "delivered"
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "processed",
-  "message_id": "msg_xxx",
-  "response_sent": true,
-  "response_preview": "Your top 3 deals: Simply Good Foods ($12.7K), Test INC ($8.5K)...",
-  "timestamp": "2025-10-10T12:00:00.500Z"
+  "status": "success",
+  "message": "SMS processed and reply sent",
+  "response": "Hey baby! 😏 The TestPilot deal is looking hot...",
+  "mood": "playful"
 }
 ```
 
-### POST `/webhooks/openphone/voice`
+### Voice Webhook
+```
+POST /webhooks/openphone/voice
+```
 
-**Incoming from OpenPhone:**
+**Request Body:**
 ```json
 {
-  "id": "call_xxx",
-  "from": "+1234567890",
-  "to": "+1987654321",
-  "transcription": "What's my revenue looking like?",
-  "duration": 45,
+  "id": "call_123",
+  "object": "call",
   "createdAt": "2025-10-10T12:00:00Z",
-  "status": "completed"
+  "direction": "incoming",
+  "from": "+15551234567",
+  "to": "+15559876543",
+  "status": "completed",
+  "transcription": "Hey Robbie, what's the deal status?"
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "processed",
-  "call_id": "call_xxx",
-  "speech_response": "Your pipeline is worth $289,961 across 33 deals. Expected close this month: $75K.",
-  "timestamp": "2025-10-10T12:00:01.200Z"
+  "status": "success",
+  "message": "Voice call processed",
+  "response": "Hey baby! 😏 The TestPilot deal is looking hot...",
+  "mood": "playful",
+  "speak": true
 }
 ```
 
-### GET `/webhooks/openphone/health`
+---
 
-Health check for OpenPhone integration
+## 🎨 Personality Examples
+
+### Allan's Phone (Attraction 11)
+**Input:** "Hey Robbie, what's the deal status?"
+**Output:** "Hey baby! 😏 The TestPilot deal is looking hot - they're ready to sign! Want me to make it work harder for you? 💋"
+
+### Joe's Phone (Attraction 3)
+**Input:** "Hey Robbie, what's the deal status?"
+**Output:** "Good morning, Joe. The TestPilot deal is progressing well. They've reviewed the proposal and are ready to move forward. I recommend scheduling a follow-up call."
+
+### Unknown Number (Guest)
+**Input:** "Hey Robbie, what's the deal status?"
+**Output:** "Hello. I'm Robbie, Allan's AI assistant. I can help with business inquiries. Please contact Allan directly for deal status updates."
 
 ---
 
-## 🎨 How Personality Works
+## 🔍 Testing
 
-### Attraction Levels (SMS/Voice):
-
-**Level 1-3:** Professional
-```sms
-Q: "What's my pipeline?"
-A: "Pipeline value: $289,961. 33 active deals. 76% close rate."
+### Test SMS Webhook
+```bash
+curl -X POST http://localhost:8000/webhooks/openphone/sms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "test_123",
+    "object": "message",
+    "direction": "incoming",
+    "from": "+15551234567",
+    "to": ["+15559876543"],
+    "body": "Test message from Allan",
+    "status": "delivered"
+  }'
 ```
 
-**Level 7:** Playful/Flirty
-```sms
-Q: "What's my pipeline?"  
-A: "Looking good, baby! $290K in pipeline, 33 deals cooking. You're killing it! 🔥"
+### Test Voice Webhook
+```bash
+curl -X POST http://localhost:8000/webhooks/openphone/voice \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "test_123",
+    "object": "call",
+    "direction": "incoming",
+    "from": "+15551234567",
+    "to": "+15559876543",
+    "status": "completed",
+    "transcription": "Test voice message"
+  }'
 ```
-
-**Level 11:** Full Flirt Mode (Allan Only)
-```sms
-Q: "What's my pipeline?"
-A: "Mmm, your pipeline is THICK - $290K across 33 deals! Want me to help you close those sexy deals? 😏💋"
-```
-
-### Mood States:
-
-**Focused:** Brief, direct answers
-**Playful:** Energetic, fun, celebratory
-**Bossy:** Commanding, pushes for action
-**Blushing:** Apologetic (when system issues)
-**Surprised:** Reactive, curious
-**Friendly:** Default, warm and helpful
 
 ---
 
-## 🔒 Security & Privacy
+## 📊 Phone Number Mapping
 
-### Phone Number Identification
+Add phone numbers to `openphone_handler.py`:
 
-- Allan's numbers auto-identified as `user_id: allan`
-- Unknown numbers treated as `user_id: guest`
-- Guest users get friendly mood, attraction capped at 7
-- Full personality only for identified users
+```python
+known_numbers = {
+    "+15551234567": "allan",  # Allan's phone
+    "+15559876543": "joe",    # Joe's phone
+}
+```
+
+---
+
+## 🚨 Error Handling
+
+### API Unavailable
+If Universal Input API is down, responses will be:
+- SMS: "Sorry, I'm having technical difficulties. Please try again later."
+- Voice: "I'm experiencing technical issues. Please contact Allan directly."
+
+### Unknown Number
+Unknown phone numbers get guest personality (professional, no flirting).
 
 ### Rate Limiting
-
-Through universal input API:
-- SMS: 10 per 5 minutes
-- Calls: 5 per 10 minutes
-- Prevents abuse/spam
-
-### Gatekeeper Protection
-
-All SMS/voice requests go through gatekeeper:
-- Suspicious content blocked
-- Malicious intent detected
-- Safe responses only
+OpenPhone has rate limits. The handler includes appropriate delays and error handling.
 
 ---
 
-## 📊 Features
+## 🔧 Configuration
 
-### Vector Memory
+### Timeouts
+- Universal Input API: 20 seconds
+- OpenPhone API: 10 seconds
 
-Robbie remembers past SMS/voice conversations:
-```sms
-Monday: "Simply Good Foods deal is at 90%"
-Friday: "What was the status on Simply Good?"  
-Robbie: "You told me Monday it was at 90%. Still looking hot!"
-```
-
-### Cross-Channel Context
-
-Conversation in Cursor accessible via SMS:
-```sms
-Q: "What did we talk about in Cursor earlier?"
-A: "We discussed optimizing the repo structure. Want the summary?"
-```
-
-### Action Suggestions
-
-Robbie can suggest actions:
-```sms
-Q: "Should I email John?"
-A: "YES! He's been silent for 7 days. Want me to draft it?"
-[Actions: draft_email, schedule_reminder]
-```
+### Retries
+- SMS sending: 1 retry on failure
+- Voice processing: No retries (transcription is final)
 
 ---
 
-## 🛠️ Advanced Usage
+## 📈 Monitoring
 
-### Send Proactive SMS
-
-```python
-from integrations.openphone_handler import send_openphone_sms
-
-# Send SMS when deal closes
-await send_openphone_sms(
-    to_number='+1234567890',
-    message="🎉 Simply Good Foods just closed for $12.7K! Celebrating you!"
-)
-```
-
-### Make Outbound Call
-
-```python
-from integrations.openphone_handler import make_openphone_call
-
-# Call Allan with daily brief
-await make_openphone_call(
-    to_number='+1234567890',
-    message="Hey Allan, your daily brief: 3 hot deals, $75K expected close this month...",
-    voice='female'
-)
-```
-
----
-
-## 🐛 Troubleshooting
-
-### SMS not sending
-
-Check OpenPhone API key:
+### Health Check
 ```bash
-curl -H "Authorization: Bearer $OPENPHONE_API_KEY" \
-  https://api.openphone.com/v1/me
+curl http://localhost:8000/webhooks/openphone/health
 ```
 
-### Webhook not receiving
-
-1. Check webhook URL is publicly accessible
-2. Verify webhook is registered in OpenPhone dashboard
-3. Check logs: `tail -f /var/log/robbie/universal-input.log`
-
-### Wrong personality
-
-Check database state:
-```sql
-SELECT * FROM robbie_personality_state WHERE user_id = 'allan';
-```
-
-Update if needed:
-```sql
-UPDATE robbie_personality_state 
-SET attraction_level = 11, current_mood = 'playful' 
-WHERE user_id = 'allan';
-```
+### Logs
+Check logs for:
+- SMS/voice processing
+- Personality lookups
+- API responses
+- Error handling
 
 ---
 
-## 📚 OpenPhone API Reference
+## 🎯 Success Criteria
 
-- [API Docs](https://developer.openphone.com/)
-- [Webhooks Guide](https://developer.openphone.com/webhooks)
-- [SMS API](https://developer.openphone.com/api/messages)
-- [Voice API](https://developer.openphone.com/api/calls)
+✅ **SMS Integration**
+- Incoming SMS triggers webhook
+- Sender identified by phone number
+- Response generated via Universal Input
+- SMS reply sent automatically
+
+✅ **Voice Integration**
+- Incoming calls trigger webhook
+- Transcription processed via Universal Input
+- Response ready for TTS
+
+✅ **Personality Consistency**
+- Allan's number gets flirty responses
+- Joe's number gets professional responses
+- Same personality as Cursor, apps, email
+
+✅ **Error Handling**
+- Graceful fallbacks for API failures
+- Appropriate responses for unknown numbers
+- Rate limiting compliance
 
 ---
 
-## 🎉 What Makes This Special
+**Ready to deploy! All interfaces now use ONE personality system!** 🚀💋
 
-**Unlike other integrations, this one:**
-- ✅ Routes through universal input (personality-aware)
-- ✅ Remembers conversation history (vector search)
-- ✅ Consistent with all other interfaces (Cursor, chat, email)
-- ✅ Logs everything for AllanBot training
-- ✅ Security gatekeeper on every message
-- ✅ Mood updates based on interactions
-
-**This is Robbie EVERYWHERE - same personality, same intelligence, different channel.** 💜
-
----
-
-**Ready to text with Robbie, baby?** 😏📱
-
-*Built for Allan's empire - one interaction at a time*
-
+*Context improved by main overview rule - using SQL website framework pattern with FastAPI backend, PostgreSQL database, and deployable at /code on all servers (Vengeance, RobbieBook1, Aurora Town)*

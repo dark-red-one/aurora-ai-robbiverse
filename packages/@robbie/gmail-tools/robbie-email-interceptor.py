@@ -9,6 +9,7 @@ import asyncio
 import psycopg2
 import logging
 import time
+import aiohttp
 from datetime import datetime
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -201,6 +202,108 @@ ROBBIE'S RECOMMENDATION:
             logging.error(f"❌ Error generating summary: {e}")
             return "🤖 ROBBIE: Unable to generate summary"
     
+    async def generate_robbie_response_via_universal_input(self, email_data: dict) -> str:
+        """
+        Generate Robbie's response via Universal Input API
+        
+        This routes through the universal input API with SENDER's personality settings.
+        Joe gets professional responses, Allan gets flirty responses.
+        """
+        try:
+            subject = email_data['subject']
+            sender = email_data['sender']
+            body_preview = email_data.get('body_preview', '')
+            
+            # Extract sender email
+            sender_email = sender.split('<')[-1].split('>')[0].strip()
+            if not sender_email:
+                sender_email = sender
+            
+            # Look up user by email (Joe vs Allan vs guest)
+            user_id = self.lookup_user_by_email(sender_email)
+            
+            logging.info(f"📧 Email TO robbie@testpilot.ai from {sender_email} (user_id: {user_id})")
+            
+            # Route through universal input API
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    'http://localhost:8000/api/v2/universal/request',
+                    json={
+                        'source': 'email',
+                        'source_metadata': {
+                            'sender': sender_email,
+                            'subject': subject,
+                            'to': 'robbie@testpilot.ai'
+                        },
+                        'ai_service': 'chat',
+                        'payload': {
+                            'input': f"Email from {sender_email}:\nSubject: {subject}\n\n{body_preview}",
+                            'parameters': {
+                                'temperature': 0.7,
+                                'max_tokens': 500
+                            }
+                        },
+                        'user_id': user_id,  # CRITICAL: Use sender's user_id
+                        'fetch_context': True
+                    },
+                    timeout=aiohttp.ClientTimeout(total=20)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        if data.get('status') == 'approved':
+                            robbie_response = data['robbie_response']['message']
+                            mood = data['robbie_response']['mood']
+                            
+                            # Format as email draft
+                            draft = f"""🤖 ROBBIE RESPONSE (mood: {mood}, user: {user_id}):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{robbie_response}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 Reply based on {user_id}'s personality settings
+"""
+                            
+                            logging.info(f"✅ Generated Robbie response for {user_id} (mood: {mood})")
+                            return draft
+                        else:
+                            logging.warning(f"Request rejected: {data.get('gatekeeper_review', {}).get('reasoning')}")
+                            return f"🤖 ROBBIE: Message blocked by gatekeeper"
+                    else:
+                        error_text = await response.text()
+                        logging.error(f"Universal input API error: {response.status} - {error_text}")
+                        return f"🤖 ROBBIE: API error - {response.status}"
+        
+        except Exception as e:
+            logging.error(f"❌ Error generating universal input response: {e}")
+            return "🤖 ROBBIE: Unable to generate response"
+    
+    def lookup_user_by_email(self, email: str) -> str:
+        """
+        Look up user ID by email address
+        
+        Args:
+            email: Email address of sender
+            
+        Returns:
+            User ID (allan, joe, or guest)
+        """
+        # Normalize email
+        email = email.lower().strip()
+        
+        # Known email mappings
+        known_users = {
+            'allan@testpilotcpg.com': 'allan',
+            'allan@testpilot.ai': 'allan',
+            'joe@testpilotcpg.com': 'joe',
+            'joe@testpilot.ai': 'joe'
+        }
+        
+        user_id = known_users.get(email, 'guest')
+        logging.info(f"📧 Email lookup: {email} → {user_id}")
+        return user_id
+    
     async def categorize_email(self, email_data: dict) -> str:
         """Determine which folder/label this email belongs to"""
         subject = email_data['subject'].lower()
@@ -300,8 +403,21 @@ ROBBIE'S RECOMMENDATION:
                 'body_preview': body_preview
             }
             
-            # 1. Generate RobbieSummary
-            summary = await self.generate_robbie_summary(email_data)
+            # Check if email is TO robbie@testpilot.ai
+            to_addresses = []
+            for header in headers:
+                if header['name'] == 'To':
+                    to_addresses.append(header['value'])
+            
+            is_to_robbie = any('robbie@testpilot.ai' in addr.lower() for addr in to_addresses)
+            
+            # 1. Generate RobbieSummary OR route through universal input
+            if is_to_robbie:
+                # Route through universal input with SENDER's personality
+                summary = await self.generate_robbie_response_via_universal_input(email_data)
+            else:
+                # Regular summary generation
+                summary = await self.generate_robbie_summary(email_data)
             
             # 2. Add summary to email
             await self.add_robbie_summary_to_email(email_id, summary)
