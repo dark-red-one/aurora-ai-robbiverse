@@ -191,12 +191,18 @@ class RobbieAvatarPanel {
                     border-radius: 50%;
                     overflow: hidden;
                     border: 3px solid #00d4ff;
+                    position: relative;
                 }
                 .avatar-image {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
                     image-rendering: auto;
+                    animation: subtle-breath 3s ease-in-out infinite;
+                }
+                @keyframes subtle-breath {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.02); }
                 }
                 .avatar-emoji {
                     font-size: 84px;
@@ -348,23 +354,44 @@ class RobbieAvatarPanel {
                     color: #ffa500;
                     font-weight: bold;
                 }
-                .action-btn {
+                .action-btn, .context-btn {
                     width: 100%;
-                    background: #00d4ff;
-                    color: #1a1a2e;
-                    border: none;
-                    padding: 8px;
-                    border-radius: 4px;
-                    font-size: 11px;
-                    font-weight: bold;
+                    background: linear-gradient(135deg, #1a1a2e, #16213e);
+                    color: #00d4ff;
+                    border: 1px solid #00d4ff;
+                    padding: 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 500;
                     cursor: pointer;
-                    transition: background 0.2s;
+                    transition: all 0.3s ease;
+                    position: relative;
+                    overflow: hidden;
+                    text-align: left;
                 }
-                .action-btn:hover {
-                    background: #00b8ff;
+                .action-btn:hover, .context-btn:hover {
+                    background: linear-gradient(135deg, #00d4ff, #0099cc);
+                    color: #000;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+                    border-color: #00ffff;
                 }
-                .action-btn:active {
-                    background: #0090cc;
+                .action-btn:before, .context-btn:before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                    transition: left 0.5s;
+                }
+                .action-btn:hover:before, .context-btn:hover:before {
+                    left: 100%;
+                }
+                .action-btn:active, .context-btn:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 10px rgba(0, 212, 255, 0.3);
                 }
                 .commit-item {
                     background: #2d2d2d;
@@ -484,38 +511,40 @@ class RobbieAvatarPanel {
             <!-- Applications Section -->
             <div class="section">
                 <div class="section-title">🚀 Applications</div>
-                <div class="context-menu">
-                    <button class="context-btn" data-context="work">@Work</button>
-                    <button class="context-btn" data-context="growth">@Growth</button>
-                    <button class="context-btn" data-context="testpilot">@TestPilot</button>
-                    <button class="context-btn" data-context="play">@Play</button>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="context-btn" data-context="work" style="width: 100%; padding: 12px; text-align: left;">💼 @Work</button>
+                    <button class="context-btn" data-context="testpilot" style="width: 100%; padding: 12px; text-align: left;">🧪 @TestPilot</button>
+                    <button class="context-btn" data-context="growth" style="width: 100%; padding: 12px; text-align: left;">📈 @Growth</button>
+                    <button class="context-btn" data-context="play" style="width: 100%; padding: 12px; text-align: left;">🎮 @Play</button>
                 </div>
             </div>
 
             <!-- Bottom padding to prevent content from going under TV bar -->
-            <div style="height: 180px;"></div>
+            <div style="height: 220px;"></div>
 
             <!-- Mood-Aware Matrix Rain Background -->
-            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 180px); z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
+            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 220px); z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
 
             <!-- Entertainment Bar - Fixed at Bottom (Separate from scrollable content) -->
-            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 2px solid #00d4ff; padding: 8px 12px; z-index: 1000;">
+            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 2px solid #00d4ff; padding: 12px; z-index: 1000;">
                 <div class="section-title" style="margin-bottom: 8px;">🎬 Entertainment</div>
-                <div style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">
-                    <button id="muteTvBtn" class="action-btn" style="flex: 0 0 60px;">🔇</button>
-                    <select id="channelSelect" class="action-btn" style="flex: 1; min-width: 100px; background: #2d2d2d; color: white; border: 1px solid #444; border-radius: 4px; padding: 8px;">
+                <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <button id="muteTvBtn" class="action-btn" style="flex: 0 0 60px; font-size: 14px;">🔇</button>
+                    <button id="fullscreenBtn" class="action-btn" style="flex: 0 0 60px; font-size: 14px;">⛶</button>
+                    <select id="channelSelect" class="action-btn" style="flex: 1; min-width: 120px; background: #2d2d2d; color: white; border: 1px solid #444; border-radius: 4px; padding: 10px; font-size: 13px;">
                         <option value="1">📰 MSNBC</option>
-                        <option value="2">🏛️ CNN</option>
-                        <option value="3">🦅 Fox News</option>
-                        <option value="4">📺 PBS</option>
-                        <option value="5" selected>🎵 Music</option>
+                        <option value="2">🦅 Fox News</option>
+                        <option value="3">🏛️ CNN</option>
+                        <option value="4" selected>🎵 Lofi Beats</option>
+                        <option value="5">🎷 Jazz</option>
+                        <option value="6">🎻 Classical</option>
+                        <option value="7">🌊 Chill</option>
                     </select>
                 </div>
-                <button id="tvLoginBtn" class="action-btn" style="display: none; width: 100%; margin-bottom: 8px;">🔑 Login to YouTube TV</button>
                 <iframe 
                     id="tvFrame"
                     width="100%" 
-                    height="100" 
+                    height="140" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
@@ -994,43 +1023,50 @@ class RobbieAvatarPanel {
                     });
                 });
 
-                // TV Configuration - Using free embeddable streams
+                // TV Configuration - 7 YouTube Live Channels (3 News + 4 Music)
                 const tvChannels = {
-                    0: { name: 'OFF', url: '', static: true },
-                    1: { name: 'MSNBC', url: 'https://www.livenewsnow.com/american/msnbc.html', static: false, requiresLogin: true },
-                    2: { name: 'CNN', url: 'https://www.livenewsnow.com/american/cnn-news-usa.html', static: false, requiresLogin: true },
-                    3: { name: 'Fox News', url: 'https://www.livenewsnow.com/american/fox-news-channel.html', static: false, requiresLogin: true },
-                    4: { name: 'PBS', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', static: false, requiresLogin: false },
-                    5: { name: 'Music', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', static: false, requiresLogin: false } // Lofi hip hop 24/7
+                    1: { name: 'MSNBC', url: 'https://www.youtube.com/embed/Rl5xoOrCkiA?autoplay=1&enablejsapi=1' },
+                    2: { name: 'Fox News', url: 'https://www.youtube.com/embed/E5X51mLOk_o?autoplay=1&enablejsapi=1' },
+                    3: { name: 'CNN', url: 'https://www.youtube.com/embed/IUqA-uMEDgg?autoplay=1&enablejsapi=1' },
+                    4: { name: 'Lofi Beats', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1' }, // Lofi Girl
+                    5: { name: 'Jazz', url: 'https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&enablejsapi=1' }, // Smooth Jazz 24/7
+                    6: { name: 'Classical', url: 'https://www.youtube.com/embed/jgpJVI3tDbY?autoplay=1&enablejsapi=1' }, // Classical Music
+                    7: { name: 'Chill', url: 'https://www.youtube.com/embed/5yx6BWlEVcY?autoplay=1&enablejsapi=1' } // ChilledCow
                 };
 
                 let isMuted = true;
-                let currentChannel = 0;
+                let currentChannel = 4; // Default to Lofi Beats
                 let channelStartTime = null;
                 let viewingHistory = [];
 
-                // TV toggle functionality
-                document.getElementById('toggleTvBtn').addEventListener('click', () => {
-                    const tvContainer = document.getElementById('tvContainer');
-                    const toggleBtn = document.getElementById('toggleTvBtn');
-                    
-                    if (tvContainer.style.display === 'none') {
-                        tvContainer.style.display = 'block';
-                        toggleBtn.textContent = '📺 ON';
-                        changeChannel(currentChannel);
-                    } else {
-                        tvContainer.style.display = 'none';
-                        toggleBtn.textContent = '📺 TV';
-                        document.getElementById('tvFrame').src = '';
-                    }
-                });
+                // Auto-start with Lofi Beats (channel 4)
+                setTimeout(() => {
+                    changeChannel(4); // Start with Lofi Beats
+                }, 500);
 
-                // Mute toggle functionality
+                // Mute toggle functionality - sync with YouTube pause/play
                 document.getElementById('muteTvBtn').addEventListener('click', () => {
                     const muteBtn = document.getElementById('muteTvBtn');
+                    const tvFrame = document.getElementById('tvFrame');
                     isMuted = !isMuted;
                     muteBtn.textContent = isMuted ? '🔇' : '🔊';
+                    
+                    // Reload iframe with new mute state
                     changeChannel(currentChannel);
+                });
+
+                // Fullscreen functionality
+                document.getElementById('fullscreenBtn').addEventListener('click', () => {
+                    const tvFrame = document.getElementById('tvFrame');
+                    if (tvFrame.requestFullscreen) {
+                        tvFrame.requestFullscreen();
+                    } else if (tvFrame.webkitRequestFullscreen) {
+                        tvFrame.webkitRequestFullscreen();
+                    } else if (tvFrame.mozRequestFullScreen) {
+                        tvFrame.mozRequestFullScreen();
+                    } else if (tvFrame.msRequestFullscreen) {
+                        tvFrame.msRequestFullscreen();
+                    }
                 });
 
                 // Channel selection functionality
@@ -1041,8 +1077,6 @@ class RobbieAvatarPanel {
 
                 function changeChannel(channel) {
                     const tvFrame = document.getElementById('tvFrame');
-                    const tvStatic = document.getElementById('tvStatic');
-                    const tvLoginBtn = document.getElementById('tvLoginBtn');
                     const channelData = tvChannels[channel];
                     
                     // Track previous channel viewing time
@@ -1053,31 +1087,13 @@ class RobbieAvatarPanel {
                         }
                     }
                     
-                    if (channel === 0) {
-                        // TV OFF - show static
-                        tvFrame.style.display = 'none';
-                        tvStatic.style.display = 'block';
-                        tvLoginBtn.style.display = 'none';
-                        channelStartTime = null;
-                    } else {
-                        // TV ON - show channel
-                        tvStatic.style.display = 'none';
-                        tvFrame.style.display = 'block';
-                        
-                        // Show login button if channel requires it
-                        if (channelData.requiresLogin) {
-                            tvLoginBtn.style.display = 'block';
-                        } else {
-                            tvLoginBtn.style.display = 'none';
-                        }
-                        
-                        const muteParam = isMuted ? '&mute=1' : '&mute=0';
-                        tvFrame.src = channelData.url + (channelData.url.includes('?') ? muteParam : '?autoplay=1' + muteParam);
-                        channelStartTime = Date.now();
-                        
-                        // Track channel switch
-                        trackChannelSwitch(channel);
-                    }
+                    // Build URL with mute parameter
+                    const muteParam = isMuted ? '&mute=1' : '&mute=0';
+                    tvFrame.src = channelData.url + muteParam;
+                    channelStartTime = Date.now();
+                    
+                    // Track channel switch
+                    trackChannelSwitch(channel);
                     
                     currentChannel = channel;
                 }
