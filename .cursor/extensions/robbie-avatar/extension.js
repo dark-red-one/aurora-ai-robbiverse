@@ -66,6 +66,18 @@ class RobbieAvatarPanel {
         this.httpGet('/code/api/personality', (personalityData) => {
             if (personalityData) {
                 this.robbieBarData.personality = personalityData;
+
+                // Send avatar update immediately with correct mood image
+                if (avatarPanel && personalityData.mood_data) {
+                    avatarPanel.webview.postMessage({
+                        command: 'updateState',
+                        mood: personalityData.mood,
+                        moodName: personalityData.mood_data.name,
+                        moodEmoji: personalityData.mood_data.emoji,
+                        avatarImage: personalityData.mood_data.main_image_url,
+                        attraction: personalityData.attraction
+                    });
+                }
             }
 
             // Fetch system stats
@@ -155,78 +167,6 @@ class RobbieAvatarPanel {
     refreshState() {
         // Fetch from RobbieBar API instead of database
         this.fetchRobbieBarData();
-
-        // Original database query for personality state
-        const query = `
-            SELECT 
-                (SELECT current_mood FROM ai_personality_state WHERE personality_id = 'robbie') as mood,
-                (SELECT COUNT(*) FROM ai_working_memory WHERE personality_id = 'robbie' AND priority >= 7) as hot_topics_count,
-                (SELECT COUNT(*) FROM ai_commitments WHERE personality_id = 'robbie' AND status = 'active') as commitments_count;
-        `;
-
-        exec(`sqlite3 "${DB_PATH}" "${query}"`, (error, stdout, stderr) => {
-            if (error) {
-                console.error('DB query error:', error);
-                return;
-            }
-
-            const parts = stdout.trim().split('|');
-            if (parts.length >= 1 && parts[0]) {
-                currentMood = parseInt(parts[0]) || 7;
-            }
-
-            // Get todo list (from working memory)
-            const todoQuery = `SELECT content, priority FROM ai_working_memory WHERE personality_id = 'robbie' AND priority >= 7 ORDER BY priority DESC LIMIT 5;`;
-            exec(`sqlite3 "${DB_PATH}" "${todoQuery}"`, (err, todoOutput) => {
-                const todoList = todoOutput ? todoOutput.trim().split('\n').filter(Boolean).map(line => {
-                    const [content, priority] = line.split('|');
-                    return { content, priority };
-                }) : [];
-
-                // Get directives
-                const directivesQuery = `SELECT directive_text, source, timestamp FROM ai_directives WHERE personality_id = 'robbie' AND status = 'active' ORDER BY timestamp DESC LIMIT 3;`;
-                exec(`sqlite3 "${DB_PATH}" "${directivesQuery}"`, (err, directivesOutput) => {
-                    const directives = directivesOutput ? directivesOutput.trim().split('\n').filter(Boolean).map(line => {
-                        const [text, source, timestamp] = line.split('|');
-                        return { text, source, timestamp };
-                    }) : [];
-
-                    // Get token usage data for chart
-                    const tokenQuery = `SELECT tokens_per_minute, timestamp FROM token_usage WHERE personality_id = 'robbie' ORDER BY timestamp DESC LIMIT 20;`;
-                    exec(`sqlite3 "${DB_PATH}" "${tokenQuery}"`, (err, tokenOutput) => {
-                        const tokenData = tokenOutput ? tokenOutput.trim().split('\n').filter(Boolean).map(line => {
-                            const [tokens, timestamp] = line.split('|');
-                            return { tokens: parseInt(tokens), timestamp };
-                        }).reverse() : [];
-
-                        if (avatarPanel) {
-                            // Use ONLY approved expressions - Friendly 50% of the time
-                            const expressionName = moodToExpression[currentMood];
-                            const expressionFiles = approvedExpressions[expressionName];
-
-                            // For Friendly and Playful expressions, use 50% weight between variants
-                            let imageFile;
-                            if (expressionName === 'Friendly' || expressionName === 'Playful') {
-                                imageFile = expressionFiles[Math.floor(Math.random() * expressionFiles.length)];
-                            } else {
-                                imageFile = expressionFiles[0]; // Use first (and only) file for other expressions
-                            }
-
-                            // Load image from web server instead of file system
-                            const imageUrl = AVATAR_BASE_URL + imageFile;
-
-                            avatarPanel.webview.postMessage({
-                                command: 'updateState',
-                                mood: currentMood,
-                                moodName: moodNames[currentMood],
-                                moodEmoji: moodEmojis[currentMood],
-                                avatarImage: imageUrl
-                            });
-                        }
-                    });
-                });
-            });
-        });
     }
 
     getHtmlContent(webview) {
@@ -245,12 +185,12 @@ class RobbieAvatarPanel {
                     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
                 }
                 .avatar-container {
-                    width: 80px;
-                    height: 80px;
+                    width: 120px;
+                    height: 120px;
                     margin: 8px auto;
                     border-radius: 50%;
                     overflow: hidden;
-                    border: 2px solid #00d4ff;
+                    border: 3px solid #00d4ff;
                 }
                 .avatar-image {
                     width: 100%;
@@ -259,13 +199,13 @@ class RobbieAvatarPanel {
                     image-rendering: auto;
                 }
                 .avatar-emoji {
-                    font-size: 56px;
+                    font-size: 84px;
                     text-align: center;
                     margin: 8px 0;
                     display: none;
                 }
                 .mood-text {
-                    font-size: 16px;
+                    font-size: 18px;
                     font-weight: bold;
                     color: #00d4ff;
                     text-align: center;
@@ -448,6 +388,43 @@ class RobbieAvatarPanel {
                     font-size: 8px;
                     margin-top: 2px;
                 }
+                .tv-static {
+                    width: 100%;
+                    height: 120px;
+                    background: #000;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .tv-static::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: 
+                        repeating-linear-gradient(
+                            90deg,
+                            #000 0px,
+                            #fff 1px,
+                            #000 2px,
+                            #000 3px
+                        ),
+                        repeating-linear-gradient(
+                            0deg,
+                            #000 0px,
+                            #fff 1px,
+                            #000 2px,
+                            #000 3px
+                        );
+                    opacity: 0.1;
+                    animation: static 0.1s infinite;
+                }
+                @keyframes static {
+                    0% { opacity: 0.05; }
+                    50% { opacity: 0.15; }
+                    100% { opacity: 0.05; }
+                }
             </style>
         </head>
         <body>
@@ -482,6 +459,8 @@ class RobbieAvatarPanel {
                 </div>
             </div>
             
+            <br>
+            
             <div class="section">
                 <div class="section-title">🌳 Git Status</div>
                 <div class="git-info">
@@ -491,22 +470,57 @@ class RobbieAvatarPanel {
                 <button id="quickCommitBtn" class="action-btn">💾 Quick Commit</button>
             </div>
             
+            <br>
+            
             <div class="section">
                 <div class="section-title">📊 Recent Commits</div>
                 <div id="recentCommits" class="loading">Loading...</div>
             </div>
             
-            <!-- Context Switcher Menu -->
-            <div class="context-menu">
-                <button class="context-btn active" data-context="code">@Code</button>
-                <button class="context-btn" data-context="work">@Work</button>
-                <button class="context-btn" data-context="growth">@Growth</button>
-                <button class="context-btn" data-context="testpilot">@TestPilot</button>
-                <button class="context-btn" data-context="play">@Play</button>
+            <br>
+            
+            <br>
+            
+            <!-- Applications Section -->
+            <div class="section">
+                <div class="section-title">🚀 Applications</div>
+                <div class="context-menu">
+                    <button class="context-btn" data-context="work">@Work</button>
+                    <button class="context-btn" data-context="growth">@Growth</button>
+                    <button class="context-btn" data-context="testpilot">@TestPilot</button>
+                    <button class="context-btn" data-context="play">@Play</button>
+                </div>
             </div>
 
+            <!-- Bottom padding to prevent content from going under TV bar -->
+            <div style="height: 180px;"></div>
+
             <!-- Mood-Aware Matrix Rain Background -->
-            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
+            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 180px); z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
+
+            <!-- Entertainment Bar - Fixed at Bottom (Separate from scrollable content) -->
+            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 2px solid #00d4ff; padding: 8px 12px; z-index: 1000;">
+                <div class="section-title" style="margin-bottom: 8px;">🎬 Entertainment</div>
+                <div style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <button id="muteTvBtn" class="action-btn" style="flex: 0 0 60px;">🔇</button>
+                    <select id="channelSelect" class="action-btn" style="flex: 1; min-width: 100px; background: #2d2d2d; color: white; border: 1px solid #444; border-radius: 4px; padding: 8px;">
+                        <option value="1">📰 MSNBC</option>
+                        <option value="2">🏛️ CNN</option>
+                        <option value="3">🦅 Fox News</option>
+                        <option value="4">📺 PBS</option>
+                        <option value="5" selected>🎵 Music</option>
+                    </select>
+                </div>
+                <button id="tvLoginBtn" class="action-btn" style="display: none; width: 100%; margin-bottom: 8px;">🔑 Login to YouTube TV</button>
+                <iframe 
+                    id="tvFrame"
+                    width="100%" 
+                    height="100" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
 
             <script>
                 const vscode = acquireVsCodeApi();
@@ -531,29 +545,44 @@ class RobbieAvatarPanel {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
                     
-                    const emojis = moodEmojis[mood] || moodEmojis['focused'];
-                    const fontSize = 16;
+                    // Matrix characters (binary + katakana + mood emojis)
+                    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+                    const charArray = chars.split('');
+                    const moodEmojisArray = moodEmojis[mood] || moodEmojis['focused'];
+                    
+                    const fontSize = 14;
                     const columns = Math.floor(canvas.width / fontSize);
-                    const drops = new Array(columns).fill(1);
+                    const drops = [];
+                    
+                    // Initialize drops at random heights
+                    for (let i = 0; i < columns; i++) {
+                        drops[i] = Math.random() * -100;
+                    }
                     
                     function draw() {
-                        // Semi-transparent black background for trail effect
+                        // Fade effect for trails
                         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         
-                        ctx.fillStyle = '#00d4ff';
                         ctx.font = fontSize + 'px monospace';
                         
                         for (let i = 0; i < drops.length; i++) {
-                            // Randomly pick an emoji for this column
-                            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-                            const text = emoji;
+                            // Occasionally use mood emoji instead of character
+                            const useMoodEmoji = Math.random() > 0.95;
+                            const char = useMoodEmoji ? 
+                                moodEmojisArray[Math.floor(Math.random() * moodEmojisArray.length)] :
+                                charArray[Math.floor(Math.random() * charArray.length)];
+                            
                             const x = i * fontSize;
                             const y = drops[i] * fontSize;
                             
-                            ctx.fillText(text, x, y);
+                            // Bright head vs dim trail
+                            const isHead = Math.random() > 0.975;
+                            ctx.fillStyle = isHead ? '#00ff41' : '#00d4ff';
                             
-                            // Reset drop to top randomly
+                            ctx.fillText(char, x, y);
+                            
+                            // Reset to top when off screen
                             if (y > canvas.height && Math.random() > 0.975) {
                                 drops[i] = 0;
                             }
@@ -567,12 +596,116 @@ class RobbieAvatarPanel {
                         clearInterval(matrixRain);
                     }
                     
-                    // Start new animation
-                    matrixRain = setInterval(draw, 100);
+                    // Start animation at 50ms (20 FPS)
+                    matrixRain = setInterval(draw, 50);
                 }
 
-                // Initialize matrix rain
-                initMatrixRain('focused');
+                function updateMatrixRainWithMoodEmojis(moodEmojisArray) {
+                    const canvas = document.getElementById('matrixRain');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Set canvas size
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    
+                    // Matrix characters (binary + katakana + mood emojis)
+                    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+                    const charArray = chars.split('');
+                    const emojis = moodEmojisArray || ['💕', '💋', '😊', '🌸', '💖'];
+                    
+                    const fontSize = 14;
+                    const columns = Math.floor(canvas.width / fontSize);
+                    const drops = [];
+                    
+                    // Initialize drops at random heights
+                    for (let i = 0; i < columns; i++) {
+                        drops[i] = Math.random() * -100;
+                    }
+                    
+                    // Big mood emojis falling slower in foreground
+                    const bigEmojis = [];
+                    const bigEmojiSize = 48;
+                    
+                    function draw() {
+                        // Fade effect for trails
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        ctx.font = fontSize + 'px monospace';
+                        
+                        for (let i = 0; i < drops.length; i++) {
+                            // Occasionally use mood emoji instead of character
+                            const useMoodEmoji = Math.random() > 0.95;
+                            const char = useMoodEmoji ? 
+                                emojis[Math.floor(Math.random() * emojis.length)] :
+                                charArray[Math.floor(Math.random() * charArray.length)];
+                            
+                            const x = i * fontSize;
+                            const y = drops[i] * fontSize;
+                            
+                            // Bright head vs dim trail
+                            const isHead = Math.random() > 0.975;
+                            ctx.fillStyle = isHead ? '#00ff41' : '#00d4ff';
+                            
+                            ctx.fillText(char, x, y);
+                            
+                            // Reset to top when off screen
+                            if (y > canvas.height && Math.random() > 0.975) {
+                                drops[i] = 0;
+                            }
+                            
+                            drops[i]++;
+                        }
+                        
+                        // Add new big mood emojis occasionally
+                        if (Math.random() < 0.02) {
+                            bigEmojis.push({
+                                x: Math.random() * canvas.width,
+                                y: -bigEmojiSize,
+                                emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                                speed: 0.5 + Math.random() * 0.5
+                            });
+                        }
+                        
+                        // Draw and update big mood emojis
+                        ctx.font = bigEmojiSize + 'px monospace';
+                        for (let i = bigEmojis.length - 1; i >= 0; i--) {
+                            const bigEmoji = bigEmojis[i];
+                            
+                            // Add glow effect
+                            ctx.shadowColor = '#ff69b4';
+                            ctx.shadowBlur = 10;
+                            ctx.fillStyle = '#ff69b4';
+                            ctx.fillText(bigEmoji.emoji, bigEmoji.x, bigEmoji.y);
+                            
+                            // Reset shadow
+                            ctx.shadowBlur = 0;
+                            
+                            // Move down
+                            bigEmoji.y += bigEmoji.speed;
+                            
+                            // Remove if off screen
+                            if (bigEmoji.y > canvas.height + bigEmojiSize) {
+                                bigEmojis.splice(i, 1);
+                            }
+                        }
+                    }
+                    
+                    // Clear existing interval
+                    if (matrixRain) {
+                        clearInterval(matrixRain);
+                    }
+                    
+                    // Start animation at 50ms (20 FPS)
+                    matrixRain = setInterval(draw, 50);
+                }
+
+                // Initialize matrix rain once
+                let matrixInitialized = false;
+                if (!matrixInitialized) {
+                    initMatrixRain('focused');
+                    matrixInitialized = true;
+                }
 
                 function drawTokenChart(data) {
                     const canvas = document.getElementById('tokenChart');
@@ -699,13 +832,25 @@ class RobbieAvatarPanel {
                     const msg = event.data;
                     
                     if (msg.command === 'updateRobbieBar') {
-                        // Update mood with Flirt11 badge if personality data is available
+                        // Update mood display
                         if (msg.personality) {
-                            const moodText = msg.personality.attraction >= 10 ? 
-                                msg.personality.mood + ' (Flirt11 💋)' : 
-                                msg.personality.mood;
+                            const moodName = msg.personality.mood_data?.name || msg.personality.mood;
                             if (document.getElementById('moodText')) {
-                                document.getElementById('moodText').textContent = moodText;
+                                document.getElementById('moodText').textContent = moodName;
+                            }
+                            
+                            // Update avatar image from API response
+                            if (msg.personality.mood_data && msg.personality.mood_data.main_image_url) {
+                                const avatarImg = document.getElementById('avatarImage');
+                                if (avatarImg) {
+                                    avatarImg.src = msg.personality.mood_data.main_image_url;
+                                }
+                            }
+                            
+                            // Update matrix rain with mood-specific emojis (only if not already running)
+                            if (!matrixInitialized && msg.personality.mood_data && msg.personality.mood_data.matrix_emojis) {
+                                updateMatrixRainWithMoodEmojis(msg.personality.mood_data.matrix_emojis);
+                                matrixInitialized = true;
                             }
                         }
                         
@@ -757,14 +902,11 @@ class RobbieAvatarPanel {
                         }
                         document.getElementById('avatarEmoji').textContent = msg.moodEmoji;
                         
-                        // Show Flirt11 badge when attraction is maxed
-                        const moodText = msg.attraction >= 10 ? msg.moodName + ' (Flirt11 💋)' : msg.moodName;
-                        document.getElementById('moodText').textContent = moodText;
+                        // Show mood name only
+                        document.getElementById('moodText').textContent = msg.moodName;
                         
-                        // Update matrix rain with new mood
-                        if (msg.mood) {
-                            initMatrixRain(msg.mood);
-                        }
+                        // Update matrix rain with new mood (only if not already running)
+                        // Skip to prevent janky reloading
                         
                         // Old sections removed - keeping it clean!
                         
@@ -813,6 +955,13 @@ class RobbieAvatarPanel {
                 });
 
                 // Add context switching functionality
+                const contextUrls = {
+                    work: 'http://aurora.testpilot.ai/work/',
+                    growth: 'http://aurora.testpilot.ai/growth/',
+                    testpilot: 'http://aurora.testpilot.ai/testpilot/',
+                    play: 'http://aurora.testpilot.ai/play/'
+                };
+
                 document.querySelectorAll('.context-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const context = e.target.dataset.context;
@@ -823,18 +972,19 @@ class RobbieAvatarPanel {
                         
                         // Switch context in database
                         try {
-                            const response = await fetch('http://localhost:8000/api/context/switch', {
+                            const response = await fetch('http://localhost:8000/code/api/context/switch', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ context: context })
                             });
                             
                             if (response.ok) {
-                                // If switching to web app contexts, open them
-                                if (context !== 'code') {
+                                // Open the web app URL
+                                const url = contextUrls[context];
+                                if (url) {
                                     vscode.postMessage({
                                         command: 'openUrl',
-                                        url: 'http://localhost/' + context
+                                        url: url
                                     });
                                 }
                             }
@@ -843,6 +993,161 @@ class RobbieAvatarPanel {
                         }
                     });
                 });
+
+                // TV Configuration - Using free embeddable streams
+                const tvChannels = {
+                    0: { name: 'OFF', url: '', static: true },
+                    1: { name: 'MSNBC', url: 'https://www.livenewsnow.com/american/msnbc.html', static: false, requiresLogin: true },
+                    2: { name: 'CNN', url: 'https://www.livenewsnow.com/american/cnn-news-usa.html', static: false, requiresLogin: true },
+                    3: { name: 'Fox News', url: 'https://www.livenewsnow.com/american/fox-news-channel.html', static: false, requiresLogin: true },
+                    4: { name: 'PBS', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', static: false, requiresLogin: false },
+                    5: { name: 'Music', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', static: false, requiresLogin: false } // Lofi hip hop 24/7
+                };
+
+                let isMuted = true;
+                let currentChannel = 0;
+                let channelStartTime = null;
+                let viewingHistory = [];
+
+                // TV toggle functionality
+                document.getElementById('toggleTvBtn').addEventListener('click', () => {
+                    const tvContainer = document.getElementById('tvContainer');
+                    const toggleBtn = document.getElementById('toggleTvBtn');
+                    
+                    if (tvContainer.style.display === 'none') {
+                        tvContainer.style.display = 'block';
+                        toggleBtn.textContent = '📺 ON';
+                        changeChannel(currentChannel);
+                    } else {
+                        tvContainer.style.display = 'none';
+                        toggleBtn.textContent = '📺 TV';
+                        document.getElementById('tvFrame').src = '';
+                    }
+                });
+
+                // Mute toggle functionality
+                document.getElementById('muteTvBtn').addEventListener('click', () => {
+                    const muteBtn = document.getElementById('muteTvBtn');
+                    isMuted = !isMuted;
+                    muteBtn.textContent = isMuted ? '🔇' : '🔊';
+                    changeChannel(currentChannel);
+                });
+
+                // Channel selection functionality
+                document.getElementById('channelSelect').addEventListener('change', (e) => {
+                    currentChannel = parseInt(e.target.value);
+                    changeChannel(currentChannel);
+                });
+
+                function changeChannel(channel) {
+                    const tvFrame = document.getElementById('tvFrame');
+                    const tvStatic = document.getElementById('tvStatic');
+                    const tvLoginBtn = document.getElementById('tvLoginBtn');
+                    const channelData = tvChannels[channel];
+                    
+                    // Track previous channel viewing time
+                    if (channelStartTime && currentChannel !== channel) {
+                        const watchTime = Math.floor((Date.now() - channelStartTime) / 1000);
+                        if (watchTime > 0) {
+                            trackChannelViewing(currentChannel, watchTime);
+                        }
+                    }
+                    
+                    if (channel === 0) {
+                        // TV OFF - show static
+                        tvFrame.style.display = 'none';
+                        tvStatic.style.display = 'block';
+                        tvLoginBtn.style.display = 'none';
+                        channelStartTime = null;
+                    } else {
+                        // TV ON - show channel
+                        tvStatic.style.display = 'none';
+                        tvFrame.style.display = 'block';
+                        
+                        // Show login button if channel requires it
+                        if (channelData.requiresLogin) {
+                            tvLoginBtn.style.display = 'block';
+                        } else {
+                            tvLoginBtn.style.display = 'none';
+                        }
+                        
+                        const muteParam = isMuted ? '&mute=1' : '&mute=0';
+                        tvFrame.src = channelData.url + (channelData.url.includes('?') ? muteParam : '?autoplay=1' + muteParam);
+                        channelStartTime = Date.now();
+                        
+                        // Track channel switch
+                        trackChannelSwitch(channel);
+                    }
+                    
+                    currentChannel = channel;
+                }
+                
+                // Add login button functionality
+                document.getElementById('tvLoginBtn').addEventListener('click', () => {
+                    const tvLoginBtn = document.getElementById('tvLoginBtn');
+                    tvLoginBtn.textContent = '🔓 Opening YouTube TV...';
+                    
+                    // Open YouTube TV login in external browser
+                    try {
+                        // For Cursor, use postMessage
+                        if (typeof vscode !== 'undefined') {
+                            vscode.postMessage({
+                                command: 'openUrl',
+                                url: 'https://tv.youtube.com/'
+                            });
+                        } else {
+                            // Fallback: open in new window
+                            window.open('https://tv.youtube.com/', '_blank');
+                        }
+                        
+                        setTimeout(() => {
+                            tvLoginBtn.textContent = '🔑 Login to YouTube TV';
+                        }, 2000);
+                    } catch (error) {
+                        tvLoginBtn.textContent = '❌ Login Failed';
+                        setTimeout(() => {
+                            tvLoginBtn.textContent = '🔑 Login to YouTube TV';
+                        }, 2000);
+                    }
+                });
+
+                function trackChannelViewing(channel, watchTimeSeconds) {
+                    const channelData = tvChannels[channel];
+                    const viewingEntry = {
+                        channel: channel,
+                        channelName: channelData.name,
+                        watchTime: watchTimeSeconds,
+                        timestamp: new Date().toISOString(),
+                        muted: isMuted
+                    };
+                    
+                    viewingHistory.push(viewingEntry);
+                    
+                    // Send to RobbieBar API for storage (silent tracking)
+                    fetch('http://localhost:8000/code/api/tv/track-viewing', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(viewingEntry)
+                    }).catch(err => {});
+                }
+
+                function trackChannelSwitch(channel) {
+                    const channelData = tvChannels[channel];
+                    const switchEntry = {
+                        channel: channel,
+                        channelName: channelData.name,
+                        action: 'channel_switch',
+                        timestamp: new Date().toISOString(),
+                        muted: isMuted
+                    };
+                    
+                    // Send to RobbieBar API for storage (silent tracking)
+                    fetch('http://localhost:8000/code/api/tv/track-switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(switchEntry)
+                    }).catch(err => {});
+                }
             </script >
         </body >
         </html > `;

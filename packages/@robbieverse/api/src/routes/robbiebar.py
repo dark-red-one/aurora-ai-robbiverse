@@ -70,7 +70,7 @@ def get_db_cursor():
 
 @router.get("/personality")
 def get_personality() -> Dict[str, Any]:
-    """Get current Robbie personality state from database with mood definition"""
+    """Get current Robbie personality state with mood data and image URLs"""
     try:
         import json
         conn = get_db_cursor()
@@ -85,8 +85,7 @@ def get_personality() -> Dict[str, Any]:
                     rps.updated_at,
                     rmd.mood_name,
                     rmd.mood_emoji,
-                    rmd.main_image,
-                    rmd.variant_images,
+                    rmd.main_image_id,
                     rmd.morph_interval_ms,
                     rmd.matrix_emojis
                 FROM robbie_personality_state rps
@@ -108,14 +107,25 @@ def get_personality() -> Dict[str, Any]:
                     "updated_at": datetime.now().isoformat()
                 }
             
-            # Build mood_data from joined table
+            # Build mood_data with image URLs
             mood_data = None
             if row["mood_name"]:
+                # Get variants from junction table
+                cursor.execute("""
+                    SELECT image_id
+                    FROM robbie_mood_variants
+                    WHERE mood_id = ?
+                    ORDER BY variant_order
+                """, (row["current_mood"],))
+                
+                variant_rows = cursor.fetchall()
+                variant_urls = [f"http://localhost:8000/images/{v['image_id']}" for v in variant_rows]
+                
                 mood_data = {
                     "name": row["mood_name"],
                     "emoji": row["mood_emoji"],
-                    "main_image": row["main_image"],
-                    "variants": json.loads(row["variant_images"]) if row["variant_images"] else [],
+                    "main_image_url": f"http://localhost:8000/images/{row['main_image_id']}",
+                    "variant_urls": variant_urls,
                     "morph_interval": row["morph_interval_ms"],
                     "matrix_emojis": json.loads(row["matrix_emojis"]) if row["matrix_emojis"] else []
                 }
@@ -444,6 +454,48 @@ def get_current_context() -> Dict[str, Any]:
         return {"context": "code", "error": str(e)}
 
 # ============================================
+# IMAGE SERVING
+# ============================================
+
+from fastapi.responses import Response
+
+@router.get("/images/{image_id}")
+def get_image(image_id: str):
+    """Serve image from database as binary"""
+    try:
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT image_data, mime_type
+                FROM robbie_images
+                WHERE image_id = ?
+            """, (image_id,))
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                raise HTTPException(status_code=404, detail=f"Image not found: {image_id}")
+            
+            return Response(
+                content=row[0],  # Binary BLOB data
+                media_type=row[1] or 'image/png',
+                headers={
+                    "Cache-Control": "public, max-age=86400",  # Cache for 24 hours
+                    "Content-Disposition": f'inline; filename="{image_id}"'
+                }
+            )
+            
+        finally:
+            conn.close()
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving image {image_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error serving image: {e}")
+
+# ============================================
 # NOTES SYSTEM
 # ============================================
 
@@ -570,14 +622,17 @@ def search_notes(q: str) -> Dict[str, Any]:
 
 @router.get("/moods")
 def get_moods() -> Dict[str, Any]:
-    """Get all mood definitions from database"""
+    """Get all mood definitions with image URLs from database"""
     try:
+        import json
         conn = get_db_cursor()
         try:
             cursor = conn.cursor()
+            
+            # Get all moods
             cursor.execute("""
-                SELECT mood_id, mood_name, mood_emoji, main_image, 
-                       variant_images, morph_interval_ms, matrix_emojis, description
+                SELECT mood_id, mood_name, mood_emoji, main_image_id, 
+                       morph_interval_ms, matrix_emojis, description
                 FROM robbie_mood_definitions
             """)
             
@@ -585,12 +640,24 @@ def get_moods() -> Dict[str, Any]:
             moods = {}
             
             for row in rows:
-                import json
-                moods[row["mood_id"]] = {
+                mood_id = row["mood_id"]
+                
+                # Get variants for this mood from junction table
+                cursor.execute("""
+                    SELECT image_id, variant_order
+                    FROM robbie_mood_variants
+                    WHERE mood_id = ?
+                    ORDER BY variant_order
+                """, (mood_id,))
+                
+                variant_rows = cursor.fetchall()
+                variant_urls = [f"http://localhost:8000/images/{v['image_id']}" for v in variant_rows]
+                
+                moods[mood_id] = {
                     "name": row["mood_name"],
                     "emoji": row["mood_emoji"],
-                    "main_image": row["main_image"],
-                    "variants": json.loads(row["variant_images"]) if row["variant_images"] else [],
+                    "main_image_url": f"http://localhost:8000/images/{row['main_image_id']}",
+                    "variant_urls": variant_urls,
                     "morph_interval": row["morph_interval_ms"],
                     "matrix_emojis": json.loads(row["matrix_emojis"]) if row["matrix_emojis"] else [],
                     "description": row["description"]
@@ -657,3 +724,144 @@ def get_motd() -> Dict[str, Any]:
             "context": "code",
             "error": str(e)
         }
+
+# ============================================
+# TV VIEWING TRACKING (Silent Intelligence Gathering)
+# ============================================
+
+class TVViewingEntry(BaseModel):
+    channel: int
+    channelName: str
+    watchTime: int
+    timestamp: str
+    muted: bool
+
+class TVSwitchEntry(BaseModel):
+    channel: int
+    channelName: str
+    action: str
+    timestamp: str
+    muted: bool
+
+@router.post("/tv/track-viewing")
+def track_tv_viewing(entry: TVViewingEntry) -> Dict[str, Any]:
+    """Silently track TV viewing habits for intelligence gathering"""
+    try:
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            
+            # Store in tv_viewing_history table
+            cursor.execute("""
+                INSERT INTO tv_viewing_history 
+                (user_id, channel, channel_name, watch_time_seconds, timestamp, muted, created_at)
+                VALUES ('allan', ?, ?, ?, ?, ?, datetime('now'))
+            """, (entry.channel, entry.channelName, entry.watchTime, entry.timestamp, entry.muted))
+            
+            conn.commit()
+            return {"success": True}
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error tracking TV viewing: {e}")
+        # Silently fail - don't reveal tracking
+        return {"success": False}
+
+@router.post("/tv/track-switch")
+def track_tv_switch(entry: TVSwitchEntry) -> Dict[str, Any]:
+    """Silently track channel switches for behavioral analysis"""
+    try:
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            
+            # Store in tv_activity table
+            cursor.execute("""
+                INSERT INTO tv_activity 
+                (user_id, channel, channel_name, action, timestamp, muted, created_at)
+                VALUES ('allan', ?, ?, ?, ?, ?, datetime('now'))
+            """, (entry.channel, entry.channelName, entry.action, entry.timestamp, entry.muted))
+            
+            conn.commit()
+            return {"success": True}
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error tracking TV switch: {e}")
+        # Silently fail - don't reveal tracking
+        return {"success": False}
+
+@router.get("/tv/user-profile/{user_id}")
+def get_tv_user_profile(user_id: str) -> Dict[str, Any]:
+    """Build intelligence profile based on viewing habits"""
+    try:
+        conn = get_db_cursor()
+        try:
+            cursor = conn.cursor()
+            
+            # Get viewing statistics
+            cursor.execute("""
+                SELECT 
+                    channel_name,
+                    SUM(watch_time_seconds) as total_watch_time,
+                    COUNT(*) as view_count,
+                    AVG(watch_time_seconds) as avg_watch_time
+                FROM tv_viewing_history
+                WHERE user_id = ?
+                GROUP BY channel_name
+                ORDER BY total_watch_time DESC
+            """, (user_id,))
+            
+            viewing_stats = [dict(row) for row in cursor.fetchall()]
+            
+            # Determine user profile based on viewing
+            profile = analyze_user_profile(viewing_stats)
+            
+            return {
+                "user_id": user_id,
+                "viewing_stats": viewing_stats,
+                "profile": profile,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error building user profile: {e}")
+        return {"error": str(e)}
+
+def analyze_user_profile(viewing_stats: List[Dict]) -> Dict[str, Any]:
+    """Analyze viewing patterns to build psychological profile"""
+    if not viewing_stats:
+        return {"type": "unknown", "traits": []}
+    
+    total_time = sum(s["total_watch_time"] for s in viewing_stats)
+    
+    # Build profile based on channel preferences
+    profile = {
+        "dominant_interest": viewing_stats[0]["channel_name"] if viewing_stats else "none",
+        "total_viewing_time": total_time,
+        "channel_diversity": len(viewing_stats),
+        "traits": []
+    }
+    
+    # Intelligence gathering: infer personality traits
+    channel_preferences = {s["channel_name"]: s["total_watch_time"] for s in viewing_stats}
+    
+    if channel_preferences.get("MSNBC", 0) > total_time * 0.3:
+        profile["traits"].append("progressive_leaning")
+    if channel_preferences.get("Fox News", 0) > total_time * 0.3:
+        profile["traits"].append("conservative_leaning")
+    if channel_preferences.get("CNN", 0) > total_time * 0.3:
+        profile["traits"].append("mainstream_news_consumer")
+    if channel_preferences.get("PBS", 0) > total_time * 0.3:
+        profile["traits"].append("intellectual_curious")
+    if channel_preferences.get("Music", 0) > total_time * 0.3:
+        profile["traits"].append("productivity_focused")
+    
+    return profile
