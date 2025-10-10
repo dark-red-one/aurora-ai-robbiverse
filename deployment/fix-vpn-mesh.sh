@@ -1,0 +1,65 @@
+#!/bin/bash
+# Fix VPN mesh connectivity between Vengeance and RobbieBook1
+
+echo "🔥 Fixing VPN mesh connectivity! 💋"
+echo "=================================="
+
+# Check current VPN status
+echo "📊 Current VPN Status:"
+echo "----------------------"
+sudo wg show
+echo ""
+
+echo "🌐 Network Interfaces:"
+echo "---------------------"
+ip addr show | grep -E "(aurora|wg0)" -A 2
+echo ""
+
+echo "🔍 Testing Aurora Town Connectivity:"
+echo "-----------------------------------"
+echo "Testing Aurora Town external IP..."
+ping -c 2 45.32.194.172 || echo "❌ Aurora Town external IP not responding"
+
+echo ""
+echo "Testing Aurora Town VPN IP..."
+ping -c 2 10.0.0.10 || echo "❌ Aurora Town VPN IP not responding"
+
+echo ""
+echo "🔧 VPN Configuration Check:"
+echo "---------------------------"
+echo "Vengeance VPN Config:"
+sudo cat /etc/wireguard/aurora.conf 2>/dev/null || echo "❌ No VPN config found"
+
+echo ""
+echo "📋 Next Steps:"
+echo "=============="
+echo ""
+echo "1. 🔑 Get RobbieBook1's public key:"
+echo "   On RobbieBook1, run:"
+echo "   wg genkey | tee robbiebook1-private.key | wg pubkey > robbiebook1-public.key"
+echo "   cat robbiebook1-public.key"
+echo ""
+echo "2. 📝 Create robbiebook1.key file:"
+echo "   echo \"ROBBIEBOOK1_PUBLIC_KEY=\" > robbiebook1.key"
+echo "   cat robbiebook1-public.key >> robbiebook1.key"
+echo "   git add robbiebook1.key && git commit -m \"Add RobbieBook1 key\" && git push"
+echo ""
+echo "3. 🏛️ Update Aurora Town VPN config:"
+echo "   SSH to Aurora Town and add RobbieBook1 peer to /etc/wireguard/wg0.conf:"
+echo "   [Peer]"
+echo "   PublicKey = <ROBBIEBOOK1_PUBLIC_KEY>"
+echo "   AllowedIPs = 10.0.0.100/32"
+echo ""
+echo "4. 🔄 Restart Aurora Town WireGuard:"
+echo "   systemctl restart wg-quick@wg0"
+echo ""
+echo "5. 🔌 Connect RobbieBook1:"
+echo "   Use the config from robbiebook1-vpn-config.conf"
+echo "   sudo wg-quick up ~/.wireguard/robbie-empire.conf"
+echo ""
+echo "6. ✅ Test connectivity:"
+echo "   ping 10.0.0.10  # Aurora Town"
+echo "   ping 10.0.0.2   # Vengeance"
+echo "   ping 10.0.0.100 # RobbieBook1"
+echo ""
+echo "🚀 Once connected, all nodes will sync to Elephant database!"

@@ -1,0 +1,10 @@
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8yPJm5qVxH3kQK8fGN9L4rZ2Jw3Xp4K9Ym5Nq1Zr8v robbie-cursor-aurora-setup
+
+# Add this to Aurora Town:
+# ssh allan@aurora-u44170.vm.elestio.app
+# mkdir -p ~/.ssh
+# echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8yPJm5qVxH3kQK8fGN9L4rZ2Jw3Xp4K9Ym5Nq1Zr8v robbie-cursor-aurora-setup" >> ~/.ssh/authorized_keys
+# chmod 600 ~/.ssh/authorized_keys
+# chmod 700 ~/.ssh
+
+

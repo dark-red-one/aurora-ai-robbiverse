@@ -19,6 +19,7 @@ import logging
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 # Import routes
@@ -28,7 +29,8 @@ from src.routes import (
     mood_routes,
     sticky_notes,
     touch_ready,
-    sync_routes
+    sync_routes,
+    robbiebar
 )
 
 # Import services for initialization
@@ -124,6 +126,10 @@ app.include_router(mood_routes.router, prefix="/api", tags=["personality"])
 app.include_router(sticky_notes.router, prefix="/api", tags=["memory"])
 app.include_router(touch_ready.router, prefix="/api", tags=["outreach"])
 app.include_router(sync_routes, prefix="/api/sync", tags=["sync"])
+app.include_router(robbiebar.router, tags=["robbiebar"])
+
+# Mount static files for RobbieBar web interface
+app.mount("/code", StaticFiles(directory="static/code", html=True), name="robbiebar-static")
 
 # WebSocket endpoint for real-time chat
 @app.websocket("/ws/chat")
@@ -163,6 +169,7 @@ if __name__ == "__main__":
     logger.info(f"🔥 Starting Robbieverse API on {host}:{port}")
     logger.info(f"📊 API Docs: http://{host}:{port}/docs")
     logger.info(f"💬 WebSocket: ws://{host}:{port}/ws/chat")
+    logger.info(f"🎯 RobbieBar: http://{host}:{port}/code")
     
     uvicorn.run(
         "main:app",

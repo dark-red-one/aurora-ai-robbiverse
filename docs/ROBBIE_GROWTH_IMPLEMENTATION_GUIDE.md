@@ -256,35 +256,96 @@ curl -X POST http://localhost:8000/api/growth/campaigns \
 
 ### Step 10: Test Automation Slider (15 minutes)
 
-```bash
-# Get current settings
-curl http://localhost:8000/api/growth/automation/settings?user_id=1
+**Example Workflow:**
 
-# Set automation to 50% (hybrid mode)
+```bash
+# 1. Get current settings
+curl http://localhost:8000/api/growth/automation/settings?user_id=1
+```
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "settings": {
+    "automation_level": 50,
+    "action_settings": {
+      "linkedin_post": {"enabled": true, "requires_approval": true, "max_per_day": 3},
+      "linkedin_comment": {"enabled": true, "requires_approval": false, "max_per_day": 10}
+    }
+  }
+}
+```
+
+```bash
+# 2. Set automation to 50% (hybrid mode)
 curl -X PATCH http://localhost:8000/api/growth/automation/level \
   -H "Content-Type: application/json" \
   -d '{"user_id": 1, "level": 50}'
+```
 
-# Queue a test LinkedIn action
+```bash
+# 3. Queue a test LinkedIn action
 curl -X POST http://localhost:8000/api/growth/linkedin/actions \
   -H "Content-Type: application/json" \
   -d '{
     "action_type": "comment",
-    "target_post_url": "https://linkedin.com/feed/update/...",
+    "target_post_url": "https://linkedin.com/feed/update/urn:li:activity:7121234567890",
     "content": "Great insight! We see this trend with our CPG clients too.",
     "reason": "Engaging with prospect discussing retail challenges",
     "quality_score": 8,
-    "priority": 7
+    "priority": 7,
+    "contact_id": "optional-uuid-if-in-crm"
   }'
+```
 
-# Get pending approvals
+**Example Response:**
+```json
+{
+  "success": true,
+  "action_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "requires_approval": true,
+  "status": "pending"
+}
+```
+
+```bash
+# 4. Get pending approvals
 curl http://localhost:8000/api/growth/linkedin/actions/pending
+```
 
-# Approve the action
-curl -X POST http://localhost:8000/api/growth/linkedin/actions/{action_id}/approve \
+**Example Response:**
+```json
+{
+  "success": true,
+  "actions": [
+    {
+      "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "action_type": "comment",
+      "content": "Great insight! We see this trend with our CPG clients too.",
+      "reason": "Engaging with prospect discussing retail challenges",
+      "quality_score": 8,
+      "contact_name": "Jane Smith",
+      "deal_name": "Acme CPG - New Product Test",
+      "created_at": "2025-10-09T14:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+```bash
+# 5. Approve the action
+curl -X POST http://localhost:8000/api/growth/linkedin/actions/f47ac10b-58cc-4372-a567-0e02b2c3d479/approve \
   -H "Content-Type: application/json" \
   -d '{"approved_by": "Allan"}'
 ```
+
+**Pro Tips:**
+- Start at 25% automation for first week
+- Review quality scores daily
+- Actions with score >8 are usually safe to auto-approve
+- Use contact_id to link actions to CRM deals
 
 ---
 
@@ -604,3 +665,4 @@ The backend is complete and battle-tested. Follow the steps above to:
 
 *Built with precision. Ship fast. Make money. 💰*  
 *— Robbie, October 9, 2025*
+

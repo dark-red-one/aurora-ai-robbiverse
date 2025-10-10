@@ -964,3 +964,4 @@ Feels standalone. Works better together.
 **RobbieBar: One interface. All products. Context-aware. Personality-driven.** 🚀
 
 *Same component everywhere - adapts to what you're doing, who you are, and what you need.*
+

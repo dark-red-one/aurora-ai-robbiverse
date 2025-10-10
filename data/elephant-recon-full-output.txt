@@ -1,0 +1,726 @@
+🔌 Connecting to aurora-postgres-u44170.vm.elestio.app:25432/aurora_unified...
+✅ Connected successfully!
+
+📋 Discovering all tables...
+✅ Found 119 tables
+
+🔍 Analyzing each table...
+
+================================================================================
+
+📊 TABLE: activities
+   Rows: 0
+   Columns: 30
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_activity_log
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_behavior_effectiveness
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_calendar_events
+   Rows: 0
+   Columns: 13
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_calendar_reminders
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_commitment_reminders
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_commitments
+   Rows: 0
+   Columns: 11
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_conversation_contexts
+   Rows: 0
+   Columns: 10
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_mentors
+   Rows: 5
+   Columns: 15
+   Sample: ['id', 'name', 'description', 'personality_prompt', 'avatar_url']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_notification_delivery
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_notifications
+   Rows: 0
+   Columns: 11
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_personalities
+   Rows: 4
+   Columns: 7
+   Sample: ['id', 'name', 'role', 'description', 'base_traits']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_personality_instances
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_personality_state
+   Rows: 4
+   Columns: 8
+   Sample: ['personality_id', 'current_mood', 'current_mode', 'energy_level', 'focus_state']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_state_history
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_sync_queue
+   Rows: 0
+   Columns: 10
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ai_working_memory
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+📊 TABLE: allan_attention
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: allan_attention_surfaced
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: allanbot_decisions
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: allanbot_memories
+   Rows: 21
+   Columns: 10
+   Sample: ['id', 'memory_type', 'content', 'source', 'priority']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: allanbot_memory
+   Rows: 9
+   Columns: 9
+   Sample: ['id', 'memory_type', 'content', 'source', 'priority']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: allanbot_patterns
+   Rows: 40
+   Columns: 7
+   Sample: ['id', 'pattern_type', 'pattern_data', 'frequency', 'confidence']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: amazon_products
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: api_keys
+   Rows: 0
+   Columns: 10
+   ----------------------------------------------------------------------------
+
+📊 TABLE: audit_log
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+📊 TABLE: aurora_activities
+   Rows: 0
+   Columns: 30
+   ----------------------------------------------------------------------------
+
+📊 TABLE: code_conversations
+   Rows: 1
+   Columns: 10
+   Sample: ['id', 'user_id', 'session_id', 'title', 'context_type']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: collaboration_activities
+   Rows: 0
+   Columns: 30
+   ----------------------------------------------------------------------------
+
+📊 TABLE: companies
+   Rows: 40
+   Columns: 9
+   Sample: ['id', 'name', 'slug', 'logo_url', 'settings']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: company_credits
+   Rows: 8
+   Columns: 5
+   Sample: ['id', 'company_id', 'total', 'created_at', 'updated_at']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: competitive_insights
+   Rows: 0
+   Columns: 12
+   ----------------------------------------------------------------------------
+
+📊 TABLE: competitive_insights_analysis
+   Rows: 0
+   Columns: 4
+   ----------------------------------------------------------------------------
+
+📊 TABLE: competitive_insights_walmart
+   Rows: 0
+   Columns: 12
+   ----------------------------------------------------------------------------
+
+📊 TABLE: competitor_products
+   Rows: 1,000
+   Columns: 8
+   Sample: ['id', 'title', 'image_url', 'price', 'source_type']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: compliance_tracking
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: context_relationships
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: conversation_context
+   Rows: 3
+   Columns: 9
+   Sample: ['id', 'session_id', 'timestamp', 'role', 'content']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: conversation_history
+   Rows: 16
+   Columns: 7
+   Sample: ['id', 'user_id', 'conversation_id', 'role', 'content']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: conversational_priorities
+   Rows: 5
+   Columns: 8
+   Sample: ['id', 'user_id', 'priority_type', 'priority_content', 'weight']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: credit_payments
+   Rows: 48
+   Columns: 9
+   Sample: ['id', 'company_id', 'stripe_payment_intent_id', 'amount_cents', 'credits_purchased']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: credit_usage
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: custom_screening
+   Rows: 11
+   Columns: 7
+   Sample: ['id', 'question', 'valid_option', 'invalid_option', 'test_id']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: deal_contacts
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: emails
+   Rows: 5
+   Columns: 11
+   Sample: ['id', 'gmail_id', 'subject', 'sender_email', 'sender_name']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: events
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: feature_flags
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: feedback
+   Rows: 0
+   Columns: 4
+   ----------------------------------------------------------------------------
+
+📊 TABLE: fluenti_activities
+   Rows: 0
+   Columns: 30
+   ----------------------------------------------------------------------------
+
+📊 TABLE: full_auto_sync_log
+   Rows: 27
+   Columns: 5
+   Sample: ['id', 'sync_type', 'status', 'message', 'created_at']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_calendar_events
+   Rows: 0
+   Columns: 11
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_calendar_massive
+   Rows: 0
+   Columns: 12
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_data_access_rules
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_drive_files
+   Rows: 6,857
+   Columns: 10
+   Sample: ['id', 'drive_file_id', 'name', 'mime_type', 'size']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_drive_massive
+   Rows: 0
+   Columns: 11
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_emails
+   Rows: 57,412
+   Columns: 11
+   Sample: ['id', 'gmail_id', 'thread_id', 'subject', 'from_email']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_emails_analyzed
+   Rows: 100
+   Columns: 21
+   Sample: ['id', 'gmail_id', 'thread_id', 'subject', 'from_email']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_emails_massive
+   Rows: 18,700
+   Columns: 12
+   Sample: ['id', 'gmail_id', 'thread_id', 'subject', 'from_email']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_sync_jobs
+   Rows: 0
+   Columns: 17
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_workspace_domains
+   Rows: 1
+   Columns: 12
+   Sample: ['id', 'domain', 'display_name', 'service_account_email', 'service_account_key_path']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: google_workspace_users
+   Rows: 0
+   Columns: 17
+   ----------------------------------------------------------------------------
+
+📊 TABLE: gpu_status
+   Rows: 2
+   Columns: 5
+   Sample: ['id', 'gpu_host', 'status', 'timestamp', 'owner_id']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ia_insights
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ia_insights_backup
+   Rows: 0
+   Columns: 10
+   ----------------------------------------------------------------------------
+
+📊 TABLE: ia_insights_backup_20241226
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: inbox_categories
+   Rows: 11
+   Columns: 6
+   Sample: ['id', 'category_name', 'description', 'color_code', 'is_active']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: insight_status
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: interactions
+   Rows: 18,700
+   Columns: 31
+   Sample: ['id', 'interaction_id', 'interaction_type', 'source_system', 'from_user']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: interactions_pending_actions
+   Rows: 0
+   Columns: 31
+   ----------------------------------------------------------------------------
+
+📊 TABLE: interactions_today
+   Rows: 0
+   Columns: 31
+   ----------------------------------------------------------------------------
+
+📊 TABLE: interactions_top10
+   Rows: 0
+   Columns: 33
+   ----------------------------------------------------------------------------
+
+📊 TABLE: invites
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: knowledge_base
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: meetings
+   Rows: 5
+   Columns: 9
+   Sample: ['id', 'title', 'attendees', 'start_time', 'end_time']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: pending_supabase_sync
+   Rows: 0
+   Columns: 6
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_context
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_current_queue
+   Rows: 2,991,740
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_eliminations
+   Rows: 0
+   Columns: 7
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_execution_log
+   Rows: 2,659
+   Columns: 10
+   Sample: ['id', 'task_id', 'action_taken', 'result', 'success']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_history
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_learning
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_metrics
+   Rows: 0
+   Columns: 11
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_queue
+   Rows: 2,994,457
+   Columns: 28
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_today_metrics
+   Rows: 1
+   Columns: 6
+   Sample: ['total_processed', 'total_executed', 'total_eliminated', 'total_failed', 'total_time_saved']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: priorities_weights
+   Rows: 6
+   Columns: 5
+   Sample: ['id', 'dimension', 'weight', 'user_id', 'updated_at']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: products
+   Rows: 0
+   Columns: 17
+   ----------------------------------------------------------------------------
+
+📊 TABLE: profiles
+   Rows: 39
+   Columns: 10
+   Sample: ['id', 'email', 'full_name', 'avatar_url', 'company_id']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: purchase_drivers
+   Rows: 0
+   Columns: 11
+   ----------------------------------------------------------------------------
+
+📊 TABLE: responses_comparisons
+   Rows: 0
+   Columns: 17
+   ----------------------------------------------------------------------------
+
+📊 TABLE: responses_comparisons_walmart
+   Rows: 0
+   Columns: 17
+   ----------------------------------------------------------------------------
+
+📊 TABLE: responses_surveys
+   Rows: 0
+   Columns: 15
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbie_personality_state
+   Rows: 1
+   Columns: 7
+   Sample: ['id', 'user_id', 'current_mood', 'gandhi_genghis_level', 'attraction_level']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_active_deploys
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_change_triggers
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_components
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_deploys
+   Rows: 0
+   Columns: 14
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_node_branding
+   Rows: 4
+   Columns: 9
+   Sample: ['id', 'node_id', 'node_name', 'style_overrides', 'enabled_apps']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_page_blocks
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_pages
+   Rows: 0
+   Columns: 15
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_published_pages
+   Rows: 0
+   Columns: 4
+   ----------------------------------------------------------------------------
+
+📊 TABLE: robbieblocks_style_tokens
+   Rows: 33
+   Columns: 7
+   Sample: ['id', 'token_key', 'token_category', 'default_value', 'description']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: shopper_demographic
+   Rows: 0
+   Columns: 12
+   ----------------------------------------------------------------------------
+
+📊 TABLE: smart_email_tags
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+📊 TABLE: summary
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+📊 TABLE: system_config
+   Rows: 4
+   Columns: 7
+   Sample: ['id', 'key', 'value', 'category', 'description']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: test_competitors
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: test_demographics
+   Rows: 0
+   Columns: 10
+   ----------------------------------------------------------------------------
+
+📊 TABLE: test_survey_questions
+   Rows: 0
+   Columns: 5
+   ----------------------------------------------------------------------------
+
+📊 TABLE: test_times
+   Rows: 0
+   Columns: 8
+   ----------------------------------------------------------------------------
+
+📊 TABLE: test_variations
+   Rows: 66
+   Columns: 12
+   Sample: ['id', 'test_id', 'product_id', 'variation_type', 'created_at']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: testers_session
+   Rows: 0
+   Columns: 10
+   ----------------------------------------------------------------------------
+
+📊 TABLE: tests
+   Rows: 33
+   Columns: 15
+   Sample: ['id', 'name', 'description', 'status', 'search_term']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: towns
+   Rows: 3
+   Columns: 10
+   Sample: ['id', 'name', 'display_name', 'description', 'region']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: user_activity
+   Rows: 2
+   Columns: 5
+   Sample: ['id', 'user_id', 'activity_type', 'details', 'created_at']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: user_mood_state
+   Rows: 1
+   Columns: 5
+   Sample: ['user_id', 'current_mood', 'mood_intensity', 'last_updated', 'mood_history']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: user_personality_state
+   Rows: 1
+   Columns: 7
+   Sample: ['user_id', 'gandhi', 'flirty', 'turbo', 'auto']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: users
+   Rows: 1
+   Columns: 7
+   Sample: ['id', 'email', 'name', 'role', 'is_active']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: walmart_products
+   Rows: 132
+   Columns: 22
+   Sample: ['id', 'title', 'price', 'rating', 'reviews_count']...
+   ----------------------------------------------------------------------------
+
+📊 TABLE: wrappers_fdw_stats
+   Rows: 0
+   Columns: 9
+   ----------------------------------------------------------------------------
+
+================================================================================
+🎯 ELEPHANT DATABASE RECONNAISSANCE REPORT
+================================================================================
+
+📍 Database: aurora_unified
+🔗 Host: aurora-postgres-u44170.vm.elestio.app
+⏰ Scan Time: 2025-10-09T19:08:28.528372
+📊 Total Tables: 119
+
+🔥 HIGH PRIORITY - EXTRACT NOW:
+================================================================================
+  • google_emails                      57,412 rows    [HIGH - Extract Now]
+  • google_emails_massive              18,700 rows    [HIGH - Extract Now]
+  • interactions                       18,700 rows    [HIGH - Extract Now]
+  • google_drive_files                  6,857 rows    [HIGH - Extract Now]
+  • google_emails_analyzed                100 rows    [HIGH - Extract Now]
+  • allanbot_patterns                      40 rows    [HIGH - Extract Now]
+  • allanbot_memories                      21 rows    [HIGH - Extract Now]
+  • conversation_history                   16 rows    [HIGH - Extract Now]
+  • allanbot_memory                         9 rows    [HIGH - Extract Now]
+  • conversational_priorities               5 rows    [HIGH - Extract Now]
+  • emails                                  5 rows    [HIGH - Extract Now]
+  • meetings                                5 rows    [HIGH - Extract Now]
+  • conversation_context                    3 rows    [HIGH - Extract Now]
+  • code_conversations                      1 rows    [HIGH - Extract Now]
+
+⚡ MEDIUM PRIORITY - CONSIDER:
+================================================================================
+  • priorities_execution_log            2,659 rows    [MEDIUM - Consider Extract]
+  • profiles                               39 rows    [MEDIUM - Small Dataset]
+  • user_activity                           2 rows    [MEDIUM - Small Dataset]
+  • user_mood_state                         1 rows    [MEDIUM - Small Dataset]
+  • user_personality_state                  1 rows    [MEDIUM - Small Dataset]
+  • users                                   1 rows    [MEDIUM - Small Dataset]
+  • ai_activity_log                         0 rows    [MEDIUM - Small Dataset]
+  • deal_contacts                           0 rows    [MEDIUM - Small Dataset]
+  • google_workspace_users                  0 rows    [MEDIUM - Small Dataset]
+
+📦 LOW PRIORITY - APIs Available:
+================================================================================
+  • priorities_queue                2,994,457 rows    [UNKNOWN - Investigate]
+  • priorities_current_queue        2,991,740 rows    [UNKNOWN - Investigate]
+  • competitor_products                 1,000 rows    [LOW - API Available]
+  • walmart_products                      132 rows    [LOW - API Available]
+  • test_variations                        66 rows    [LOW - API Available]
+  • credit_payments                        48 rows    [LOW - API Available]
+  • companies                              40 rows    [LOW - API Available]
+  • robbieblocks_style_tokens              33 rows    [UNKNOWN - Investigate]
+  • tests                                  33 rows    [LOW - API Available]
+  • full_auto_sync_log                     27 rows    [UNKNOWN - Investigate]
+  • custom_screening                       11 rows    [UNKNOWN - Investigate]
+  • inbox_categories                       11 rows    [UNKNOWN - Investigate]
+  • company_credits                         8 rows    [LOW - API Available]
+  • priorities_weights                      6 rows    [UNKNOWN - Investigate]
+  • ai_mentors                              5 rows    [UNKNOWN - Investigate]
+  • ai_personalities                        4 rows    [UNKNOWN - Investigate]
+  • ai_personality_state                    4 rows    [UNKNOWN - Investigate]
+  • robbieblocks_node_branding              4 rows    [UNKNOWN - Investigate]
+  • system_config                           4 rows    [UNKNOWN - Investigate]
+  • towns                                   3 rows    [UNKNOWN - Investigate]
+  • gpu_status                              2 rows    [UNKNOWN - Investigate]
+  • google_workspace_domains                1 rows    [UNKNOWN - Investigate]
+  • priorities_today_metrics                1 rows    [UNKNOWN - Investigate]
+  • robbie_personality_state                1 rows    [UNKNOWN - Investigate]
+
+🗑️  EMPTY TABLES (72):
+================================================================================
+  activities, ai_behavior_effectiveness, ai_calendar_events, ai_calendar_reminders, ai_commitment_reminders, ai_commitments, ai_conversation_contexts, ai_notification_delivery, ai_notifications, ai_personality_instances, ai_state_history, ai_sync_queue, ai_working_memory, allan_attention, allan_attention_surfaced, allanbot_decisions, amazon_products, api_keys, audit_log, aurora_activities, collaboration_activities, competitive_insights, competitive_insights_analysis, competitive_insights_walmart, compliance_tracking, context_relationships, credit_usage, events, feature_flags, feedback, fluenti_activities, google_calendar_events, google_calendar_massive, google_data_access_rules, google_drive_massive, google_sync_jobs, ia_insights, ia_insights_backup, ia_insights_backup_20241226, insight_status, interactions_pending_actions, interactions_today, interactions_top10, invites, knowledge_base, pending_supabase_sync, priorities_context, priorities_eliminations, priorities_history, priorities_learning, priorities_metrics, products, purchase_drivers, responses_comparisons, responses_comparisons_walmart, responses_surveys, robbieblocks_active_deploys, robbieblocks_change_triggers, robbieblocks_components, robbieblocks_deploys, robbieblocks_page_blocks, robbieblocks_pages, robbieblocks_published_pages, shopper_demographic, smart_email_tags, summary, test_competitors, test_demographics, test_survey_questions, test_times, testers_session, wrappers_fdw_stats
+
+📊 TOTAL RECORDS IN DATABASE: 6,092,218
+
+================================================================================
+
+💾 Detailed findings saved to: data/elephant-exports/recon-findings.json
+
+✅ Reconnaissance complete!
+🎯 Next: Review findings and extract high-priority tables
+
+🔌 Disconnected from database

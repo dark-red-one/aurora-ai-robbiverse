@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobbieBar - Code Command Center</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- RobbieBar Top Bar -->
+    <div class="robbiebar">
+        <!-- 1. Robbie Avatar + Personality -->
+        <div class="robbiebar-section robbiebar-personality" id="personality-section">
+            <div class="avatar-container" onclick="cycleMood()">
+                <span class="avatar-emoji" id="mood-emoji">🎯</span>
+            </div>
+            <div class="personality-info">
+                <div class="mood-text" id="mood-text">focused</div>
+                <div class="personality-indicators">
+                    <span class="indicator" id="attraction-indicator" title="Attraction Level">❤️ <span
+                            id="attraction-level">8</span></span>
+                    <span class="indicator" id="gg-indicator" title="Gandhi-Genghis">⚖️ <span
+                            id="gg-level">7</span></span>
+                    <span class="indicator" id="energy-indicator" title="Energy">⚡ <span
+                            id="energy-level">50</span>%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Git Quick Commands -->
+        <div class="robbiebar-section robbiebar-git" id="git-section">
+            <div class="git-status">
+                <span class="git-branch" id="git-branch">main</span>
+                <span class="git-modified" id="git-modified">0 changes</span>
+                <span class="git-sync" id="git-sync"></span>
+            </div>
+            <button class="btn-primary" onclick="quickCommit()" id="commit-btn">
+                💾 Quick Commit
+            </button>
+        </div>
+
+        <!-- 3. System Resources -->
+        <div class="robbiebar-section robbiebar-stats" id="stats-section">
+            <div class="stat" title="CPU Usage">
+                <span class="stat-icon">🔥</span>
+                <span class="stat-value" id="cpu-stat">0%</span>
+            </div>
+            <div class="stat" title="Memory Usage">
+                <span class="stat-icon">💾</span>
+                <span class="stat-value" id="memory-stat">0%</span>
+            </div>
+            <div class="stat" title="GPU Usage">
+                <span class="stat-icon">🎮</span>
+                <span class="stat-value" id="gpu-stat">0%</span>
+            </div>
+        </div>
+
+        <!-- 4. Active Users -->
+        <div class="robbiebar-section robbiebar-users" id="users-section">
+            <span class="users-icon">👥</span>
+            <span class="user-badge user-allan">Allan</span>
+        </div>
+
+        <!-- 5. Status Indicator -->
+        <div class="robbiebar-section robbiebar-status">
+            <div class="status-dot" id="status-dot"></div>
+            <span class="status-text" id="status-text">connecting...</span>
+        </div>
+    </div>
+
+    <!-- Recent Commits Panel (Optional - Shows on hover) -->
+    <div class="recent-commits-panel" id="commits-panel" style="display: none;">
+        <div class="panel-header">Recent Commits</div>
+        <div class="commits-list" id="commits-list">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
+

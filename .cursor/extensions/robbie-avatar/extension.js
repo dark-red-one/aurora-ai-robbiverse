@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const { exec } = require('child_process');
+const http = require('http');
 
 let currentMood = 4; // Default to Focused
 let avatarPanel = null;
@@ -43,11 +44,65 @@ class RobbieAvatarPanel {
     constructor(context) {
         this.context = context;
         this.refreshInterval = null;
+        this.robbieBarData = {
+            systemStats: { cpu: 0, memory: 0, gpu: 0 },
+            gitStatus: { branch: 'main', modified_files: 0, clean: true },
+            recentCommits: []
+        };
+    }
+
+    fetchRobbieBarData() {
+        // Fetch system stats
+        this.httpGet('/code/api/system/stats', (data) => {
+            if (data) this.robbieBarData.systemStats = data;
+
+            // Fetch git status
+            this.httpGet('/code/api/git/status', (data) => {
+                if (data) this.robbieBarData.gitStatus = data;
+
+                // Fetch recent commits
+                this.httpGet('/code/api/git/recent', (data) => {
+                    if (data && data.commits) this.robbieBarData.recentCommits = data.commits;
+
+                    // Send update to webview
+                    if (avatarPanel) {
+                        avatarPanel.webview.postMessage({
+                            command: 'updateRobbieBar',
+                            ...this.robbieBarData
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    httpGet(path, callback) {
+        const options = {
+            hostname: 'localhost',
+            port: 8000,
+            path: path,
+            method: 'GET'
+        };
+
+        const req = http.request(options, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    callback(JSON.parse(data));
+                } catch (e) {
+                    callback(null);
+                }
+            });
+        });
+
+        req.on('error', () => callback(null));
+        req.end();
     }
 
     resolveWebviewView(webviewView) {
         avatarPanel = webviewView;
-        
+
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
@@ -64,14 +119,14 @@ class RobbieAvatarPanel {
 
         // Initial load
         this.refreshState();
-        
+
         // Listen for webview visibility changes to refresh when shown
         webviewView.onDidChangeVisibility(() => {
             if (webviewView.visible) {
                 this.refreshState();
             }
         });
-        
+
         // Listen for webview messages to handle refresh requests
         webviewView.webview.onDidReceiveMessage(message => {
             if (message.command === 'refresh') {
@@ -81,25 +136,28 @@ class RobbieAvatarPanel {
     }
 
     refreshState() {
-        // Query database using command-line sqlite3
+        // Fetch from RobbieBar API instead of database
+        this.fetchRobbieBarData();
+
+        // Original database query for personality state
         const query = `
             SELECT 
                 (SELECT current_mood FROM ai_personality_state WHERE personality_id = 'robbie') as mood,
                 (SELECT COUNT(*) FROM ai_working_memory WHERE personality_id = 'robbie' AND priority >= 7) as hot_topics_count,
                 (SELECT COUNT(*) FROM ai_commitments WHERE personality_id = 'robbie' AND status = 'active') as commitments_count;
         `;
-        
+
         exec(`sqlite3 "${DB_PATH}" "${query}"`, (error, stdout, stderr) => {
             if (error) {
                 console.error('DB query error:', error);
                 return;
             }
-            
+
             const parts = stdout.trim().split('|');
             if (parts.length >= 1 && parts[0]) {
                 currentMood = parseInt(parts[0]) || 7;
             }
-            
+
             // Get todo list (from working memory)
             const todoQuery = `SELECT content, priority FROM ai_working_memory WHERE personality_id = 'robbie' AND priority >= 7 ORDER BY priority DESC LIMIT 5;`;
             exec(`sqlite3 "${DB_PATH}" "${todoQuery}"`, (err, todoOutput) => {
@@ -107,7 +165,7 @@ class RobbieAvatarPanel {
                     const [content, priority] = line.split('|');
                     return { content, priority };
                 }) : [];
-                
+
                 // Get directives
                 const directivesQuery = `SELECT directive_text, source, timestamp FROM ai_directives WHERE personality_id = 'robbie' AND status = 'active' ORDER BY timestamp DESC LIMIT 3;`;
                 exec(`sqlite3 "${DB_PATH}" "${directivesQuery}"`, (err, directivesOutput) => {
@@ -115,7 +173,7 @@ class RobbieAvatarPanel {
                         const [text, source, timestamp] = line.split('|');
                         return { text, source, timestamp };
                     }) : [];
-                    
+
                     // Get token usage data for chart
                     const tokenQuery = `SELECT tokens_per_minute, timestamp FROM token_usage WHERE personality_id = 'robbie' ORDER BY timestamp DESC LIMIT 20;`;
                     exec(`sqlite3 "${DB_PATH}" "${tokenQuery}"`, (err, tokenOutput) => {
@@ -123,34 +181,34 @@ class RobbieAvatarPanel {
                             const [tokens, timestamp] = line.split('|');
                             return { tokens: parseInt(tokens), timestamp };
                         }).reverse() : [];
-                        
+
                         if (avatarPanel) {
-                        // Use ONLY approved expressions - Friendly 50% of the time
-                        const expressionName = moodToExpression[currentMood];
-                        const expressionFiles = approvedExpressions[expressionName];
-                        
-                        // For Friendly and Playful expressions, use 50% weight between variants
-                        let imageFile;
-                        if (expressionName === 'Friendly' || expressionName === 'Playful') {
-                            imageFile = expressionFiles[Math.floor(Math.random() * expressionFiles.length)];
-                        } else {
-                            imageFile = expressionFiles[0]; // Use first (and only) file for other expressions
-                        }
-                        
-                        const imagePath = AVATAR_PATH + imageFile;
-                        const imageUri = avatarPanel.webview.asWebviewUri(
-                            vscode.Uri.file(imagePath)
-                        );
-                        avatarPanel.webview.postMessage({
-                            command: 'updateState',
-                            mood: currentMood,
-                            moodName: moodNames[currentMood],
-                            moodEmoji: moodEmojis[currentMood],
-                            avatarImage: imageUri.toString(),
-                            todoList: todoList,
-                            directives: directives,
-                            tokenData: tokenData
-                        });
+                            // Use ONLY approved expressions - Friendly 50% of the time
+                            const expressionName = moodToExpression[currentMood];
+                            const expressionFiles = approvedExpressions[expressionName];
+
+                            // For Friendly and Playful expressions, use 50% weight between variants
+                            let imageFile;
+                            if (expressionName === 'Friendly' || expressionName === 'Playful') {
+                                imageFile = expressionFiles[Math.floor(Math.random() * expressionFiles.length)];
+                            } else {
+                                imageFile = expressionFiles[0]; // Use first (and only) file for other expressions
+                            }
+
+                            const imagePath = AVATAR_PATH + imageFile;
+                            const imageUri = avatarPanel.webview.asWebviewUri(
+                                vscode.Uri.file(imagePath)
+                            );
+                            avatarPanel.webview.postMessage({
+                                command: 'updateState',
+                                mood: currentMood,
+                                moodName: moodNames[currentMood],
+                                moodEmoji: moodEmojis[currentMood],
+                                avatarImage: imageUri.toString(),
+                                todoList: todoList,
+                                directives: directives,
+                                tokenData: tokenData
+                            });
                         }
                     });
                 });
@@ -284,6 +342,100 @@ class RobbieAvatarPanel {
                     height: 80px;
                     background: transparent;
                 }
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 6px;
+                }
+                .stat-item {
+                    background: #2d2d2d;
+                    padding: 6px 8px;
+                    border-radius: 3px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border-left: 3px solid #4caf50;
+                }
+                .stat-label {
+                    font-size: 10px;
+                    color: #888;
+                }
+                .stat-value {
+                    font-size: 11px;
+                    font-weight: bold;
+                    color: #00d4ff;
+                    font-family: monospace;
+                }
+                .stat-value.high {
+                    color: #ffa500;
+                }
+                .stat-value.critical {
+                    color: #f44336;
+                }
+                .git-info {
+                    background: #2d2d2d;
+                    padding: 6px 8px;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    margin-bottom: 6px;
+                    border-left: 3px solid #4caf50;
+                }
+                .git-branch {
+                    margin-bottom: 3px;
+                    color: #888;
+                }
+                .git-branch span {
+                    color: #00d4ff;
+                    font-weight: bold;
+                    font-family: monospace;
+                }
+                .git-modified {
+                    color: #888;
+                }
+                .git-modified span {
+                    color: #ffa500;
+                    font-weight: bold;
+                }
+                .action-btn {
+                    width: 100%;
+                    background: #00d4ff;
+                    color: #1a1a2e;
+                    border: none;
+                    padding: 8px;
+                    border-radius: 4px;
+                    font-size: 11px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                .action-btn:hover {
+                    background: #00b8ff;
+                }
+                .action-btn:active {
+                    background: #0090cc;
+                }
+                .commit-item {
+                    background: #2d2d2d;
+                    padding: 5px 6px;
+                    margin: 3px 0;
+                    border-radius: 3px;
+                    font-size: 9px;
+                    border-left: 3px solid #9c27b0;
+                }
+                .commit-hash {
+                    color: #00d4ff;
+                    font-family: monospace;
+                    font-weight: bold;
+                    margin-right: 4px;
+                }
+                .commit-message {
+                    color: #ffffff;
+                }
+                .commit-time {
+                    color: #888;
+                    font-size: 8px;
+                    margin-top: 2px;
+                }
             </style>
         </head>
         <body>
@@ -313,6 +465,38 @@ class RobbieAvatarPanel {
                 <div class="chart-container">
                     <canvas id="tokenChart" width="200" height="80"></canvas>
                 </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">🔥 System Stats</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">CPU</span>
+                        <span class="stat-value" id="cpuStat">--%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Memory</span>
+                        <span class="stat-value" id="memoryStat">--%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">GPU</span>
+                        <span class="stat-value" id="gpuStat">--%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">🌳 Git Status</div>
+                <div class="git-info">
+                    <div class="git-branch">Branch: <span id="gitBranch">main</span></div>
+                    <div class="git-modified">Modified: <span id="gitModified">0</span> files</div>
+                </div>
+                <button id="quickCommitBtn" class="action-btn">💾 Quick Commit</button>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">📊 Recent Commits</div>
+                <div id="recentCommits" class="loading">Loading...</div>
             </div>
 
             <script>
@@ -443,6 +627,49 @@ class RobbieAvatarPanel {
                 window.addEventListener('message', event => {
                     const msg = event.data;
                     
+                    if (msg.command === 'updateRobbieBar') {
+                        // Update system stats
+                        if (msg.systemStats) {
+                            const cpuEl = document.getElementById('cpuStat');
+                            const memEl = document.getElementById('memoryStat');
+                            const gpuEl = document.getElementById('gpuStat');
+                            
+                            cpuEl.textContent = msg.systemStats.cpu.toFixed(1) + '%';
+                            memEl.textContent = msg.systemStats.memory.toFixed(1) + '%';
+                            gpuEl.textContent = msg.systemStats.gpu.toFixed(1) + '%';
+                            
+                            // Color coding
+                            [cpuEl, memEl, gpuEl].forEach(el => {
+                                const val = parseFloat(el.textContent);
+                                el.classList.remove('high', 'critical');
+                                if (val > 80) el.classList.add('critical');
+                                else if (val > 60) el.classList.add('high');
+                            });
+                        }
+                        
+                        // Update git status
+                        if (msg.gitStatus) {
+                            document.getElementById('gitBranch').textContent = msg.gitStatus.branch || 'main';
+                            document.getElementById('gitModified').textContent = msg.gitStatus.modified_files || 0;
+                        }
+                        
+                        // Update recent commits
+                        if (msg.recentCommits) {
+                            const commitsDiv = document.getElementById('recentCommits');
+                            if (msg.recentCommits.length > 0) {
+                                commitsDiv.innerHTML = msg.recentCommits.map(c => 
+                                    '<div class="commit-item">' +
+                                    '<span class="commit-hash">' + c.hash + '</span>' +
+                                    '<span class="commit-message">' + truncate(c.message, 25) + '</span>' +
+                                    '<div class="commit-time">' + c.time + '</div>' +
+                                    '</div>'
+                                ).join('');
+                            } else {
+                                commitsDiv.innerHTML = '<div class="loading">No recent commits</div>';
+                            }
+                        }
+                    }
+                    
                     if (msg.command === 'updateState') {
                         if (msg.avatarImage) {
                             document.getElementById('avatarImage').src = msg.avatarImage;
@@ -492,6 +719,36 @@ class RobbieAvatarPanel {
                 document.getElementById('refreshBtn').addEventListener('click', () => {
                     vscode.postMessage({ command: 'refresh' });
                 });
+                
+                // Add quick commit button functionality
+                document.getElementById('quickCommitBtn').addEventListener('click', async () => {
+                    const btn = document.getElementById('quickCommitBtn');
+                    btn.textContent = '⏳ Committing...';
+                    btn.disabled = true;
+                    
+                    try {
+                        const response = await fetch('http://localhost:8000/code/api/git/quick-commit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({})
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            btn.textContent = data.skipped ? '✅ No Changes' : '✅ Pushed!';
+                        } else {
+                            btn.textContent = '❌ Failed';
+                        }
+                    } catch (error) {
+                        btn.textContent = '❌ Error';
+                    }
+                    
+                    setTimeout(() => {
+                        btn.textContent = '💾 Quick Commit';
+                        btn.disabled = false;
+                    }, 2000);
+                });
             </script>
         </body>
         </html>`;
@@ -505,7 +762,7 @@ function activate(context) {
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider('robbie-avatar-view', avatarPanelProvider)
     );
-    
+
     // Register activation command
     const activateCommand = vscode.commands.registerCommand('robbie.activate', () => {
         vscode.window.showInformationMessage('Robbie Avatar activated!');

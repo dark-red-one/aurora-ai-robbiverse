@@ -510,3 +510,4 @@ if __name__ == "__main__":
     pending = get_pending_expenses()
     print(f"Pending Expenses: {len(pending)}")
 
+

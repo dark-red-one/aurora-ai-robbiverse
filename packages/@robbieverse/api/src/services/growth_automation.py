@@ -550,3 +550,4 @@ if __name__ == "__main__":
     hot_leads = get_hot_leads(10)
     print(f"Hot Leads: {len(hot_leads)}")
 
+
