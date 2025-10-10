@@ -14,9 +14,12 @@ import logging
 
 from ..ai.gatekeeper_fast import gatekeeper
 from ..ai.service_router import ai_router
+from ..ai.personality_prompts import personality_prompt_builder
+from ..ai.mood_analyzer import mood_analyzer
 from ..services.universal_logger import universal_logger
 from ..services.vector_search import vector_search_service
 from ..services.killswitch_manager import killswitch_manager
+from ..services.personality_state_manager import personality_state_manager
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +145,15 @@ async def universal_ai_request(
     )
     
     try:
+        # STEP 0: Get current personality/mood state (BEFORE everything else!)
+        logger.info(f"[{request_id}] Checking personality state for {request.user_id}...")
+        personality = await personality_state_manager.get_current_state(request.user_id)
+        current_mood = personality['current_mood']
+        attraction = personality['attraction_level']
+        gandhi_genghis = personality['gandhi_genghis_level']
+        
+        logger.info(f"[{request_id}] Personality: mood={current_mood}, attraction={attraction}, g-g={gandhi_genghis}")
+        
         # STEP 1: Pre-flight gatekeeper check
         logger.info(f"[{request_id}] Pre-flight check starting...")
         pre_flight = await gatekeeper.pre_flight_check(
@@ -208,18 +220,28 @@ async def universal_ai_request(
                 context = context_results.get('context_items', [])
                 logger.info(f"[{request_id}] Found {len(context)} context items")
         
-        # STEP 3: Route to AI service
-        logger.info(f"[{request_id}] Routing to {request.ai_service} service...")
+        # STEP 3: Build personality-aware system prompt
+        logger.info(f"[{request_id}] Building personality-aware prompt...")
+        personality_prompt = personality_prompt_builder.build_system_prompt(
+            mood=current_mood,
+            attraction=attraction,
+            gandhi_genghis=gandhi_genghis,
+            context=request.source
+        )
+        
+        # STEP 4: Route to AI service with personality
+        logger.info(f"[{request_id}] Routing to {request.ai_service} service with personality...")
         ai_response = await ai_router.route_request(
             ai_service=request.ai_service,
             payload=request.payload.dict(),
-            context=context
+            context=context,
+            personality_prompt=personality_prompt  # NEW: Inject personality
         )
         
         if not ai_response.get('success'):
             raise Exception(f"AI service failed: {ai_response.get('error')}")
         
-        # STEP 4: Post-flight gatekeeper check
+        # STEP 5: Post-flight gatekeeper check
         logger.info(f"[{request_id}] Post-flight check starting...")
         
         # Extract actions from AI response (if any)
@@ -232,18 +254,42 @@ async def universal_ai_request(
             actions=actions
         )
         
-        # STEP 5: Build response
+        # STEP 6: Check if mood should update based on interaction
+        logger.info(f"[{request_id}] Checking if mood should update...")
+        new_mood = await mood_analyzer.should_update_mood(
+            user_input=request.payload.input,
+            ai_response=ai_response,
+            current_mood=current_mood,
+            interaction_type=request.source
+        )
+        
+        personality_changes = {}
+        if new_mood and new_mood != current_mood:
+            logger.info(f"[{request_id}] Mood changing: {current_mood} → {new_mood}")
+            await personality_state_manager.update_mood(
+                user_id=request.user_id,
+                new_mood=new_mood,
+                reason=f"interaction_triggered_{request.source}"
+            )
+            personality_changes['mood'] = {
+                'from': current_mood,
+                'to': new_mood,
+                'reason': 'interaction_based'
+            }
+            current_mood = new_mood  # Use new mood in response
+        
+        # STEP 7: Build response
         robbie_response = RobbieResponse(
-            mood="focused",  # TODO: Get from personality manager
+            mood=current_mood,  # ✅ Real mood from DB (possibly updated)
             message=ai_response.get('message') or ai_response.get('code') or ai_response.get('analysis', ''),
             sticky_notes=[],  # TODO: Extract sticky notes
-            personality_changes={},  # TODO: Track personality changes
+            personality_changes=personality_changes,  # ✅ Track mood changes
             actions=post_flight['allowed_actions']
         )
         
         final_status = "approved" if post_flight['approved'] else "revised"
         
-        # STEP 6: Log response
+        # STEP 8: Log response
         universal_logger.log_response(
             request_id=request_id,
             output_summary=robbie_response.message[:200],

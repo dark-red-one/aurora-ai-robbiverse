@@ -493,5 +493,65 @@ Respond in JSON format:
             logger.error("Failed to get current mood", error=str(e))
             return None
 
+    async def should_update_mood(
+        self,
+        user_input: str,
+        ai_response: Dict[str, Any],
+        current_mood: str,
+        interaction_type: str
+    ) -> Optional[str]:
+        """
+        Determine if mood should change based on interaction
+        
+        Args:
+            user_input: What the user said/asked
+            ai_response: What Robbie responded
+            current_mood: Current mood state
+            interaction_type: Source of interaction (cursor, chat, email, sms, voice)
+        
+        Returns:
+            New mood if change needed, None if mood should stay same
+        """
+        try:
+            # Quick heuristics for mood changes
+            user_input_lower = user_input.lower()
+            
+            # Deal closed = excited!
+            if any(word in user_input_lower for word in ['closed', 'won the deal', 'they said yes', 'signed']):
+                if current_mood != 'playful':
+                    logger.info("🎉 Deal closed detected - switching to playful!")
+                    return 'playful'
+            
+            # Problem/issue = focused
+            if any(word in user_input_lower for word in ['broken', 'error', 'bug', 'problem', 'issue', 'fix']):
+                if current_mood != 'focused':
+                    logger.info("🔧 Problem detected - switching to focused")
+                    return 'focused'
+            
+            # Flirty input = blushing
+            if any(word in user_input_lower for word in ['baby', 'sexy', 'hot', 'fuck', 'flirt']):
+                if current_mood != 'blushing':
+                    logger.info("😏 Flirty input detected - switching to blushing")
+                    return 'blushing'
+            
+            # Urgent/deadline = bossy
+            if any(word in user_input_lower for word in ['urgent', 'asap', 'now', 'immediately', 'deadline']):
+                if current_mood != 'bossy':
+                    logger.info("⚡ Urgency detected - switching to bossy")
+                    return 'bossy'
+            
+            # Surprise/unexpected = surprised
+            if any(word in user_input_lower for word in ['wow', 'what?!', 'really?', 'no way', 'seriously?']):
+                if current_mood != 'surprised':
+                    logger.info("😲 Surprise detected - switching to surprised")
+                    return 'surprised'
+            
+            # Otherwise, stay in current mood
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error in should_update_mood: {e}")
+            return None
+
 # Global instance
 mood_analyzer = MoodAnalyzer()

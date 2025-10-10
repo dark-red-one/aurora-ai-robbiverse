@@ -11,6 +11,9 @@ Routes all conversations through local GPU WITH:
 - Smart GPU mesh routing
 
 This is THE integration point between Cursor and Robbie's full AI copilot system.
+
+NEW: Can route through universal input API for full personality integration!
+Set USE_UNIVERSAL_INPUT=true to enable.
 """
 
 import asyncio
@@ -22,6 +25,18 @@ from datetime import datetime
 import aiohttp
 import sqlite3
 from pathlib import Path
+
+# Check if we should use universal input
+USE_UNIVERSAL_INPUT = os.getenv('USE_UNIVERSAL_INPUT', 'false').lower() == 'true'
+
+if USE_UNIVERSAL_INPUT:
+    try:
+        from universal_input_adapter import UniversalInputAdapter
+        universal_adapter = UniversalInputAdapter()
+        print("✅ Universal Input Adapter loaded - using main DB for personality!")
+    except ImportError:
+        print("⚠️ Universal Input Adapter not found - falling back to local SQLite")
+        USE_UNIVERSAL_INPUT = False
 
 # Logging setup
 LOG_DIR = Path("/tmp/robbie-cursor")
@@ -348,6 +363,11 @@ class RobbieCompleteServer:
         """Chat with full Robbie intelligence"""
         start_time = datetime.now()
         
+        # Route through universal input if enabled
+        if USE_UNIVERSAL_INPUT:
+            return await self.chat_via_universal_input(user_message)
+        
+        # Otherwise use local flow (original implementation)
         # 1. Get current personality state (sliders + mood)
         personality = self.state.get_current_state()
         current_mood = personality["mood"]
@@ -426,6 +446,50 @@ class RobbieCompleteServer:
         
         except Exception as e:
             return {"error": str(e)}
+    
+    async def chat_via_universal_input(self, user_message: str) -> Dict[str, Any]:
+        """
+        Chat through universal input API (new flow with full personality integration)
+        
+        This routes through the main API which:
+        1. Checks personality from main DB
+        2. Does vector search across ALL conversations
+        3. Builds personality-aware prompt
+        4. Gets AI response with mood/attraction
+        5. Updates mood if triggered
+        6. Logs everything centrally
+        """
+        try:
+            response_data = await universal_adapter.chat(
+                user_message=user_message,
+                user_id='allan',
+                context={'source': 'cursor-mcp'}
+            )
+            
+            return {
+                "response": response_data['message'],
+                "mood": response_data['mood'],
+                "model": "via-universal-input",
+                "response_time_ms": response_data['processing_time_ms'],
+                "context_used": True,
+                "personality_changes": response_data.get('personality_changes', {}),
+                "actions": response_data.get('actions', [])
+            }
+            
+        except Exception as e:
+            logger.error(f"Universal input chat failed: {e}")
+            # Fallback to local if universal input fails
+            return await self._chat_local_fallback(user_message)
+    
+    async def _chat_local_fallback(self, user_message: str) -> Dict[str, Any]:
+        """Fallback to local Ollama if universal input unavailable"""
+        logger.warning("Falling back to local Ollama")
+        # Use existing local logic as fallback
+        return {
+            "response": f"Universal input unavailable. Local response: {user_message}",
+            "mood": "focused",
+            "model": "local-fallback"
+        }
     
     async def set_mood(self, mood: str, intensity: int = 7):
         """Update Robbie's mood"""

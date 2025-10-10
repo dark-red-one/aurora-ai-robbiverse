@@ -69,12 +69,49 @@ class ApiClient {
     return this.request('/api/companies')
   }
 
-  // Chat endpoints
+  // Chat endpoints (via universal input!)
   async sendMessage(message: string, conversationId?: string) {
-    return this.request('/api/chat/message', {
+    // Route through universal input API for personality + context
+    const response = await this.request('/api/v2/universal/request', {
       method: 'POST',
-      body: JSON.stringify({ message, conversation_id: conversationId }),
+      body: JSON.stringify({
+        source: 'testpilot-cpg',
+        source_metadata: {
+          sender: 'allan',
+          timestamp: new Date().toISOString(),
+          platform: 'web-app',
+          conversation_id: conversationId
+        },
+        ai_service: 'chat',
+        payload: {
+          input: message,
+          parameters: {
+            temperature: 0.7,
+            max_tokens: 1500
+          }
+        },
+        user_id: 'allan',
+        fetch_context: true  // Get vector search results
+      })
     })
+    
+    // Extract Robbie's response
+    if (response.data?.status === 'approved') {
+      return {
+        data: {
+          message: response.data.robbie_response.message,
+          mood: response.data.robbie_response.mood,
+          personality_changes: response.data.robbie_response.personality_changes,
+          actions: response.data.robbie_response.actions,
+          processing_time: response.data.processing_time_ms
+        }
+      }
+    } else {
+      return {
+        data: null,
+        error: response.data?.gatekeeper_review?.reasoning || 'Request blocked'
+      }
+    }
   }
 
   async getConversation(id: string) {
