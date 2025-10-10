@@ -21,6 +21,16 @@ except ImportError:
     context_switcher_available = False
     logger.warning("Context switcher not available")
 
+# Import OpenPhone webhook
+try:
+    import sys
+    sys.path.insert(0, '../../@robbie/integrations')
+    from openphone_webhook import router as openphone_router
+    openphone_available = True
+except ImportError:
+    openphone_available = False
+    logger.warning("OpenPhone integration not available")
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -64,6 +74,11 @@ app.include_router(monitoring.router, tags=["monitoring"])
 if context_switcher_available:
     app.include_router(context_switcher.router, tags=["contexts"])
     logger.info("🎯 Context switcher registered")
+
+# Register OpenPhone webhooks if available
+if openphone_available:
+    app.include_router(openphone_router, tags=["openphone"])
+    logger.info("📞 OpenPhone integration registered")
 
 if __name__ == "__main__":
     import uvicorn

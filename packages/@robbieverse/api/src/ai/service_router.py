@@ -46,7 +46,8 @@ class AIServiceRouter:
         self,
         ai_service: str,
         payload: Dict[str, Any],
-        context: List[Dict[str, Any]] = None
+        context: List[Dict[str, Any]] = None,
+        personality_prompt: str = None
     ) -> Dict[str, Any]:
         """
         Route request to appropriate AI service
@@ -55,6 +56,7 @@ class AIServiceRouter:
             ai_service: Type of service (chat, embedding, image, code, analysis)
             payload: Request payload
             context: Optional context from vector search
+            personality_prompt: Personality-aware system prompt (NEW!)
             
         Returns:
             AI service response
@@ -63,15 +65,15 @@ class AIServiceRouter:
         
         try:
             if ai_service == 'chat':
-                response = await self._handle_chat(payload, context)
+                response = await self._handle_chat(payload, context, personality_prompt)
             elif ai_service == 'embedding':
                 response = await self._handle_embedding(payload)
             elif ai_service == 'image':
                 response = await self._handle_image(payload)
             elif ai_service == 'code':
-                response = await self._handle_code(payload, context)
+                response = await self._handle_code(payload, context, personality_prompt)
             elif ai_service == 'analysis':
-                response = await self._handle_analysis(payload, context)
+                response = await self._handle_analysis(payload, context, personality_prompt)
             else:
                 raise ValueError(f"Unknown AI service: {ai_service}")
             
@@ -94,14 +96,15 @@ class AIServiceRouter:
     async def _handle_chat(
         self,
         payload: Dict[str, Any],
-        context: List[Dict[str, Any]] = None
+        context: List[Dict[str, Any]] = None,
+        personality_prompt: str = None
     ) -> Dict[str, Any]:
         """Handle chat request with Maverick (or fallback model)"""
         user_input = payload.get('input', '')
         parameters = payload.get('parameters', {})
         
-        # Build context-aware prompt
-        system_prompt = self._build_robbie_system_prompt()
+        # Build context-aware prompt (use personality if provided)
+        system_prompt = personality_prompt or self._build_robbie_system_prompt()
         
         # Add context if available
         if context:
@@ -195,14 +198,15 @@ class AIServiceRouter:
     async def _handle_code(
         self,
         payload: Dict[str, Any],
-        context: List[Dict[str, Any]] = None
+        context: List[Dict[str, Any]] = None,
+        personality_prompt: str = None
     ) -> Dict[str, Any]:
         """Handle code generation with Qwen 2.5-Coder"""
         user_input = payload.get('input', '')
         parameters = payload.get('parameters', {})
         
-        # Use code-specific system prompt
-        system_prompt = """You are a coding assistant. Generate clean, efficient code.
+        # Use code-specific system prompt (or personality if provided)
+        system_prompt = personality_prompt or """You are a coding assistant. Generate clean, efficient code.
 Follow best practices and include error handling. Keep code concise."""
         
         # Add context if available
@@ -241,14 +245,15 @@ Follow best practices and include error handling. Keep code concise."""
     async def _handle_analysis(
         self,
         payload: Dict[str, Any],
-        context: List[Dict[str, Any]] = None
+        context: List[Dict[str, Any]] = None,
+        personality_prompt: str = None
     ) -> Dict[str, Any]:
         """Handle analysis request with Maverick"""
         # Similar to chat but with analysis-focused prompt
         user_input = payload.get('input', '')
         parameters = payload.get('parameters', {})
         
-        system_prompt = """You are Robbie, Allan's strategic AI advisor at TestPilot CPG.
+        system_prompt = personality_prompt or """You are Robbie, Allan's strategic AI advisor at TestPilot CPG.
 Analyze the situation deeply. Think revenue-first. Consider 3 steps ahead.
 Provide direct, actionable insights."""
         
