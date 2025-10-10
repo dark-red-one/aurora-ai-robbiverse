@@ -1,0 +1,20 @@
+{
+  "name": "@robbie/blocks",
+  "version": "1.0.0",
+  "description": "Shared RobbieBlocks component library for the Robbie Ecosystem",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "test": "echo \"RobbieBlocks library - import directly into apps\""
+  },
+  "keywords": ["robbie", "blocks", "components", "personality", "ai"],
+  "author": "Allan Peretz <allan@testpilotcpg.com>",
+  "license": "PRIVATE",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "framer-motion": "^10.0.0",
+    "zustand": "^4.0.0"
+  }
+}
+

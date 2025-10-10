@@ -1,0 +1,91 @@
+{
+  "name": "robbiebar-webview",
+  "displayName": "RobbieBar - Your AI Coding Companion",
+  "description": "Beautiful webview panel showing Robbie's mood, system stats, git commands, and matrix rain",
+  "version": "2.0.0",
+  "publisher": "robbie",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "robbiebar.openPanel",
+        "title": "RobbieBar: Open Panel",
+        "icon": "$(heart)"
+      },
+      {
+        "command": "robbiebar.refresh",
+        "title": "RobbieBar: Refresh",
+        "icon": "$(refresh)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "robbiebar-sidebar",
+          "title": "RobbieBar",
+          "icon": "resources/robbie-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "robbiebar-sidebar": [
+        {
+          "type": "webview",
+          "id": "robbiebar.mainView",
+          "name": "Command Center",
+          "icon": "resources/robbie-icon.svg"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "RobbieBar",
+      "properties": {
+        "robbiebar.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "Backend API URL for robbiebar server"
+        },
+        "robbiebar.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open RobbieBar on startup"
+        },
+        "robbiebar.updateInterval": {
+          "type": "number",
+          "default": 2000,
+          "description": "Stats update interval in milliseconds"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package",
+    "install-local": "code --install-extension robbiebar-webview-2.0.0.vsix"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "vsce": "^2.15.0"
+  },
+  "keywords": [
+    "ai",
+    "robbie",
+    "assistant",
+    "personality",
+    "matrix",
+    "git"
+  ],
+  "author": "Allan Peretz",
+  "license": "MIT"
+}
+
+

@@ -8,10 +8,12 @@
         "apps/*"
     ],
     "scripts": {
-        "dev": "echo 'Choose your app: npm run dev:testpilot or npm run dev:chat'",
+        "dev": "echo 'Choose your app: npm run dev:testpilot or npm run dev:heyshopper'",
         "dev:testpilot": "cd apps/testpilot-cpg && npm run dev",
-        "dev:chat": "cd apps/chat-minimal && npm run dev",
+        "dev:heyshopper": "cd apps/heyshopper && npm run dev",
         "build": "npm run build --workspaces",
+        "build:apps": "npm run build --workspace=apps/*",
+        "build:packages": "npm run build --workspace=packages/*",
         "test": "npm run test --workspaces"
     },
     "engines": {

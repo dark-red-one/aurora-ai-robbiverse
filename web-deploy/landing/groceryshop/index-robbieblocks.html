@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestPilot - GroceryShop Follow-Up</title>
+    
+    <!-- TestPilot Brand System -->
+    <link rel="stylesheet" href="/assets/testpilot/brand.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--testpilot-gradient-dark);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--testpilot-shadow-sm);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .brand-name {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .greeting {
+            color: var(--testpilot-primary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        /* Container Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .hero-headline {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--testpilot-gray-900);
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+        
+        .hero-underline {
+            text-decoration: underline;
+            text-decoration-color: var(--testpilot-primary);
+            text-decoration-thickness: 4px;
+            text-underline-offset: 6px;
+        }
+        
+        .hero-subheadline {
+            font-size: 18px;
+            color: var(--testpilot-gray-600);
+            line-height: 1.7;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .checkmarks {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .check-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--testpilot-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            box-shadow: var(--testpilot-shadow-sm);
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 18px 24px;
+            background: white;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--testpilot-gray-300);
+            border-bottom: 3px solid transparent;
+            font-family: var(--testpilot-font-family);
+        }
+        
+        .tab:hover {
+            background: var(--testpilot-gray-50);
+            color: var(--testpilot-gray-900);
+        }
+        
+        .tab.active {
+            color: var(--testpilot-primary);
+            border-bottom-color: var(--testpilot-primary);
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 40px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: var(--testpilot-shadow-sm);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Process Steps */
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .step {
+            background: var(--testpilot-gradient-light);
+            border-radius: 12px;
+            padding: 30px 25px;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 25px;
+            width: 40px;
+            height: 40px;
+            background: var(--testpilot-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(78, 205, 196, 0.3);
+        }
+        
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 15px 0 10px;
+        }
+        
+        .step-desc {
+            font-size: 15px;
+            color: var(--testpilot-gray-600);
+            line-height: 1.6;
+        }
+        
+        /* Allan Bar (Sidebar CTA) */
+        .allan-bar {
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--testpilot-shadow-sm);
+            position: sticky;
+            top: 110px;
+            height: fit-content;
+        }
+        
+        .allan-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            background: var(--testpilot-gradient-primary);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            font-weight: 700;
+        }
+        
+        .allan-name {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .allan-title {
+            font-size: 14px;
+            color: var(--testpilot-gray-300);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .allan-bar {
+                width: 100%;
+                position: static;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-headline {
+                font-size: 28px;
+            }
+            
+            .hero-subheadline {
+                font-size: 16px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-bottom: 1px solid var(--testpilot-gray-100);
+                border-left: 3px solid transparent;
+            }
+            
+            .tab.active {
+                border-left-color: var(--testpilot-primary);
+                border-bottom-color: var(--testpilot-gray-100);
+            }
+            
+            .checkmarks {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        /* Additional Styles from Original */
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--testpilot-gray-900);
+        }
+        
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .case-item {
+            background: var(--testpilot-gray-50);
+            padding: 20px 25px;
+            border-radius: 10px;
+            border-left: 4px solid var(--testpilot-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .case-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--testpilot-shadow-md);
+        }
+        
+        .case-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .case-desc {
+            font-size: 14px;
+            color: var(--testpilot-gray-600);
+        }
+        
+        .comparison {
+            margin: 40px 0;
+            overflow-x: auto;
+        }
+        
+        .comparison-container {
+            background: var(--testpilot-gradient-primary);
+            border-radius: 12px;
+            padding: 35px;
+            color: white;
+            min-width: 600px;
+        }
+        
+        .comparison-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .comparison-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .faq-item {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--testpilot-gray-100);
+        }
+        
+        .faq-question {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .faq-answer {
+            font-size: 15px;
+            color: var(--testpilot-gray-600);
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="testpilot-logo"></div>
+                <div class="brand-name">TestPilot™</div>
+            </div>
+            <div class="greeting" id="greeting">Great connecting at GroceryShop!</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Hero -->
+            <div class="hero">
+                <h1 class="hero-headline">
+                    <span class="hero-underline">70% of CPG launches fail</span>... You don't have to be a statistic!
+                </h1>
+                <p class="hero-subheadline">
+                    TestPilot helps brands validate <span class="testpilot-bold-text">new products, packaging, pricing, and positioning</span> before launch using real shopper behavior. In just 72 hours, Robbie (our expert-trained AI co-pilot) delivers clear insights so you can act with confidence, not guesswork.
+                </p>
+            </div>
+
+            <div class="checkmarks">
+                <div class="check-item">
+                    <div class="check-icon">✓</div>
+                    <span>Setup in 30 minutes</span>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon">✓</div>
+                    <span>Results in 72 hours</span>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon">✓</div>
+                    <span>Just $49 per shopper</span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(0)">TestPilot Overview</button>
+                <button class="tab" onclick="switchTab(1)">The Science</button>
+                <button class="tab" onclick="switchTab(2)">FAQ</button>
+            </div>
+
+            <!-- Tab Content 1: Overview -->
+            <div class="tab-content active">
+                <div class="process-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Real Shoppers</div>
+                        <div class="step-desc">We bring 1.2M+ U.S. shoppers filtered by demographics or custom screening</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Simulated Stores</div>
+                        <div class="step-desc">Realistic Amazon or Walmart shelves with your product vs. 11 competitors</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-title">AI Analysis</div>
+                        <div class="step-desc">Robbie analyzes every click, scroll, and purchase to deliver actionable recommendations</div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Top 5 Use Cases</h2>
+                <div class="cases-grid">
+                    <div class="case-item">
+                        <div class="case-title">New Product Testing</div>
+                        <div class="case-desc">Which of these 3 flavors should we launch?</div>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-title">Package Design</div>
+                        <div class="case-desc">Does this new bottle outperform our current one?</div>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-title">Pricing Strategy</div>
+                        <div class="case-desc">Will shoppers trade up to our premium line?</div>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-title">Positioning & Claims</div>
+                        <div class="case-desc">Which message drives more clicks and purchases?</div>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-title">Digital Shelf Optimization</div>
+                        <div class="case-desc">Which items have the highest "right to win"?</div>
+                    </div>
+                </div>
+
+                <div class="comparison">
+                    <div class="comparison-container">
+                        <h2 class="comparison-title">🎯 Why Smart Brands Choose TestPilot</h2>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>TestPilot™</th>
+                                    <th>Focus Groups</th>
+                                    <th>Survey-Based</th>
+                                    <th>Test Markets</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Time to Results</strong></td>
+                                    <td>72 hours</td>
+                                    <td>2-3 weeks</td>
+                                    <td>2-4 weeks</td>
+                                    <td>3-6 months</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cost per Test</strong></td>
+                                    <td>$2,450+</td>
+                                    <td>$8,000+</td>
+                                    <td>$15,000+</td>
+                                    <td>$150,000+</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Real Purchase Behavior</strong></td>
+                                    <td>✓</td>
+                                    <td>✗</td>
+                                    <td>✗</td>
+                                    <td>✓</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Science -->
+            <div class="tab-content">
+                <div style="background: var(--testpilot-gradient-light); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 15px;">Meet Robbie: Your AI Co-Pilot</h2>
+                    <p style="margin-bottom: 15px;"><strong>The challenge:</strong> Traditional market research takes weeks because it requires expert analysis. Most companies can't afford to have a 25-year CPG veteran analyze every product test.</p>
+                    <p><strong>Our solution:</strong> We built Robbie - an AI co-pilot trained by actual CPG experts to deliver that same expertise in 72 hours. Think of it as <strong>expertise in a box</strong> that scales.</p>
+                </div>
+
+                <h3 class="section-title">How Robbie Delivers Quality at Speed</h3>
+                <div class="cases-grid">
+                    <div class="case-item">
+                        <div style="font-size: 32px; margin-bottom: 10px;">🎓</div>
+                        <div class="case-title">Expert Training</div>
+                        <div class="case-desc">Trained by a 25-year CPG marketer from blue-chip brands (P&G, Walmart, Amazon, Nestlé) and a PhD in statistics</div>
+                    </div>
+                    <div class="case-item">
+                        <div style="font-size: 32px; margin-bottom: 10px;">🔍</div>
+                        <div class="case-title">Pattern Recognition</div>
+                        <div class="case-desc">Analyzes thousands of data points (clicks, scrolls, purchases) to spot what distinguishes winners from underperformers</div>
+                    </div>
+                    <div class="case-item">
+                        <div style="font-size: 32px; margin-bottom: 10px;">💡</div>
+                        <div class="case-title">Actionable Insights</div>
+                        <div class="case-desc">Delivers specific recommendations (pricing tweaks, claim adjustments, packaging changes) not vague diagnoses</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 3: FAQ -->
+            <div class="tab-content">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">What is TestPilot?</div>
+                    <div class="faq-answer">A platform that helps CPG brands test product performance before launch using realistic eCommerce simulations and real shopper behavior. Results in 72 hours—faster and cheaper than traditional test markets.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">How fast and cost-effective is it?</div>
+                    <div class="faq-answer"><strong>72 hours</strong> for results. <strong>10x faster and 5x cheaper</strong> than traditional test markets. Starting at <strong>$49 per shopper</strong> with tests from 50 shoppers minimum (~$2,450 per test).</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What kind of shopper data do you use?</div>
+                    <div class="faq-answer">TestPilot recruits from <strong>over 1.2 million U.S.-based shoppers</strong> using demographic filters, psychographic groups, or custom screening questions.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Who's already using it?</div>
+                    <div class="faq-answer">Beta testers included <strong>Cholula, Modica, and Shaz & Kiks</strong>. TestPilot has helped them refine claims, pricing, and packaging—all before launch.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allan Bar (Sidebar CTA) -->
+        <div class="allan-bar">
+            <div class="allan-photo">AP</div>
+            <div class="allan-name">Allan Peretz</div>
+            <div class="allan-title">CEO & Co-Founder</div>
+            <div class="action-buttons">
+                <a href="https://calendly.com/allan-testpilotcpg/30min" class="testpilot-btn testpilot-btn-primary" target="_blank">📅 Book Meeting</a>
+                <a href="mailto:allan@testpilotcpg.com" class="testpilot-btn testpilot-btn-secondary">✉️ Email Allan</a>
+                <a href="https://www.linkedin.com/in/afperetz/" class="testpilot-btn testpilot-btn-secondary" target="_blank">💼 LinkedIn</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Robbie Popup (10-second delay) -->
+    <script>
+        // Load Robbie Popup component
+        fetch('/packages/@robbieblocks/landing/RobbiePopup.html')
+            .then(response => response.text())
+            .then(html => {
+                document.body.insertAdjacentHTML('beforeend', html);
+            })
+            .catch(err => console.log('Robbie popup load failed (non-critical)'));
+    </script>
+
+    <!-- Personalization & Tab Switching -->
+    <script>
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+
+        function personalize() {
+            let firstName = getUrlParameter('name');
+            let company = getUrlParameter('company');
+
+            if (!firstName) firstName = getCookie('visitor_name');
+            if (!company) company = getCookie('visitor_company');
+
+            if (firstName) {
+                setCookie('visitor_name', firstName, 30);
+                document.getElementById('greeting').textContent = `Hi ${firstName}! Great connecting at GroceryShop!`;
+            }
+            if (company) {
+                setCookie('visitor_company', company, 30);
+            }
+        }
+
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            tabs[index].classList.add('active');
+            contents[index].classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', personalize);
+
+        const visitorName = getUrlParameter('name') || 'Anonymous';
+        const visitorCompany = getUrlParameter('company') || 'Unknown';
+        console.log(`Page view: ${visitorName} from ${visitorCompany}`);
+    </script>
+
+    <!-- Comprehensive Tracking (from existing implementation) -->
+    <script>
+        (function() {
+            try {
+                // Generate or retrieve session ID
+                function generateUUID() {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                }
+                
+                const sessionId = sessionStorage.getItem('tracking_session_id') || generateUUID();
+                sessionStorage.setItem('tracking_session_id', sessionId);
+                
+                // Fault-tolerant tracking function
+                async function track(endpoint, data) {
+                    try {
+                        await fetch(`/api/tracking/${endpoint}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                session_id: sessionId,
+                                ...data
+                            })
+                        }).catch(() => {}); // Silent fail on network error
+                    } catch (e) {
+                        // Silent fail - never break page functionality
+                    }
+                }
+                
+                // Make track function global for Robbie Popup
+                window.track = track;
+                
+                // Initial pageview tracking
+                track('pageview', {
+                    page_url: window.location.href,
+                    page_title: document.title,
+                    referrer: document.referrer || 'direct',
+                    user_agent: navigator.userAgent,
+                    visitor_name: visitorName !== 'Anonymous' ? visitorName : null,
+                    visitor_company: visitorCompany !== 'Unknown' ? visitorCompany : null
+                });
+                
+                // Heartbeat every 10 seconds
+                setInterval(() => {
+                    try {
+                        track('heartbeat', { seconds: 10 });
+                    } catch (e) {}
+                }, 10000);
+                
+                // Scroll depth tracking with debounce
+                let maxScroll = 0;
+                let scrollTimeout;
+                window.addEventListener('scroll', function() {
+                    try {
+                        clearTimeout(scrollTimeout);
+                        scrollTimeout = setTimeout(() => {
+                            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                            const percent = Math.round((scrollTop / scrollHeight) * 100);
+                            
+                            if (percent > maxScroll) {
+                                maxScroll = percent;
+                                track('event', {
+                                    event_type: 'scroll',
+                                    event_data: { depth: percent }
+                                });
+                            }
+                        }, 500);
+                    } catch (e) {}
+                });
+                
+                // Tab switch tracking
+                document.querySelectorAll('.tab').forEach((tab, index) => {
+                    try {
+                        tab.addEventListener('click', function() {
+                            try {
+                                const tabName = this.textContent.trim();
+                                track('event', {
+                                    event_type: 'tab_switch',
+                                    event_data: { tab: tabName, index: index }
+                                });
+                            } catch (e) {}
+                        });
+                    } catch (e) {}
+                });
+                
+                // Conversion tracking on action buttons
+                document.querySelectorAll('.testpilot-btn').forEach(btn => {
+                    try {
+                        btn.addEventListener('click', function() {
+                            try {
+                                const btnText = this.textContent.trim();
+                                let conversionType = 'unknown_click';
+                                let conversionValue = 0;
+                                
+                                if (btnText.includes('Book') || btnText.includes('📅')) {
+                                    conversionType = 'calendly_book';
+                                    conversionValue = 100;
+                                } else if (btnText.includes('Email') || btnText.includes('✉️')) {
+                                    conversionType = 'email_click';
+                                    conversionValue = 50;
+                                } else if (btnText.includes('LinkedIn') || btnText.includes('💼')) {
+                                    conversionType = 'linkedin_click';
+                                    conversionValue = 25;
+                                }
+                                
+                                track('conversion', {
+                                    conversion_type: conversionType,
+                                    conversion_value: conversionValue
+                                });
+                            } catch (e) {}
+                        });
+                    } catch (e) {}
+                });
+                
+                console.log(`✅ Tracking initialized: ${sessionId}`);
+                
+            } catch (e) {
+                // Global catch - tracking never breaks the page
+                console.log('Tracking initialization failed (non-critical)');
+            }
+        })();
+    </script>
+</body>
+</html>
+

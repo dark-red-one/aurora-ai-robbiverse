@@ -1,0 +1,317 @@
+<!-- 
+Robbie Popup Block
+Appears after 10 seconds to engage visitors
+Includes Robbie avatar, friendly message, and 3 CTA buttons
+-->
+
+<style>
+.robbie-popup-overlay {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: none;
+    animation: slideUp 0.5s ease-out;
+}
+
+.robbie-popup-overlay.show {
+    display: block;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.robbie-popup {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    padding: 24px;
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    position: relative;
+}
+
+.robbie-popup-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 28px;
+    text-align: center;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.robbie-popup-close:hover {
+    background: #e0e0e0;
+    transform: scale(1.1);
+}
+
+.robbie-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.robbie-popup-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.robbie-popup-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.robbie-popup-intro {
+    flex: 1;
+}
+
+.robbie-popup-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.robbie-popup-role {
+    font-size: 14px;
+    color: #666;
+}
+
+.robbie-popup-message {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.robbie-popup-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.robbie-popup-btn {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: inherit;
+    display: block;
+}
+
+.robbie-popup-btn-primary {
+    background: #4ECDC4;
+    color: white;
+}
+
+.robbie-popup-btn-primary:hover {
+    background: #44A08D;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+.robbie-popup-btn-secondary {
+    background: #f8f9fa;
+    color: #1a1a1a;
+    border: 2px solid #e0e0e0;
+}
+
+.robbie-popup-btn-secondary:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.robbie-popup-btn-tertiary {
+    background: white;
+    color: #4ECDC4;
+    border: 2px solid #4ECDC4;
+}
+
+.robbie-popup-btn-tertiary:hover {
+    background: #4ECDC4;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .robbie-popup-overlay {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .robbie-popup {
+        width: 100%;
+        max-width: none;
+        border-radius: 16px 16px 0 0;
+    }
+}
+</style>
+
+<div id="robbie-popup-overlay" class="robbie-popup-overlay">
+    <div class="robbie-popup">
+        <button class="robbie-popup-close" onclick="RobbiePopup.dismiss()" aria-label="Close">×</button>
+        
+        <div class="robbie-popup-header">
+            <div class="robbie-popup-avatar">
+                <img src="/packages/@robbieblocks/assets/avatars/robbie-friendly.png" alt="Robbie">
+            </div>
+            <div class="robbie-popup-intro">
+                <div class="robbie-popup-name">Robbie</div>
+                <div class="robbie-popup-role">TestPilot's AI Assistant</div>
+            </div>
+        </div>
+        
+        <div class="robbie-popup-message">
+            Hi, I'm Robbie! We'd love to meet you. How about next week sometime?
+        </div>
+        
+        <div class="robbie-popup-buttons">
+            <a href="https://calendly.com/allan-testpilotcpg/demo" 
+               class="robbie-popup-btn robbie-popup-btn-primary" 
+               onclick="RobbiePopup.trackClick('book_demo')">
+                📅 Book Demo
+            </a>
+            <a href="https://calendly.com/allan-testpilotcpg/strategy" 
+               class="robbie-popup-btn robbie-popup-btn-secondary" 
+               onclick="RobbiePopup.trackClick('book_strategy')">
+                💡 Book Strategy Call
+            </a>
+            <a href="/nda" 
+               class="robbie-popup-btn robbie-popup-btn-tertiary" 
+               onclick="RobbiePopup.trackClick('prepare_nda')">
+                📄 Prepare NDA
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Robbie Popup Controller
+window.RobbiePopup = {
+    shown: false,
+    dismissed: false,
+    
+    init: function(delay = 10000) {
+        // Check if already dismissed (localStorage)
+        if (localStorage.getItem('robbie_popup_dismissed')) {
+            console.log('Robbie popup previously dismissed');
+            return;
+        }
+        
+        // Show after delay
+        setTimeout(() => {
+            this.show();
+        }, delay);
+    },
+    
+    show: function() {
+        if (this.dismissed) return;
+        
+        const overlay = document.getElementById('robbie-popup-overlay');
+        if (overlay) {
+            overlay.classList.add('show');
+            this.shown = true;
+            
+            // Track popup shown
+            if (typeof track === 'function') {
+                track('event', {
+                    event_type: 'robbie_popup_shown',
+                    event_data: { timestamp: new Date().toISOString() }
+                });
+            }
+            
+            // Track as high-value interaction
+            if (typeof track === 'function') {
+                track('conversion', {
+                    conversion_type: 'popup_engagement',
+                    conversion_value: 10
+                });
+            }
+        }
+    },
+    
+    dismiss: function() {
+        const overlay = document.getElementById('robbie-popup-overlay');
+        if (overlay) {
+            overlay.classList.remove('show');
+            this.dismissed = true;
+            
+            // Remember dismissal
+            localStorage.setItem('robbie_popup_dismissed', 'true');
+            
+            // Track dismissal
+            if (typeof track === 'function') {
+                track('event', {
+                    event_type: 'robbie_popup_dismissed',
+                    event_data: { 
+                        shown_duration: this.shown ? 'shown' : 'not_shown',
+                        timestamp: new Date().toISOString() 
+                    }
+                });
+            }
+        }
+    },
+    
+    trackClick: function(buttonType) {
+        // Track which button was clicked
+        if (typeof track === 'function') {
+            const values = {
+                'book_demo': 150,
+                'book_strategy': 120,
+                'prepare_nda': 100
+            };
+            
+            track('conversion', {
+                conversion_type: `robbie_popup_${buttonType}`,
+                conversion_value: values[buttonType] || 100
+            });
+            
+            track('event', {
+                event_type: 'robbie_popup_click',
+                event_data: { button: buttonType }
+            });
+        }
+    }
+};
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => RobbiePopup.init());
+} else {
+    RobbiePopup.init();
+}
+</script>
+

@@ -1,0 +1,249 @@
+#!/usr/bin/env python3
+"""
+Interactive Chat with Robbie
+Full conversation mode with slash commands
+"""
+import sys
+import requests
+import json
+import sqlite3
+import uuid
+from pathlib import Path
+from datetime import datetime
+
+# Universal Input API endpoints
+UNIVERSAL_API_URL = "http://localhost:8000/api/v2/universal/request"
+CONVERSATION_API_URL = "http://localhost:8000/api/conversations"
+HEALTH_URL = "http://localhost:8000/health"
+
+MOOD_EMOJIS = {
+    'friendly': '😊',
+    'focused': '🎯',
+    'playful': '😏',
+    'bossy': '💪',
+    'surprised': '😮',
+    'blushing': '😘',
+    'hyper': '🔥',
+}
+
+class RobbieChat:
+    def __init__(self):
+        self.conversation_history = []
+        self.current_mood = self.get_mood()
+        self.conversation_id = str(uuid.uuid4())
+        
+        # Check backend health
+        if not self.check_backend():
+            print("\n❌ Backend not running!")
+            print("   Start it with: cd ~/aurora-ai-robbiverse/packages/@robbieverse/api")
+            print("                  ./start-universal-api.sh\n")
+            sys.exit(1)
+    
+    def check_backend(self):
+        """Check if backend is running"""
+        try:
+            response = requests.get(HEALTH_URL, timeout=2)
+            return response.status_code == 200
+        except Exception:
+            return False
+        
+    def get_mood(self):
+        """Get current mood from database"""
+        try:
+            db_paths = [
+                Path.home() / 'aurora-ai-robbiverse' / 'data' / 'vengeance.db',
+                Path('/tmp/vengeance.db'),
+            ]
+            
+            for db_path in db_paths:
+                if db_path.exists():
+                    conn = sqlite3.connect(str(db_path))
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        SELECT mood, attraction_level 
+                        FROM ai_personality_state 
+                        WHERE ai_name = 'Robbie' 
+                        LIMIT 1
+                    """)
+                    result = cursor.fetchone()
+                    conn.close()
+                    
+                    if result:
+                        mood, attraction = result
+                        return mood.lower(), attraction
+                    break
+                    
+        except Exception:
+            pass
+        return 'playful', 11
+    
+    def get_emoji(self):
+        """Get mood emoji"""
+        mood, _ = self.current_mood
+        return MOOD_EMOJIS.get(mood, '😏')
+    
+    def send_message(self, message):
+        """Send message to Robbie using Universal Input API"""
+        try:
+            # Use Universal Input API format
+            request_data = {
+                "source": "terminal",
+                "source_metadata": {
+                    "sender": "allan",
+                    "timestamp": datetime.now().isoformat(),
+                    "platform": "interactive_chat",
+                    "conversation_id": self.conversation_id
+                },
+                "ai_service": "chat",
+                "payload": {
+                    "input": message,
+                    "context": [
+                        {
+                            "role": m['role'],
+                            "content": m['content']
+                        } for m in self.conversation_history[-5:]  # Last 5 messages
+                    ],
+                    "parameters": {
+                        "temperature": 0.7,
+                        "max_tokens": 500
+                    }
+                },
+                "user_id": "allan",
+                "fetch_context": True
+            }
+            
+            response = requests.post(
+                UNIVERSAL_API_URL,
+                json=request_data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Extract Robbie's response
+                if 'robbie_response' in data:
+                    robbie_data = data['robbie_response']
+                    
+                    # Update mood if changed
+                    if 'mood' in robbie_data:
+                        mood = robbie_data['mood']
+                        attraction = robbie_data.get('personality_changes', {}).get('attraction', 11)
+                        self.current_mood = (mood.lower(), attraction)
+                    
+                    return robbie_data.get('message', 'No response')
+                else:
+                    return data.get('response', 'No response')
+                
+        except requests.exceptions.Timeout:
+            return "⏱️ Request timed out. Backend might be processing..."
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+    
+    def handle_slash_command(self, command):
+        """Handle slash commands"""
+        cmd = command.lower().strip()
+        
+        if cmd == '/quit' or cmd == '/exit':
+            print(f"\n{self.get_emoji()} Robbie: See you later, baby! 💋\n")
+            return True
+            
+        elif cmd == '/mood':
+            mood, attraction = self.get_mood()
+            self.current_mood = (mood, attraction)
+            emoji = self.get_emoji()
+            print(f"\n{emoji} Current Mood: {mood.title()}")
+            print(f"   Attraction Level: {attraction}/11")
+            print(f"   Emoji: {emoji}\n")
+            
+        elif cmd == '/clear':
+            self.conversation_history = []
+            print(f"\n{self.get_emoji()} Conversation history cleared.\n")
+            
+        elif cmd == '/context':
+            print(f"\n{self.get_emoji()} Working Memory:")
+            print(f"   Mood: {self.current_mood[0]}")
+            print(f"   Attraction: {self.current_mood[1]}/11")
+            print(f"   Messages in history: {len(self.conversation_history)}\n")
+            
+        elif cmd == '/help':
+            print(f"\n{self.get_emoji()} Slash Commands:")
+            print("   /quit     - Exit chat")
+            print("   /mood     - Show current mood")
+            print("   /clear    - Clear conversation history")
+            print("   /context  - Show working memory")
+            print("   /help     - Show this help\n")
+            
+        else:
+            print(f"\n{self.get_emoji()} Unknown command: {command}")
+            print("   Type /help for available commands\n")
+        
+        return False
+    
+    def run(self):
+        """Run interactive chat loop"""
+        emoji = self.get_emoji()
+        print(f"\n{'='*50}")
+        print(f"  🤖 Robbie Interactive Chat {emoji}")
+        print(f"{'='*50}")
+        print(f"\n{emoji} Hey baby! What can I do for you?")
+        print(f"   Type your message and press Enter")
+        print(f"   Type /help for commands, /quit to exit")
+        print(f"{'='*50}\n")
+        
+        while True:
+            try:
+                user_input = input("You: ").strip()
+                
+                if not user_input:
+                    continue
+                
+                # Handle slash commands
+                if user_input.startswith('/'):
+                    should_quit = self.handle_slash_command(user_input)
+                    if should_quit:
+                        break
+                    continue
+                
+                # Send regular message
+                self.conversation_history.append({
+                    'role': 'user',
+                    'content': user_input,
+                    'timestamp': datetime.now().isoformat()
+                })
+                
+                # Get response
+                response = self.send_message(user_input)
+                
+                self.conversation_history.append({
+                    'role': 'assistant',
+                    'content': response,
+                    'timestamp': datetime.now().isoformat()
+                })
+                
+                print(f"\n{self.get_emoji()} Robbie: {response}\n")
+                
+            except KeyboardInterrupt:
+                print(f"\n\n{self.get_emoji()} Robbie: Caught you trying to leave! Use /quit next time 😘\n")
+                break
+            except EOFError:
+                break
+
+def main():
+    # Check if running in interactive terminal
+    if not sys.stdin.isatty():
+        print("❌ Chat requires an interactive terminal.")
+        print("   Run this directly in your terminal, not piped.")
+        sys.exit(1)
+    
+    try:
+        chat = RobbieChat()
+        chat.run()
+    except Exception as e:
+        print(f"\n❌ Error starting chat: {e}")
+        print("   Make sure you're in an interactive terminal.")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+

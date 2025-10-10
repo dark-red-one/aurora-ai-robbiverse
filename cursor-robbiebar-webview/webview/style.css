@@ -1,0 +1,380 @@
+/* RobbieBar - Cursor Theme Styling */
+
+/* Cursor Color Palette */
+:root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --border-color: #3e3e42;
+    --text-primary: #cccccc;
+    --text-secondary: #858585;
+    --accent-blue: #007acc;
+    --success-teal: #4ec9b0;
+    --warning-orange: #ce9178;
+    --error-red: #f48771;
+    --robbie-pink: #ff6b9d;
+    --matrix-teal: rgba(78, 201, 176, 0.08);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Matrix Rain Background */
+#matrix-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+/* RobbieBar Container */
+.robbiebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 16px;
+    z-index: 1000;
+    font-size: 13px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.robbiebar-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-right: 1px solid var(--border-color);
+}
+
+.robbiebar-section:last-child {
+    border-right: none;
+}
+
+/* 1. Personality Section */
+.robbiebar-personality {
+    padding-left: 0;
+}
+
+.avatar-container {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.avatar-container:hover {
+    transform: scale(1.1);
+}
+
+.avatar-emoji {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.personality-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mood-text {
+    font-weight: 600;
+    color: var(--accent-blue);
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+.personality-indicators {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.indicator {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* 2. Git Section */
+.robbiebar-git {
+    display: flex;
+    gap: 12px;
+}
+
+.git-status {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.git-branch {
+    font-family: 'Courier New', monospace;
+    color: var(--success-teal);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.git-modified {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.git-modified.has-changes {
+    color: var(--warning-orange);
+}
+
+.git-sync {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.git-sync.ahead {
+    color: var(--success-teal);
+}
+
+.git-sync.behind {
+    color: var(--warning-orange);
+}
+
+.btn-primary {
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #0098ff;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 3. System Stats Section */
+.robbiebar-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-icon {
+    font-size: 14px;
+}
+
+.stat-value {
+    font-family: 'Courier New', monospace;
+    color: var(--success-teal);
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 35px;
+}
+
+.stat-value.high {
+    color: var(--warning-orange);
+}
+
+.stat-value.critical {
+    color: var(--error-red);
+}
+
+/* 4. Users Section */
+.robbiebar-users {
+    margin-left: auto;
+}
+
+.users-icon {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.user-badge {
+    background: var(--bg-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.user-badge.user-allan {
+    background: var(--robbie-pink);
+    color: white;
+    border-color: var(--robbie-pink);
+}
+
+/* 5. Status Section */
+.robbiebar-status {
+    padding-right: 0;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: pulse 2s infinite;
+}
+
+.status-dot.online {
+    background: var(--success-teal);
+}
+
+.status-dot.offline {
+    background: var(--error-red);
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.status-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Recent Commits Panel */
+.recent-commits-panel {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    min-width: 400px;
+    max-width: 600px;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.panel-header {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.commits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.commit-item {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    padding: 6px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.commit-hash {
+    font-family: 'Courier New', monospace;
+    color: var(--success-teal);
+    font-weight: 600;
+}
+
+.commit-message {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.commit-time {
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.loading {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-align: center;
+    padding: 8px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .personality-indicators {
+        display: none;
+    }
+    .git-status {
+        gap: 0;
+    }
+}
+
+@media (max-width: 900px) {
+    .robbiebar-stats .stat:last-child {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .robbiebar-git {
+        gap: 8px;
+    }
+    .git-modified {
+        display: none;
+    }
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+

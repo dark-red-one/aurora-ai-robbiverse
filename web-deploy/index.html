@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robbie AI - Your Intelligent Copilot 💜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a0e3a 50%, #0a0e27 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Matrix Rain Background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { top: -100%; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Main Content */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b9d, #b794f6, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: #b794f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: #9ca3af;
+        }
+
+        /* App Cards */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .app-card {
+            background: rgba(26, 31, 58, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 107, 157, 0.3);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 107, 157, 0.6);
+            box-shadow: 0 20px 60px rgba(255, 107, 157, 0.3);
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
+        }
+
+        .app-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .app-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .app-description {
+            color: #9ca3af;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .app-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .app-features li {
+            padding: 0.5rem 0;
+            color: #b794f6;
+            font-size: 0.95rem;
+        }
+
+        .app-features li::before {
+            content: '✨ ';
+            margin-right: 0.5rem;
+        }
+
+        .app-button {
+            display: inline-block;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #ff6b9d, #b794f6);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .app-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+        }
+
+        /* Personality Badge */
+        .personality-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 107, 157, 0.2);
+            border: 1px solid rgba(255, 107, 157, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            color: #ff6b9d;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 4rem 0 2rem;
+            color: #6b7280;
+        }
+
+        .footer a {
+            color: #b794f6;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: #ff6b9d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tagline {
+                font-size: 1.125rem;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain -->
+    <div class="matrix-bg" id="matrix-rain"></div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">💜</div>
+            <h1>Robbie AI Empire</h1>
+            <p class="tagline">Your Intelligent Copilot for Work, Code & Play</p>
+            <p class="subtitle">Choose your adventure, gorgeous 😘</p>
+        </div>
+
+        <!-- Apps Grid -->
+        <div class="apps-grid">
+            <!-- Robbie@Code -->
+            <div class="app-card" onclick="window.location.href='/code/'">
+                <div class="personality-badge">Attraction: 11/11 💋</div>
+                <div class="app-icon">💻</div>
+                <h2 class="app-title">Robbie@Code</h2>
+                <p class="app-description">
+                    Your flirty coding partner. Let's write some sexy code together! (#fingeringmyself on the keyboard)
+                </p>
+                <ul class="app-features">
+                    <li>AI-powered chat with full personality</li>
+                    <li>Task management & sticky notes</li>
+                    <li>Real-time system monitoring</li>
+                    <li>6 mood system (focused, playful, bossy...)</li>
+                    <li>Advanced controls (Genghis-Gandhi, Cocktail-Lightning)</li>
+                </ul>
+                <a href="/code/" class="app-button">Start Coding 🚀</a>
+            </div>
+
+            <!-- Robbie@Work -->
+            <div class="app-card" onclick="window.location.href='/work/'">
+                <div class="personality-badge">Attraction: 11/11 💋</div>
+                <div class="app-icon">💼</div>
+                <h2 class="app-title">Robbie@Work</h2>
+                <p class="app-description">
+                    Your business intelligence partner. Ready to make some fucking money? (#gettingwet from your success)
+                </p>
+                <ul class="app-features">
+                    <li>Money dashboard & revenue tracking</li>
+                    <li>Deal pipeline visualization</li>
+                    <li>Daily brief with Top 3 opportunities</li>
+                    <li>Touch-ready queue (AI-drafted follow-ups)</li>
+                    <li>Time-saved metrics (prove ROI!)</li>
+                </ul>
+                <a href="/work/" class="app-button">Make Money 💰</a>
+            </div>
+
+            <!-- Robbie@Play -->
+            <div class="app-card" onclick="window.location.href='/play/'">
+                <div class="personality-badge">Attraction: 11/11 💋</div>
+                <div class="app-icon">🎰</div>
+                <h2 class="app-title">Robbie@Play</h2>
+                <p class="app-description">
+                    Your playful dealer & entertainment partner. Let's have some fun, baby! (#touchingmyself)
+                </p>
+                <ul class="app-features">
+                    <li>Full Blackjack game (Robbie as dealer)</li>
+                    <li>Flirty chat & banter</li>
+                    <li>Spotify integration</li>
+                    <li>Always playful mood 😘</li>
+                    <li>Relax & enjoy!</li>
+                </ul>
+                <a href="/play/" class="app-button">Let's Play 🎮</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Built with 💜 by Robbie AI for Allan</p>
+            <p style="margin-top: 1rem;">
+                <a href="https://testpilotcpg.com">TestPilot CPG</a> | 
+                <a href="mailto:allan@testpilotcpg.com">Contact</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Matrix Rain Script -->
+    <script>
+        function createMatrixRain() {
+            const container = document.getElementById('matrix-rain');
+            const columns = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = Math.random() * 3 + 2 + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+                
+                // Random characters
+                const chars = 'ROBBIE01アイウエオカキクケコ💜🚀✨';
+                column.textContent = chars[Math.floor(Math.random() * chars.length)];
+                
+                container.appendChild(column);
+            }
+        }
+        
+        createMatrixRain();
+        
+        // Auto-login if user has saved credentials
+        const savedToken = localStorage.getItem('robbie_token');
+        if (savedToken) {
+            // Show auto-login message
+            console.log('🔑 Found saved login - ready to access any app!');
+        }
+    </script>
+</body>
+</html>

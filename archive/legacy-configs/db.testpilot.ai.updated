@@ -1,0 +1,24 @@
+;
+; BIND data file for testpilot.ai
+;
+$TTL    604800
+@       IN      SOA     ns1.testpilot.ai. admin.testpilot.ai. (
+                              3         ; Serial (increased)
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      ns1.testpilot.ai.
+@       IN      NS      ns2.testpilot.ai.
+
+; A records
+@       IN      A       155.138.194.222
+ns1     IN      A       155.138.194.222
+ns2     IN      A       155.138.194.222
+
+; Aurora subdomain
+aurora  IN      A       155.138.194.222
+
+; CNAME records
+www     IN      CNAME   @
