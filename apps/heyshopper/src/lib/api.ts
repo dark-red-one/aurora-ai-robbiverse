@@ -1,7 +1,7 @@
 /**
  * API Client for HeyShopper
  * 
- * Routes through universal input API for personality-aware responses
+ * Connects to Robbie API via Universal Input
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
@@ -46,9 +46,9 @@ class ApiClient {
     }
   }
 
-  // Chat with Robbie (via universal input!)
-  async chat(message: string) {
-    // Route through universal input API
+  // Chat endpoint (via universal input!)
+  async sendMessage(message: string, conversationId?: string) {
+    // Route through universal input API for personality + context
     const response = await this.request('/api/v2/universal/request', {
       method: 'POST',
       body: JSON.stringify({
@@ -56,27 +56,30 @@ class ApiClient {
         source_metadata: {
           sender: 'user',
           timestamp: new Date().toISOString(),
-          platform: 'web-app'
+          platform: 'web-app',
+          conversation_id: conversationId
         },
         ai_service: 'chat',
         payload: {
           input: message,
           parameters: {
-            temperature: 0.8,  // Slightly higher for friendly shopping assistant
-            max_tokens: 1000
+            temperature: 0.7,
+            max_tokens: 1500
           }
         },
-        user_id: 'guest',  // HeyShopper users are guests by default
+        user_id: 'guest',  // HeyShopper is public, so use guest
         fetch_context: true
       })
     })
     
-    // Extract response
+    // Extract Robbie's response
     if (response.data?.status === 'approved') {
       return {
         data: {
           message: response.data.robbie_response.message,
           mood: response.data.robbie_response.mood,
+          personality_changes: response.data.robbie_response.personality_changes,
+          actions: response.data.robbie_response.actions,
           processing_time: response.data.processing_time_ms
         }
       }
@@ -88,15 +91,22 @@ class ApiClient {
     }
   }
 
-  // Search products (future)
+  // Shopper insights (future endpoint)
+  async getShopperInsights(productId?: string) {
+    const query = productId ? `?product_id=${productId}` : ''
+    return this.request(`/api/shopper/insights${query}`)
+  }
+
+  // Product search (future endpoint)
   async searchProducts(query: string) {
-    return this.request('/api/products/search', {
-      method: 'POST',
-      body: JSON.stringify({ query })
-    })
+    return this.request(`/api/shopper/search?q=${encodeURIComponent(query)}`)
+  }
+
+  // Personality
+  async getCurrentMood() {
+    return this.request('/api/personality/mood')
   }
 }
 
 export const api = new ApiClient()
 export default api
-

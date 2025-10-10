@@ -1,205 +1,198 @@
 """
 Universal Input Adapter for Cursor MCP
-=======================================
-Routes Cursor MCP requests through the universal input API instead of local SQLite.
+======================================
+Routes Cursor MCP requests through the Universal Input API.
 
-This gives Cursor:
-- Real personality state from main DB
-- Vector search across ALL conversations (not just Cursor)
-- Consistent mood with chat apps, email, SMS, voice
-- Centralized logging
+This decouples Cursor from local SQLite/Ollama and uses the centralized
+personality management, vector search, and logging system.
 """
 
 import aiohttp
+import asyncio
 import logging
-from typing import Dict, Any, Optional
-from datetime import datetime
+from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
-UNIVERSAL_INPUT_URL = "http://localhost:8000/api/v2/universal/request"
 
 class UniversalInputAdapter:
-    """Adapter for routing Cursor requests through universal input API"""
+    """Adapter to route MCP requests through Universal Input API"""
     
-    def __init__(self, api_url: str = UNIVERSAL_INPUT_URL):
+    def __init__(self, api_url: str = "http://localhost:8000"):
         self.api_url = api_url
+        self.universal_endpoint = f"{api_url}/api/v2/universal/request"
+        self.health_endpoint = f"{api_url}/api/v2/universal/health"
     
     async def chat(
         self,
-        user_message: str,
-        user_id: str = 'allan',
-        context: Optional[Dict[str, Any]] = None
+        user_input: str,
+        user_id: str = "allan",
+        context: List[Dict[str, Any]] = None,
+        temperature: float = 0.7
     ) -> Dict[str, Any]:
         """
-        Send chat message through universal input API
+        Send chat request through Universal Input API
         
         Args:
-            user_message: What the user said in Cursor
-            user_id: User identifier
-            context: Optional additional context
-        
+            user_input: User's message/query
+            user_id: User identifier (for per-user personality)
+            context: Optional pre-fetched context
+            temperature: AI temperature parameter
+            
         Returns:
-        {
-            'message': "Robbie's response",
-            'mood': 'focused',
-            'attraction': 11,
-            'gandhi_genghis': 7,
-            'personality_changes': {},
-            'actions': [],
-            'processing_time_ms': 1500
-        }
+            {
+                'success': bool,
+                'message': str,
+                'mood': str,
+                'personality_changes': dict,
+                'actions': list
+            }
         """
         try:
-            # Build request
-            payload = {
-                'source': 'cursor',
-                'source_metadata': {
-                    'sender': user_id,
-                    'timestamp': datetime.now().isoformat(),
-                    'platform': 'cursor-mcp',
-                    'extra': context or {}
-                },
-                'ai_service': 'chat',
-                'payload': {
-                    'input': user_message,
-                    'parameters': {
-                        'temperature': 0.7,
-                        'max_tokens': 2000  # Cursor can handle longer responses
-                    }
-                },
-                'user_id': user_id,
-                'fetch_context': True  # Get vector search results
-            }
-            
-            # Call universal input API
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, json=payload, timeout=30) as response:
-                    if response.status != 200:
-                        error_text = await response.text()
-                        logger.error(f"Universal input API error: {response.status} - {error_text}")
-                        raise Exception(f"API returned {response.status}")
-                    
-                    data = await response.json()
-            
-            # Check if request was approved
-            if data['status'] != 'approved':
-                logger.warning(f"Request blocked: {data['gatekeeper_review']['reasoning']}")
-                return {
-                    'message': f"Request blocked by gatekeeper: {data['gatekeeper_review']['reasoning']}",
-                    'mood': 'focused',
-                    'attraction': 7,
-                    'gandhi_genghis': 7,
-                    'personality_changes': {},
-                    'actions': [],
-                    'processing_time_ms': data['processing_time_ms']
+                payload = {
+                    "source": "cursor-mcp",
+                    "source_metadata": {
+                        "platform": "cursor",
+                        "timestamp": asyncio.get_event_loop().time()
+                    },
+                    "ai_service": "chat",
+                    "payload": {
+                        "input": user_input,
+                        "context": context,
+                        "parameters": {
+                            "temperature": temperature,
+                            "max_tokens": 1500
+                        }
+                    },
+                    "user_id": user_id,
+                    "fetch_context": True  # Get vector search context
                 }
-            
-            # Extract response
-            robbie_response = data['robbie_response']
-            
-            return {
-                'message': robbie_response['message'],
-                'mood': robbie_response['mood'],
-                'attraction': 11,  # Will come from personality state
-                'gandhi_genghis': 7,  # Will come from personality state
-                'personality_changes': robbie_response.get('personality_changes', {}),
-                'actions': robbie_response.get('actions', []),
-                'sticky_notes': robbie_response.get('sticky_notes', []),
-                'processing_time_ms': data['processing_time_ms']
-            }
-            
-        except Exception as e:
-            logger.error(f"Failed to call universal input: {e}")
-            # Return error response
-            return {
-                'message': f"Sorry, I'm having trouble right now: {str(e)}",
-                'mood': 'focused',
-                'attraction': 7,
-                'gandhi_genghis': 7,
-                'personality_changes': {},
-                'actions': [],
-                'processing_time_ms': 0
-            }
-    
-    async def get_personality_state(self, user_id: str = 'allan') -> Dict[str, Any]:
-        """
-        Get current personality state from main DB (via API)
-        
-        Returns:
-        {
-            'mood': 'focused',
-            'attraction': 11,
-            'gandhi_genghis': 7,
-            'updated_at': '2025-10-10T12:00:00Z'
-        }
-        """
-        try:
-            # Call personality endpoint (assuming it exists)
-            personality_url = self.api_url.replace('/universal/request', f'/personality/{user_id}')
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.get(personality_url, timeout=5) as response:
+                
+                logger.info(f"[Cursor MCP] Sending request to Universal Input API: {user_input[:50]}...")
+                
+                async with session.post(
+                    self.universal_endpoint,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=30)
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
-                        return data.get('personality', {})
+                        
+                        if data.get('status') == 'approved':
+                            robbie = data.get('robbie_response', {})
+                            
+                            logger.info(f"[Cursor MCP] ✅ Response received (mood: {robbie.get('mood')})")
+                            
+                            return {
+                                'success': True,
+                                'message': robbie.get('message', ''),
+                                'mood': robbie.get('mood', 'focused'),
+                                'personality_changes': robbie.get('personality_changes', {}),
+                                'actions': robbie.get('actions', []),
+                                'processing_time_ms': data.get('processing_time_ms', 0)
+                            }
+                        else:
+                            # Request was rejected or revised
+                            logger.warning(f"[Cursor MCP] Request {data.get('status')}: {data.get('gatekeeper_review', {}).get('reasoning')}")
+                            
+                            return {
+                                'success': False,
+                                'error': data.get('gatekeeper_review', {}).get('reasoning', 'Request blocked'),
+                                'status': data.get('status')
+                            }
                     else:
-                        # Return defaults
+                        error_text = await response.text()
+                        logger.error(f"[Cursor MCP] API returned {response.status}: {error_text}")
+                        
                         return {
-                            'mood': 'focused',
-                            'attraction': 11,
-                            'gandhi_genghis': 7,
-                            'updated_at': datetime.now().isoformat()
+                            'success': False,
+                            'error': f"API error: {response.status}"
                         }
-        except Exception as e:
-            logger.error(f"Failed to get personality state: {e}")
+                        
+        except asyncio.TimeoutError:
+            logger.error("[Cursor MCP] Request timeout")
             return {
-                'mood': 'focused',
-                'attraction': 11,
-                'gandhi_genghis': 7,
-                'updated_at': datetime.now().isoformat()
+                'success': False,
+                'error': "Request timeout - API took too long to respond"
+            }
+        except Exception as e:
+            logger.error(f"[Cursor MCP] Universal Input request failed: {e}")
+            return {
+                'success': False,
+                'error': str(e)
             }
     
-    async def update_personality(
-        self,
-        user_id: str = 'allan',
-        mood: Optional[str] = None,
-        attraction: Optional[int] = None,
-        gandhi_genghis: Optional[int] = None
-    ) -> bool:
+    async def check_health(self) -> bool:
         """
-        Update personality state in main DB
+        Check if Universal Input API is available
         
         Returns:
-            True if successful
+            True if API is healthy, False otherwise
         """
         try:
-            personality_url = self.api_url.replace('/universal/request', f'/personality/{user_id}')
-            
-            update_data = {}
-            if mood:
-                update_data['current_mood'] = mood
-            if attraction is not None:
-                update_data['attraction_level'] = attraction
-            if gandhi_genghis is not None:
-                update_data['gandhi_genghis_level'] = gandhi_genghis
-            
-            if not update_data:
-                return True
-            
             async with aiohttp.ClientSession() as session:
-                async with session.put(
-                    personality_url,
-                    json=update_data,
-                    timeout=5
+                async with session.get(
+                    self.health_endpoint,
+                    timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
-                    return response.status == 200
-                    
+                    if response.status == 200:
+                        data = await response.json()
+                        is_healthy = data.get('status') == 'healthy'
+                        
+                        if is_healthy:
+                            logger.info("[Cursor MCP] ✅ Universal Input API is healthy")
+                        else:
+                            logger.warning("[Cursor MCP] ⚠️ Universal Input API reports unhealthy")
+                        
+                        return is_healthy
+                    else:
+                        logger.error(f"[Cursor MCP] Health check failed: {response.status}")
+                        return False
+                        
         except Exception as e:
-            logger.error(f"Failed to update personality: {e}")
+            logger.error(f"[Cursor MCP] Health check error: {e}")
             return False
+    
+    async def get_personality_status(self, user_id: str = "allan") -> Dict[str, Any]:
+        """
+        Get current personality status for user
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            {
+                'mood': str,
+                'attraction': int,
+                'gandhi_genghis': int,
+                'updated_at': str
+            }
+        """
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{self.api_url}/api/personality/{user_id}",
+                    timeout=aiohttp.ClientTimeout(total=5)
+                ) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    else:
+                        logger.error(f"[Cursor MCP] Failed to get personality status: {response.status}")
+                        return {
+                            'mood': 'focused',
+                            'attraction': 7,
+                            'gandhi_genghis': 7
+                        }
+                        
+        except Exception as e:
+            logger.error(f"[Cursor MCP] Personality status error: {e}")
+            return {
+                'mood': 'focused',
+                'attraction': 7,
+                'gandhi_genghis': 7
+            }
 
 
 # Global instance
 universal_input_adapter = UniversalInputAdapter()
-

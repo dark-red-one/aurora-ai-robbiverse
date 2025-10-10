@@ -1,240 +1,167 @@
 """
-OpenPhone Webhook Endpoints
-============================
-FastAPI routes for OpenPhone webhook callbacks.
+OpenPhone Webhooks
+==================
+FastAPI webhooks for incoming OpenPhone SMS and voice calls.
 
-Configure in OpenPhone dashboard:
-- SMS webhook: https://your-domain.com/webhooks/openphone/sms
-- Voice webhook: https://your-domain.com/webhooks/openphone/voice
-
-All requests route through universal input API for:
-- Personality-aware responses
-- Vector search context
-- Consistent mood across channels
-- Comprehensive logging
+Register these endpoints in your OpenPhone dashboard:
+- SMS: POST /webhooks/openphone/sms
+- Voice: POST /webhooks/openphone/voice
 """
 
 import logging
-from fastapi import APIRouter, Request, HTTPException
-from typing import Dict, Any
-from datetime import datetime
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional, List
 
-from .openphone_handler import (
-    handle_incoming_sms,
-    handle_incoming_call
-)
+from .openphone_handler import openphone_handler
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/webhooks/openphone", tags=["openphone"])
 
 
+# ============================================
+# PYDANTIC MODELS
+# ============================================
+
+class OpenPhoneSMSWebhook(BaseModel):
+    """Incoming SMS webhook from OpenPhone"""
+    id: str
+    object: str = "message"
+    createdAt: str
+    direction: str = "incoming"
+    from_: str = Field(..., alias="from")
+    to: List[str]
+    media: Optional[List[Dict[str, Any]]] = []
+    body: str
+    status: str
+
+
+class OpenPhoneVoiceWebhook(BaseModel):
+    """Incoming voice call webhook from OpenPhone"""
+    id: str
+    object: str = "call"
+    createdAt: str
+    direction: str = "incoming"
+    from_: str = Field(..., alias="from")
+    to: str
+    status: str
+    duration: Optional[int] = None
+    recording: Optional[Dict[str, Any]] = None
+    transcription: Optional[str] = None
+
+
+# ============================================
+# WEBHOOK ENDPOINTS
+# ============================================
+
 @router.post("/sms")
-async def openphone_sms_webhook(request: Request) -> Dict[str, Any]:
+async def openphone_sms_webhook(webhook: OpenPhoneSMSWebhook):
     """
-    Webhook for incoming SMS from OpenPhone
+    Handle incoming SMS from OpenPhone
     
-    OpenPhone will POST here when SMS arrives:
-    {
-      "id": "msg_xxx",
-      "from": "+1234567890",
-      "to": "+1987654321",
-      "text": "Hey Robbie, what's my pipeline worth?",
-      "createdAt": "2025-10-10T12:00:00Z",
-      "direction": "incoming"
-    }
+    OpenPhone will call this endpoint when an SMS is received.
+    We route it through the universal input API and send a reply.
     """
     try:
-        data = await request.json()
+        logger.info(f"📱 OpenPhone SMS webhook received from {webhook.from_}")
         
-        # Extract SMS details
-        phone_number = data.get('from')
-        message_text = data.get('text', '')
-        message_id = data.get('id')
-        timestamp = data.get('createdAt')
+        # Only process incoming messages
+        if webhook.direction != "incoming":
+            logger.info(f"Ignoring {webhook.direction} message")
+            return {"status": "ignored", "reason": "not_incoming"}
         
-        if not phone_number or not message_text:
-            raise HTTPException(status_code=400, detail="Missing required fields: 'from' or 'text'")
+        # Look up user by phone number
+        user_id = openphone_handler.lookup_user_by_phone(webhook.from_)
         
-        logger.info(f"📱 SMS webhook triggered - from {phone_number}")
-        
-        # Identify user (for now, assume Allan)
-        # TODO: Add phone number to user mapping
-        user_id = 'allan'
-        
-        # Build metadata
-        metadata = {
-            'message_id': message_id,
-            'timestamp': timestamp,
-            'direction': data.get('direction'),
-            'openphone_data': data
-        }
-        
-        # Process through universal input
-        response_message = await handle_incoming_sms(
-            phone_number=phone_number,
-            message=message_text,
-            user_id=user_id,
-            metadata=metadata
+        # Handle the SMS
+        result = await openphone_handler.handle_incoming_sms(
+            from_number=webhook.from_,
+            message_body=webhook.body,
+            user_id=user_id
         )
         
-        return {
-            "status": "processed",
-            "message_id": message_id,
-            "response_sent": True,
-            "response_preview": response_message[:100],
-            "timestamp": datetime.now().isoformat()
-        }
-        
+        if result['success']:
+            return {
+                "status": "success",
+                "message": "SMS processed and reply sent",
+                "response": result['response'],
+                "mood": result['mood']
+            }
+        else:
+            logger.error(f"Failed to process SMS: {result.get('error')}")
+            return {
+                "status": "error",
+                "message": result.get('error', 'Unknown error')
+            }
+    
     except Exception as e:
-        logger.error(f"SMS webhook error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"SMS processing failed: {str(e)}")
+        logger.error(f"Error in SMS webhook: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Webhook processing failed: {str(e)}")
 
 
 @router.post("/voice")
-async def openphone_voice_webhook(request: Request) -> Dict[str, Any]:
+async def openphone_voice_webhook(webhook: OpenPhoneVoiceWebhook):
     """
-    Webhook for voice calls from OpenPhone
+    Handle incoming voice call from OpenPhone
     
-    OpenPhone will POST here during/after voice call:
-    {
-      "id": "call_xxx",
-      "from": "+1234567890",
-      "to": "+1987654321",
-      "transcription": "Hey Robbie, can you tell me about my top deals?",
-      "duration": 45,
-      "createdAt": "2025-10-10T12:00:00Z",
-      "status": "completed"
-    }
+    OpenPhone will call this endpoint when a voice call is received.
+    If transcription is available, we route it through the universal input API.
     """
     try:
-        data = await request.json()
+        logger.info(f"📞 OpenPhone voice webhook received from {webhook.from_}")
         
-        # Extract call details
-        phone_number = data.get('from')
-        transcription = data.get('transcription', '')
-        call_id = data.get('id')
-        duration = data.get('duration')
-        timestamp = data.get('createdAt')
+        # Only process incoming calls
+        if webhook.direction != "incoming":
+            logger.info(f"Ignoring {webhook.direction} call")
+            return {"status": "ignored", "reason": "not_incoming"}
         
-        if not phone_number:
-            raise HTTPException(status_code=400, detail="Missing required field: 'from'")
-        
-        if not transcription:
-            # No transcription yet - might be real-time call
+        # Check if we have a transcription
+        if not webhook.transcription:
+            logger.info("No transcription available yet")
             return {
-                "status": "waiting",
+                "status": "pending",
                 "message": "Waiting for transcription"
             }
         
-        logger.info(f"📞 Voice webhook triggered - from {phone_number}, duration {duration}s")
+        # Look up user by phone number
+        user_id = openphone_handler.lookup_user_by_phone(webhook.from_)
         
-        # Identify user
-        user_id = 'allan'
-        
-        # Build metadata
-        metadata = {
-            'call_id': call_id,
-            'timestamp': timestamp,
-            'duration': duration,
-            'status': data.get('status'),
-            'openphone_data': data
-        }
-        
-        # Process through universal input
-        response_message = await handle_incoming_call(
-            phone_number=phone_number,
-            transcribed_text=transcription,
-            user_id=user_id,
-            metadata=metadata
+        # Handle the voice call
+        result = await openphone_handler.handle_incoming_call(
+            from_number=webhook.from_,
+            transcribed_text=webhook.transcription,
+            user_id=user_id
         )
         
-        return {
-            "status": "processed",
-            "call_id": call_id,
-            "speech_response": response_message,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Voice webhook error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Voice processing failed: {str(e)}")
-
-
-@router.post("/status")
-async def openphone_status_webhook(request: Request) -> Dict[str, Any]:
-    """
-    Webhook for OpenPhone status updates (delivery receipts, etc.)
+        if result['success']:
+            return {
+                "status": "success",
+                "message": "Voice call processed",
+                "response": result['response'],
+                "mood": result['mood'],
+                "speak": result.get('speak', False)
+            }
+        else:
+            logger.error(f"Failed to process voice call: {result.get('error')}")
+            return {
+                "status": "error",
+                "message": result.get('error', 'Unknown error')
+            }
     
-    OpenPhone sends status updates for messages/calls:
-    {
-      "id": "msg_xxx",
-      "status": "delivered|failed|read",
-      "updatedAt": "2025-10-10T12:00:01Z"
-    }
-    """
-    try:
-        data = await request.json()
-        
-        message_id = data.get('id')
-        status = data.get('status')
-        
-        logger.info(f"📊 OpenPhone status update - {message_id}: {status}")
-        
-        # Log status update (could store in DB for analytics)
-        # For now, just acknowledge
-        
-        return {
-            "status": "acknowledged",
-            "message_id": message_id,
-            "received_status": status
-        }
-        
     except Exception as e:
-        logger.error(f"Status webhook error: {e}")
-        return {"status": "error", "message": str(e)}
+        logger.error(f"Error in voice webhook: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Webhook processing failed: {str(e)}")
 
 
 @router.get("/health")
-async def openphone_health():
-    """Health check for OpenPhone integration"""
-    
-    has_api_key = bool(OPENPHONE_API_KEY)
-    has_phone_number = bool(OPENPHONE_NUMBER)
-    
+async def openphone_webhook_health():
+    """Health check for OpenPhone webhooks"""
     return {
-        "status": "healthy" if (has_api_key and has_phone_number) else "misconfigured",
-        "api_key_configured": has_api_key,
-        "phone_number_configured": has_phone_number,
-        "universal_input_url": UNIVERSAL_INPUT_URL
+        "status": "healthy",
+        "service": "openphone-webhooks",
+        "endpoints": {
+            "sms": "/webhooks/openphone/sms",
+            "voice": "/webhooks/openphone/voice"
+        }
     }
-
-
-# ============================================
-# HELPER: Identify User by Phone Number
-# ============================================
-
-async def identify_user_by_phone(phone_number: str) -> str:
-    """
-    Identify user by phone number
-    
-    For now, returns 'allan' for Allan's number, 'guest' for others.
-    TODO: Add phone number mapping in database.
-    
-    Args:
-        phone_number: Phone number to identify
-    
-    Returns:
-        user_id string
-    """
-    # Allan's numbers (add to .env)
-    allan_numbers = os.getenv('ALLAN_PHONE_NUMBERS', '').split(',')
-    
-    if phone_number in allan_numbers:
-        return 'allan'
-    else:
-        # For other numbers, could check contacts table
-        # For now, return guest
-        logger.info(f"Unknown phone number: {phone_number} - treating as guest")
-        return 'guest'
-

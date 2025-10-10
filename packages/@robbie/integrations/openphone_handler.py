@@ -1,10 +1,9 @@
 """
-OpenPhone Integration - Voice + SMS
-====================================
-Handles both SMS and voice calls through universal input API.
-Uses OpenPhone API for business phone/SMS automation.
+OpenPhone Handler
+=================
+Handles incoming SMS and voice calls via OpenPhone API.
 
-OpenPhone API Docs: https://developer.openphone.com/
+Routes everything through Universal Input API for consistent personality.
 """
 
 import os
@@ -14,286 +13,242 @@ from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
-# OpenPhone configuration
-OPENPHONE_API_KEY = os.getenv('OPENPHONE_API_KEY')
-OPENPHONE_API_URL = 'https://api.openphone.com/v1'
-OPENPHONE_NUMBER = os.getenv('OPENPHONE_NUMBER')  # Your OpenPhone business number
-UNIVERSAL_INPUT_URL = os.getenv('UNIVERSAL_INPUT_URL', 'http://localhost:8000/api/v2/universal/request')
 
-
-async def call_universal_input(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Call the universal input API
-    Returns the complete response including personality state
-    """
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(UNIVERSAL_INPUT_URL, json=payload) as response:
-                if response.status == 200:
-                    return await response.json()
-                else:
-                    error_text = await response.text()
-                    logger.error(f"Universal input API error: {response.status} - {error_text}")
-                    raise Exception(f"API error: {response.status}")
-    except Exception as e:
-        logger.error(f"Failed to call universal input: {e}")
-        raise
-
-
-async def handle_incoming_sms(
-    phone_number: str,
-    message: str,
-    user_id: str = 'allan',
-    metadata: Optional[Dict[str, Any]] = None
-) -> str:
-    """
-    Process incoming SMS through universal input API
+class OpenPhoneHandler:
+    """Handle OpenPhone SMS and voice interactions"""
     
-    Args:
-        phone_number: Sender's phone number
-        message: SMS message text
-        user_id: User identifier (default: allan)
-        metadata: Additional metadata from OpenPhone
+    def __init__(self):
+        self.api_key = os.getenv("OPENPHONE_API_KEY")
+        self.phone_number = os.getenv("OPENPHONE_NUMBER")
+        self.openphone_api = "https://api.openphone.com/v1"
+        self.universal_input_url = "http://localhost:8000/api/v2/universal/request"
+        
+        if not self.api_key:
+            logger.warning("⚠️ OPENPHONE_API_KEY not set - OpenPhone integration disabled")
     
-    Returns:
-        Robbie's response message (personality-aware)
-    """
-    logger.info(f"📱 Incoming SMS from {phone_number}: {message[:50]}...")
-    
-    # Build universal input request
-    payload = {
-        'source': 'sms',
-        'source_metadata': {
-            'sender': phone_number,
-            'timestamp': metadata.get('timestamp') if metadata else None,
-            'platform': 'openphone',
-            'extra': metadata or {}
-        },
-        'ai_service': 'chat',
-        'payload': {
-            'input': message,
-            'parameters': {
-                'temperature': 0.7,
-                'max_tokens': 500  # Keep SMS responses concise
+    async def handle_incoming_sms(
+        self,
+        from_number: str,
+        message_body: str,
+        user_id: str = "guest"
+    ) -> Dict[str, Any]:
+        """
+        Handle incoming SMS message
+        
+        Args:
+            from_number: Sender's phone number
+            message_body: SMS message content
+            user_id: User ID (based on phone number lookup)
+            
+        Returns:
+            Response data with AI-generated reply
+        """
+        try:
+            logger.info(f"📱 Incoming SMS from {from_number}: {message_body[:50]}...")
+            
+            # Route through universal input API
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.universal_input_url,
+                    json={
+                        "source": "openphone-sms",
+                        "source_metadata": {
+                            "sender": from_number,
+                            "platform": "sms"
+                        },
+                        "ai_service": "chat",
+                        "payload": {
+                            "input": message_body,
+                            "parameters": {
+                                "temperature": 0.7,
+                                "max_tokens": 160  # SMS length limit
+                            }
+                        },
+                        "user_id": user_id,
+                        "fetch_context": True
+                    },
+                    timeout=aiohttp.ClientTimeout(total=20)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        if data.get('status') == 'approved':
+                            robbie_response = data['robbie_response']['message']
+                            
+                            # Send SMS reply
+                            await self.send_sms(from_number, robbie_response)
+                            
+                            logger.info(f"✅ SMS reply sent to {from_number}")
+                            
+                            return {
+                                'success': True,
+                                'response': robbie_response,
+                                'mood': data['robbie_response']['mood']
+                            }
+                        else:
+                            logger.warning(f"Request rejected: {data.get('gatekeeper_review', {}).get('reasoning')}")
+                            return {
+                                'success': False,
+                                'error': 'Message blocked by gatekeeper'
+                            }
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Universal input API error: {response.status} - {error_text}")
+                        return {
+                            'success': False,
+                            'error': f"API error: {response.status}"
+                        }
+        
+        except Exception as e:
+            logger.error(f"Error handling incoming SMS: {e}")
+            return {
+                'success': False,
+                'error': str(e)
             }
-        },
-        'user_id': user_id,
-        'fetch_context': True  # Get relevant conversation history
-    }
     
-    try:
-        # Route through universal input
-        response = await call_universal_input(payload)
+    async def handle_incoming_call(
+        self,
+        from_number: str,
+        transcribed_text: str,
+        user_id: str = "guest"
+    ) -> Dict[str, Any]:
+        """
+        Handle incoming voice call (transcribed)
         
-        if response['status'] != 'approved':
-            logger.warning(f"SMS response blocked: {response['gatekeeper_review']['reasoning']}")
-            # Return safe fallback
-            return "I received your message. Let me review and get back to you shortly."
+        Args:
+            from_number: Caller's phone number
+            transcribed_text: Transcribed voice content
+            user_id: User ID (based on phone number lookup)
+            
+        Returns:
+            Response data with AI-generated reply (can be spoken back)
+        """
+        try:
+            logger.info(f"📞 Incoming call from {from_number}: {transcribed_text[:50]}...")
+            
+            # Route through universal input API
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.universal_input_url,
+                    json={
+                        "source": "openphone-voice",
+                        "source_metadata": {
+                            "sender": from_number,
+                            "platform": "voice"
+                        },
+                        "ai_service": "chat",
+                        "payload": {
+                            "input": transcribed_text,
+                            "parameters": {
+                                "temperature": 0.7,
+                                "max_tokens": 500
+                            }
+                        },
+                        "user_id": user_id,
+                        "fetch_context": True
+                    },
+                    timeout=aiohttp.ClientTimeout(total=20)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        if data.get('status') == 'approved':
+                            robbie_response = data['robbie_response']['message']
+                            
+                            logger.info(f"✅ Voice response generated for {from_number}")
+                            
+                            # TODO: Integrate with TTS/voice response system
+                            
+                            return {
+                                'success': True,
+                                'response': robbie_response,
+                                'mood': data['robbie_response']['mood'],
+                                'speak': True  # Flag that this should be spoken
+                            }
+                        else:
+                            logger.warning(f"Request rejected: {data.get('gatekeeper_review', {}).get('reasoning')}")
+                            return {
+                                'success': False,
+                                'error': 'Call blocked by gatekeeper'
+                            }
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Universal input API error: {response.status} - {error_text}")
+                        return {
+                            'success': False,
+                            'error': f"API error: {response.status}"
+                        }
         
-        robbie_message = response['robbie_response']['message']
-        current_mood = response['robbie_response']['mood']
-        
-        logger.info(f"💜 Robbie responding (mood: {current_mood}): {robbie_message[:50]}...")
-        
-        # Send via OpenPhone
-        await send_openphone_sms(phone_number, robbie_message)
-        
-        # Log any actions suggested
-        if response['robbie_response']['actions']:
-            logger.info(f"📋 Actions suggested: {response['robbie_response']['actions']}")
-        
-        return robbie_message
-        
-    except Exception as e:
-        logger.error(f"Failed to process SMS: {e}")
-        # Send error message
-        error_msg = "I'm having trouble right now. Can you try again in a moment?"
-        await send_openphone_sms(phone_number, error_msg)
-        return error_msg
-
-
-async def handle_incoming_call(
-    phone_number: str,
-    transcribed_text: str,
-    user_id: str = 'allan',
-    metadata: Optional[Dict[str, Any]] = None
-) -> str:
-    """
-    Process voice call through universal input API
-    
-    Args:
-        phone_number: Caller's phone number
-        transcribed_text: Voice-to-text transcription
-        user_id: User identifier
-        metadata: Additional call metadata from OpenPhone
-    
-    Returns:
-        Robbie's response (converted to speech by OpenPhone)
-    """
-    logger.info(f"📞 Incoming call from {phone_number}: {transcribed_text[:50]}...")
-    
-    # Build universal input request
-    payload = {
-        'source': 'voice',
-        'source_metadata': {
-            'sender': phone_number,
-            'timestamp': metadata.get('timestamp') if metadata else None,
-            'platform': 'openphone',
-            'call_id': metadata.get('call_id') if metadata else None,
-            'extra': metadata or {}
-        },
-        'ai_service': 'chat',
-        'payload': {
-            'input': transcribed_text,
-            'parameters': {
-                'temperature': 0.8,  # Slightly higher for natural speech
-                'max_tokens': 300  # Keep voice responses brief
+        except Exception as e:
+            logger.error(f"Error handling incoming call: {e}")
+            return {
+                'success': False,
+                'error': str(e)
             }
-        },
-        'user_id': user_id,
-        'fetch_context': True
-    }
     
-    try:
-        # Route through universal input
-        response = await call_universal_input(payload)
+    async def send_sms(self, to_number: str, message: str) -> bool:
+        """
+        Send SMS via OpenPhone API
         
-        if response['status'] != 'approved':
-            logger.warning(f"Voice response blocked: {response['gatekeeper_review']['reasoning']}")
-            return "I received your call. Let me review the request and call you back shortly."
+        Args:
+            to_number: Recipient's phone number
+            message: Message to send
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.api_key:
+            logger.error("Cannot send SMS: OPENPHONE_API_KEY not set")
+            return False
         
-        robbie_message = response['robbie_response']['message']
-        current_mood = response['robbie_response']['mood']
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.openphone_api}/messages",
+                    headers={
+                        "Authorization": self.api_key,
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "from": self.phone_number,
+                        "to": [to_number],
+                        "content": message
+                    },
+                    timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
+                    if response.status == 200:
+                        logger.info(f"✅ SMS sent to {to_number}")
+                        return True
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Failed to send SMS: {response.status} - {error_text}")
+                        return False
         
-        logger.info(f"🎤 Robbie responding (mood: {current_mood}): {robbie_message[:50]}...")
+        except Exception as e:
+            logger.error(f"Error sending SMS: {e}")
+            return False
+    
+    def lookup_user_by_phone(self, phone_number: str) -> str:
+        """
+        Look up user ID by phone number
         
-        # OpenPhone will convert this to speech
-        return robbie_message
+        Args:
+            phone_number: Phone number to look up
+            
+        Returns:
+            User ID (allan, joe, or guest)
+        """
+        # Normalize phone number
+        normalized = phone_number.replace("+1", "").replace("-", "").replace(" ", "")
         
-    except Exception as e:
-        logger.error(f"Failed to process voice call: {e}")
-        return "I'm having trouble processing your request right now. Please try again."
+        # Known phone numbers (TODO: move to database)
+        known_numbers = {
+            # Add Allan's number when known
+            # "5551234567": "allan",
+        }
+        
+        return known_numbers.get(normalized, "guest")
 
 
-async def send_openphone_sms(to_number: str, message: str) -> bool:
-    """
-    Send SMS via OpenPhone API
-    
-    Args:
-        to_number: Recipient phone number
-        message: Message text
-    
-    Returns:
-        True if sent successfully, False otherwise
-    """
-    if not OPENPHONE_API_KEY:
-        logger.error("OpenPhone API key not configured")
-        return False
-    
-    if not OPENPHONE_NUMBER:
-        logger.error("OpenPhone number not configured")
-        return False
-    
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f'{OPENPHONE_API_URL}/messages',
-                headers={
-                    'Authorization': f'Bearer {OPENPHONE_API_KEY}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'to': to_number,
-                    'from': OPENPHONE_NUMBER,
-                    'text': message
-                }
-            ) as response:
-                if response.status == 200:
-                    logger.info(f"✅ SMS sent to {to_number}")
-                    return True
-                else:
-                    error_text = await response.text()
-                    logger.error(f"❌ OpenPhone SMS failed: {response.status} - {error_text}")
-                    return False
-                    
-    except Exception as e:
-        logger.error(f"Failed to send OpenPhone SMS: {e}")
-        return False
-
-
-async def make_openphone_call(
-    to_number: str,
-    message: str,
-    voice: str = 'female'  # OpenPhone voice options
-) -> bool:
-    """
-    Make outbound call via OpenPhone with text-to-speech
-    
-    Args:
-        to_number: Number to call
-        message: Message to speak
-        voice: Voice selection (check OpenPhone docs for options)
-    
-    Returns:
-        True if call initiated successfully
-    """
-    if not OPENPHONE_API_KEY:
-        logger.error("OpenPhone API key not configured")
-        return False
-    
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f'{OPENPHONE_API_URL}/calls',
-                headers={
-                    'Authorization': f'Bearer {OPENPHONE_API_KEY}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'to': to_number,
-                    'from': OPENPHONE_NUMBER,
-                    'message': message,
-                    'voice': voice
-                }
-            ) as response:
-                if response.status == 200:
-                    logger.info(f"✅ Call initiated to {to_number}")
-                    return True
-                else:
-                    error_text = await response.text()
-                    logger.error(f"❌ OpenPhone call failed: {response.status} - {error_text}")
-                    return False
-                    
-    except Exception as e:
-        logger.error(f"Failed to make OpenPhone call: {e}")
-        return False
-
-
-async def get_openphone_messages(limit: int = 50) -> list:
-    """
-    Fetch recent messages from OpenPhone
-    
-    Returns:
-        List of recent message objects
-    """
-    if not OPENPHONE_API_KEY:
-        return []
-    
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f'{OPENPHONE_API_URL}/messages',
-                headers={'Authorization': f'Bearer {OPENPHONE_API_KEY}'},
-                params={'limit': limit}
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data.get('data', [])
-                else:
-                    logger.error(f"Failed to fetch OpenPhone messages: {response.status}")
-                    return []
-                    
-    except Exception as e:
-        logger.error(f"Error fetching OpenPhone messages: {e}")
-        return []
-
+# Global instance
+openphone_handler = OpenPhoneHandler()

@@ -55,11 +55,51 @@ app.on('activate', () => {
 // IPC handlers for communication with renderer
 ipcMain.handle('get-personality-status', async () => {
   try {
-    const response = await axios.get('http://aurora.testpilot.ai/api/personality/status');
-    return response.data;
+    // Route through universal input API for full personality integration
+    const response = await axios.post('http://localhost:8000/api/v2/universal/request', {
+      source: 'robbiebar-macos',
+      source_metadata: {
+        sender: 'allan',
+        platform: 'macos-desktop'
+      },
+      ai_service: 'chat',
+      payload: {
+        input: 'status_check',
+        parameters: {
+          temperature: 0.3,
+          max_tokens: 50
+        }
+      },
+      user_id: 'allan',
+      fetch_context: false  // Just get personality, no full context needed
+    });
+    
+    const data = response.data;
+    
+    if (data.status === 'approved') {
+      return {
+        mood: data.robbie_response.mood,
+        attraction: 11,  // Allan's attraction level
+        gandhi_genghis: 7,
+        energy: 85,
+        message: data.robbie_response.message,
+        personality_changes: data.robbie_response.personality_changes,
+        updated_at: data.timestamp
+      };
+    } else {
+      throw new Error(`Request rejected: ${data.gatekeeper_review.reasoning}`);
+    }
   } catch (error) {
-    console.error('Error fetching personality status:', error);
-    return { error: 'Failed to fetch status' };
+    console.error('Error fetching personality status via universal input:', error);
+    // Fallback to default
+    return { 
+      mood: 'focused',
+      attraction: 11,
+      gandhi_genghis: 7,
+      energy: 85,
+      message: 'Ready to go!',
+      error: 'Failed to fetch status'
+    };
   }
 });
 
@@ -73,15 +113,48 @@ ipcMain.handle('close-app', () => {
   app.quit();
 });
 
-// Update personality status every minute
+// Update personality status every 30 seconds (faster updates!)
 setInterval(async () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     try {
-      const response = await axios.get('http://aurora.testpilot.ai/api/personality/status');
-      mainWindow.webContents.send('personality-update', response.data);
+      // Route through universal input for auto-updates
+      const response = await axios.post('http://localhost:8000/api/v2/universal/request', {
+        source: 'robbiebar-macos',
+        source_metadata: {
+          sender: 'allan',
+          platform: 'macos-desktop',
+          auto_update: true
+        },
+        ai_service: 'chat',
+        payload: {
+          input: 'auto_status_update',
+          parameters: {
+            temperature: 0.1,
+            max_tokens: 30
+          }
+        },
+        user_id: 'allan',
+        fetch_context: false
+      });
+      
+      const data = response.data;
+      
+      if (data.status === 'approved') {
+        const personalityData = {
+          mood: data.robbie_response.mood,
+          attraction: 11,
+          gandhi_genghis: 7,
+          energy: 85,
+          message: data.robbie_response.message,
+          personality_changes: data.robbie_response.personality_changes,
+          updated_at: data.timestamp
+        };
+        
+        mainWindow.webContents.send('personality-update', personalityData);
+      }
     } catch (error) {
       console.error('Auto-update error:', error);
     }
   }
-}, 60000); // 60 seconds
+}, 30000); // 30 seconds
 

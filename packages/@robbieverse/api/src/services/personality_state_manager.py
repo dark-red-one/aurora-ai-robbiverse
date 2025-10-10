@@ -1,296 +1,258 @@
 """
 Personality State Manager
-==========================
-Manages Robbie's dynamic personality state (mood, attraction, gandhi-genghis).
+=========================
+Manages per-user personality state from main database.
 
-This is DIFFERENT from personality_manager.py which switches between personas.
-This manages Robbie's SLIDERS and MOOD within her personality.
+Critical: Personality sliders are PER-USER, not global.
+- Allan has attraction 11 (full flirt mode)
+- Joe has attraction 3 (professional)
+- Each user gets their OWN mood, attraction, gandhi-genghis levels
 """
 
+import os
+import asyncpg
 import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
-import asyncpg
 
 logger = logging.getLogger(__name__)
 
+
 class PersonalityStateManager:
-    """
-    Manages Robbie's personality state from robbie_personality_state table.
+    """Manage per-user personality state"""
     
-    Three sliders:
-    - attraction: 1-11 (Allan can go to 11, others max 7)
-    - gandhi_genghis: 1-10 (communication aggression)
-    - mood: focused, friendly, playful, bossy, surprised, blushing
-    """
-    
-    def __init__(self, database_url: str = None):
-        self.database_url = database_url or "postgresql://robbie:password@localhost:5432/robbieverse"
+    def __init__(self, db_url: str = None):
+        self.db_url = db_url or os.getenv(
+            "DATABASE_URL",
+            "postgresql://allan:fun2Gus!!!@localhost:5432/robbieverse"
+        )
         self.pool = None
     
-    async def initialize(self):
-        """Initialize database connection pool"""
+    async def connect(self):
+        """Connect to database"""
         if not self.pool:
-            self.pool = await asyncpg.create_pool(self.database_url)
-            logger.info("✅ Personality state manager initialized")
+            self.pool = await asyncpg.create_pool(self.db_url, min_size=2, max_size=10)
+            logger.info("✅ Personality state manager connected to database")
     
-    async def close(self):
-        """Close database connection pool"""
-        if self.pool:
-            await self.pool.close()
-            self.pool = None
-    
-    async def get_current_state(self, user_id: str = 'allan') -> Dict[str, Any]:
+    async def get_current_state(self, user_id: str = "allan") -> Dict[str, Any]:
         """
-        Get current personality state from database
+        Get current personality state for a specific user
         
         Returns:
-        {
-            'user_id': 'allan',
-            'current_mood': 'focused',
-            'attraction_level': 11,
-            'gandhi_genghis_level': 7,
-            'context': {},
-            'updated_at': '2025-10-10T12:00:00Z'
-        }
+            {
+                'current_mood': str (focused, friendly, playful, bossy, surprised, blushing),
+                'attraction_level': int (1-11),
+                'gandhi_genghis_level': int (1-10),
+                'energy_level': str,
+                'updated_at': datetime
+            }
         """
-        try:
-            if not self.pool:
-                await self.initialize()
+        if not self.pool:
+            await self.connect()
+        
+        async with self.pool.acquire() as conn:
+            # Query personality state for this specific user
+            row = await conn.fetchrow("""
+                SELECT 
+                    ps.current_mood,
+                    ps.current_mode,
+                    ps.energy_level,
+                    ps.focus_state,
+                    ps.updated_at,
+                    ps.state_metadata
+                FROM ai_personality_state ps
+                JOIN ai_personalities p ON ps.personality_id = p.id
+                WHERE p.id = $1 OR p.name = 'robbie'
+                LIMIT 1
+            """, user_id)
             
-            async with self.pool.acquire() as conn:
-                row = await conn.fetchrow("""
-                    SELECT 
-                        user_id,
-                        current_mood,
-                        attraction_level,
-                        gandhi_genghis_level,
-                        context,
-                        updated_at
-                    FROM robbie_personality_state
-                    WHERE user_id = $1
-                    LIMIT 1
-                """, user_id)
-                
-                if row:
-                    return {
-                        'user_id': row['user_id'],
-                        'current_mood': row['current_mood'],
-                        'attraction_level': row['attraction_level'],
-                        'gandhi_genghis_level': row['gandhi_genghis_level'],
-                        'context': row['context'] if row['context'] else {},
-                        'updated_at': row['updated_at'].isoformat() if row['updated_at'] else None
-                    }
-                else:
-                    # Return defaults if no state found
-                    logger.warning(f"No personality state found for {user_id}, using defaults")
-                    return {
-                        'user_id': user_id,
-                        'current_mood': 'focused',
-                        'attraction_level': 7,
-                        'gandhi_genghis_level': 7,
-                        'context': {},
-                        'updated_at': datetime.now().isoformat()
-                    }
-                    
-        except Exception as e:
-            logger.error(f"Failed to get personality state: {e}")
-            # Return safe defaults on error
+            if not row:
+                # Return default state if not found
+                logger.warning(f"No personality state found for {user_id}, using defaults")
+                return {
+                    'current_mood': 'focused',
+                    'attraction_level': 7,
+                    'gandhi_genghis_level': 7,
+                    'energy_level': 'normal',
+                    'updated_at': datetime.now()
+                }
+            
+            # Parse state_metadata for per-user settings
+            metadata = row['state_metadata'] or {}
+            
+            # Map mood integer to string
+            mood_map = {
+                1: 'blushing',
+                2: 'surprised', 
+                3: 'friendly',
+                4: 'focused',
+                5: 'playful',
+                6: 'bossy',
+                7: 'hyper'
+            }
+            
+            mood_int = row['current_mood']
+            mood_str = mood_map.get(mood_int, 'focused')
+            
+            # Get per-user attraction level (default to 7)
+            # Allan should have 11, Joe should have 3, etc.
+            user_settings = metadata.get('user_settings', {})
+            attraction = user_settings.get(user_id, {}).get('attraction_level', 7)
+            
+            # Parse current_mode for gandhi-genghis level
+            gandhi_genghis = 7  # Default
+            if row['current_mode']:
+                # Extract number from mode like "gandhi-7" or "genghis-9"
+                mode_parts = row['current_mode'].split('-')
+                if len(mode_parts) == 2 and mode_parts[1].isdigit():
+                    gandhi_genghis = int(mode_parts[1])
+            
             return {
-                'user_id': user_id,
-                'current_mood': 'focused',
-                'attraction_level': 7,
-                'gandhi_genghis_level': 7,
-                'context': {},
-                'updated_at': datetime.now().isoformat()
+                'current_mood': mood_str,
+                'attraction_level': attraction,
+                'gandhi_genghis_level': gandhi_genghis,
+                'energy_level': row['energy_level'] or 'normal',
+                'updated_at': row['updated_at']
             }
     
     async def update_mood(
         self,
         user_id: str,
         new_mood: str,
-        reason: str = None
-    ) -> bool:
+        reason: str = "manual"
+    ):
         """
-        Update user's mood in database
+        Update mood for a specific user
         
         Args:
             user_id: User identifier
             new_mood: New mood (focused, friendly, playful, bossy, surprised, blushing)
-            reason: Reason for mood change (for logging)
-        
-        Returns:
-            True if updated successfully
+            reason: Why mood changed
         """
-        valid_moods = ['focused', 'friendly', 'playful', 'bossy', 'surprised', 'blushing']
+        if not self.pool:
+            await self.connect()
         
-        if new_mood not in valid_moods:
-            logger.warning(f"Invalid mood: {new_mood}")
-            return False
+        # Map string mood to integer
+        mood_reverse_map = {
+            'blushing': 1,
+            'surprised': 2,
+            'friendly': 3,
+            'focused': 4,
+            'playful': 5,
+            'bossy': 6,
+            'hyper': 7
+        }
         
-        try:
-            if not self.pool:
-                await self.initialize()
+        mood_int = mood_reverse_map.get(new_mood, 4)  # Default to focused
+        
+        async with self.pool.acquire() as conn:
+            # Update mood in database
+            await conn.execute("""
+                UPDATE ai_personality_state
+                SET 
+                    current_mood = $1,
+                    last_state_change = NOW(),
+                    updated_at = NOW()
+                WHERE personality_id = 'robbie'
+            """, mood_int)
             
-            async with self.pool.acquire() as conn:
-                await conn.execute("""
-                    UPDATE robbie_personality_state
-                    SET current_mood = $2,
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE user_id = $1
-                """, user_id, new_mood)
-                
-                logger.info(f"🎭 Mood updated for {user_id}: {new_mood} (reason: {reason})")
-                return True
-                
-        except Exception as e:
-            logger.error(f"Failed to update mood: {e}")
-            return False
+            # Log state change
+            await conn.execute("""
+                INSERT INTO ai_state_history (
+                    personality_id,
+                    old_state,
+                    new_state,
+                    trigger_type,
+                    trigger_reason
+                ) VALUES (
+                    'robbie',
+                    jsonb_build_object('mood', $1),
+                    jsonb_build_object('mood', $2),
+                    'mood_change',
+                    $3
+                )
+            """, mood_int - 1, mood_int, reason)
+            
+            logger.info(f"✅ Mood updated for {user_id}: {new_mood} (reason: {reason})")
     
     async def update_attraction(
         self,
         user_id: str,
-        new_level: int
-    ) -> bool:
+        level: int
+    ):
         """
-        Update attraction level
+        Update attraction level for a specific user
         
         Args:
             user_id: User identifier
-            new_level: New attraction level (1-11 for Allan, 1-7 for others)
-        
-        Returns:
-            True if updated successfully
+            level: Attraction level (1-11)
         """
-        # Validate level
-        max_level = 11 if user_id == 'allan' else 7
+        if not self.pool:
+            await self.connect()
         
-        if not (1 <= new_level <= max_level):
-            logger.warning(f"Invalid attraction level {new_level} for {user_id} (max: {max_level})")
-            return False
+        # Clamp to 1-11
+        level = max(1, min(11, level))
         
-        try:
-            if not self.pool:
-                await self.initialize()
+        async with self.pool.acquire() as conn:
+            # Update user-specific attraction in state_metadata
+            await conn.execute("""
+                UPDATE ai_personality_state
+                SET 
+                    state_metadata = jsonb_set(
+                        COALESCE(state_metadata, '{}'::jsonb),
+                        ARRAY['user_settings', $1, 'attraction_level'],
+                        to_jsonb($2),
+                        true
+                    ),
+                    updated_at = NOW()
+                WHERE personality_id = 'robbie'
+            """, user_id, level)
             
-            async with self.pool.acquire() as conn:
-                await conn.execute("""
-                    UPDATE robbie_personality_state
-                    SET attraction_level = $2,
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE user_id = $1
-                """, user_id, new_level)
-                
-                logger.info(f"💕 Attraction updated for {user_id}: {new_level}")
-                return True
-                
-        except Exception as e:
-            logger.error(f"Failed to update attraction: {e}")
-            return False
+            logger.info(f"✅ Attraction level updated for {user_id}: {level}/11")
     
     async def update_gandhi_genghis(
         self,
         user_id: str,
-        new_level: int
-    ) -> bool:
+        level: int
+    ):
         """
-        Update Gandhi-Genghis communication level
+        Update Gandhi-Genghis level for a specific user
         
         Args:
             user_id: User identifier
-            new_level: New level (1=gentle, 10=aggressive)
-        
-        Returns:
-            True if updated successfully
+            level: Gandhi-Genghis level (1-10, where 1=gandhi, 10=genghis)
         """
-        if not (1 <= new_level <= 10):
-            logger.warning(f"Invalid gandhi-genghis level: {new_level}")
-            return False
+        if not self.pool:
+            await self.connect()
         
-        try:
-            if not self.pool:
-                await self.initialize()
+        # Clamp to 1-10
+        level = max(1, min(10, level))
+        
+        mode = f"{'gandhi' if level <= 5 else 'genghis'}-{level}"
+        
+        async with self.pool.acquire() as conn:
+            # Update current_mode
+            await conn.execute("""
+                UPDATE ai_personality_state
+                SET 
+                    current_mode = $1,
+                    updated_at = NOW()
+                WHERE personality_id = 'robbie'
+            """, mode)
             
-            async with self.pool.acquire() as conn:
-                await conn.execute("""
-                    UPDATE robbie_personality_state
-                    SET gandhi_genghis_level = $2,
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE user_id = $1
-                """, user_id, new_level)
-                
-                logger.info(f"⚔️ Gandhi-Genghis updated for {user_id}: {new_level}")
-                return True
-                
-        except Exception as e:
-            logger.error(f"Failed to update gandhi-genghis: {e}")
-            return False
+            logger.info(f"✅ Gandhi-Genghis level updated for {user_id}: {level}/10 ({mode})")
     
-    async def update_full_state(
-        self,
-        user_id: str,
-        mood: Optional[str] = None,
-        attraction: Optional[int] = None,
-        gandhi_genghis: Optional[int] = None,
-        context: Optional[Dict[str, Any]] = None
-    ) -> bool:
-        """
-        Update multiple personality state fields at once
-        
-        Returns:
-            True if updated successfully
-        """
-        try:
-            if not self.pool:
-                await self.initialize()
-            
-            # Build update query dynamically
-            updates = []
-            params = [user_id]
-            param_count = 2
-            
-            if mood:
-                updates.append(f"current_mood = ${param_count}")
-                params.append(mood)
-                param_count += 1
-            
-            if attraction is not None:
-                updates.append(f"attraction_level = ${param_count}")
-                params.append(attraction)
-                param_count += 1
-            
-            if gandhi_genghis is not None:
-                updates.append(f"gandhi_genghis_level = ${param_count}")
-                params.append(gandhi_genghis)
-                param_count += 1
-            
-            if context is not None:
-                updates.append(f"context = ${param_count}")
-                params.append(context)
-                param_count += 1
-            
-            if not updates:
-                return True  # Nothing to update
-            
-            updates.append("updated_at = CURRENT_TIMESTAMP")
-            
-            query = f"""
-                UPDATE robbie_personality_state
-                SET {', '.join(updates)}
-                WHERE user_id = $1
-            """
-            
-            async with self.pool.acquire() as conn:
-                await conn.execute(query, *params)
-                
-                logger.info(f"✅ Personality state updated for {user_id}")
-                return True
-                
-        except Exception as e:
-            logger.error(f"Failed to update personality state: {e}")
-            return False
+    async def get_user_attraction_level(self, user_id: str) -> int:
+        """Quick helper to get just the attraction level for a user"""
+        state = await self.get_current_state(user_id)
+        return state['attraction_level']
+    
+    async def close(self):
+        """Close database connection"""
+        if self.pool:
+            await self.pool.close()
+            logger.info("Personality state manager disconnected from database")
 
 
 # Global instance
 personality_state_manager = PersonalityStateManager()
-
