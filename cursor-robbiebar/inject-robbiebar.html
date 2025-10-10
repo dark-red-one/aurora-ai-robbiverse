@@ -283,7 +283,7 @@
     // Fetch system stats every 2 seconds
     async function updateStats() {
       try {
-        const response = await fetch('http://localhost:8000/api/system/stats');
+        const response = await fetch('http://localhost:8000/code/api/system/stats');
         if (response.ok) {
           const stats = await response.json();
           document.getElementById('cpu-stat').textContent = stats.cpu.toFixed(0) + '%';

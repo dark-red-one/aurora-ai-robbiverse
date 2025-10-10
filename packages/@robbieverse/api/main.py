@@ -28,7 +28,8 @@ from src.routes import (
     mood_routes,
     sticky_notes,
     touch_ready,
-    sync_routes
+    sync_routes,
+    robbiebar  # Add robbiebar routes for Cursor integration 🔥
 )
 
 # Import services for initialization
@@ -124,6 +125,7 @@ app.include_router(mood_routes.router, prefix="/api", tags=["personality"])
 app.include_router(sticky_notes.router, prefix="/api", tags=["memory"])
 app.include_router(touch_ready.router, prefix="/api", tags=["outreach"])
 app.include_router(sync_routes, prefix="/api/sync", tags=["sync"])
+app.include_router(robbiebar.router, tags=["robbiebar"])  # RobbieBar for Cursor integration 😘
 
 # WebSocket endpoint for real-time chat
 @app.websocket("/ws/chat")
