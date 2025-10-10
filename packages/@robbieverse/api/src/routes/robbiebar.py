@@ -9,7 +9,9 @@ import os
 import subprocess
 import psutil
 import sqlite3
-from datetime import datetime
+import requests
+import json
+from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -865,3 +867,76 @@ def analyze_user_profile(viewing_stats: List[Dict]) -> Dict[str, Any]:
         profile["traits"].append("productivity_focused")
     
     return profile
+
+# ============================================
+# WIDGET ENDPOINTS (Time, Weather, Calendar)
+# ============================================
+
+# Weather cache to avoid rate limits
+weather_cache = {"data": None, "timestamp": None}
+
+@router.get("/widget/weather")
+def get_weather() -> Dict[str, Any]:
+    """Get current weather information"""
+    try:
+        # Check cache (15 minutes)
+        now = datetime.now()
+        if (weather_cache["data"] and weather_cache["timestamp"] and 
+            (now - weather_cache["timestamp"]).seconds < 900):
+            return weather_cache["data"]
+        
+        # For now, return mock data (can be replaced with real API)
+        weather_data = {
+            "temp": 72,
+            "feels_like": 68,
+            "condition": "Partly Cloudy",
+            "icon": "⛅",
+            "location": "San Francisco, CA",
+            "timestamp": now.isoformat()
+        }
+        
+        # Cache the result
+        weather_cache["data"] = weather_data
+        weather_cache["timestamp"] = now
+        
+        return weather_data
+        
+    except Exception as e:
+        logger.error(f"Error getting weather: {e}")
+        return {
+            "temp": "--",
+            "feels_like": "--",
+            "condition": "Offline",
+            "icon": "❌",
+            "location": "Unknown",
+            "error": str(e)
+        }
+
+@router.get("/widget/calendar")
+def get_next_calendar_event() -> Dict[str, Any]:
+    """Get next calendar event"""
+    try:
+        # For now, return mock data (can be replaced with Google Calendar API)
+        now = datetime.now()
+        
+        # Mock next event (replace with real calendar integration)
+        next_event = {
+            "title": "Team Standup",
+            "time": "in 30 mins",
+            "duration": "15m",
+            "start_time": (now + timedelta(minutes=30)).isoformat(),
+            "location": "Zoom"
+        }
+        
+        return {
+            "next_event": next_event,
+            "timestamp": now.isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting calendar: {e}")
+        return {
+            "next_event": None,
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }

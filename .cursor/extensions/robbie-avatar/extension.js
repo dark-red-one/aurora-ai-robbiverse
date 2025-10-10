@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const { exec } = require('child_process');
 const http = require('http');
+const os = require('os');
 
 let currentMood = 4; // Default to Focused
 let avatarPanel = null;
@@ -13,7 +14,32 @@ const BASE_PATH = IS_MAC
 
 const DB_PATH = `${BASE_PATH}/data/vengeance.db`;
 
-// Avatar images now served from robbiebar web server
+// Detect which Robbie machine we're on
+function getRobbieHostInfo() {
+    const hostname = os.hostname().toLowerCase();
+
+    if (hostname.includes('vengeance')) {
+        return {
+            name: 'vengeance',
+            apiUrl: 'http://localhost:8000',
+            isLocal: true
+        };
+    } else if (hostname.includes('aurora')) {
+        return {
+            name: 'aurora',
+            apiUrl: 'http://localhost:8000', // Aurora connects to its own API
+            isLocal: true
+        };
+    } else {
+        // RobbieBook or other devices - connect to Vengeance main server
+        return {
+            name: hostname.split('.')[0],
+            apiUrl: 'http://192.168.1.246:8000',
+            isLocal: false
+        };
+    }
+}
+
 const AVATAR_BASE_URL = 'http://localhost:8000/images/';
 
 const moodEmojis = {
@@ -67,17 +93,7 @@ class RobbieAvatarPanel {
             if (personalityData) {
                 this.robbieBarData.personality = personalityData;
 
-                // Send avatar update immediately with correct mood image
-                if (avatarPanel && personalityData.mood_data) {
-                    avatarPanel.webview.postMessage({
-                        command: 'updateState',
-                        mood: personalityData.mood,
-                        moodName: personalityData.mood_data.name,
-                        moodEmoji: personalityData.mood_data.emoji,
-                        avatarImage: personalityData.mood_data.main_image_url,
-                        attraction: personalityData.attraction
-                    });
-                }
+                // Store personality data for later combined message
             }
 
             // Fetch system stats
@@ -129,6 +145,18 @@ class RobbieAvatarPanel {
         req.end();
     }
 
+    handleApiCall(message) {
+        this.httpGet(message.path, (data) => {
+            if (avatarPanel) {
+                avatarPanel.webview.postMessage({
+                    command: 'apiResponse',
+                    requestId: message.requestId,
+                    data: data
+                });
+            }
+        });
+    }
+
     resolveWebviewView(webviewView) {
         avatarPanel = webviewView;
 
@@ -156,10 +184,13 @@ class RobbieAvatarPanel {
             }
         });
 
-        // Listen for webview messages to handle refresh requests
+        // Listen for webview messages to handle refresh requests and API calls
         webviewView.webview.onDidReceiveMessage(message => {
             if (message.command === 'refresh') {
                 this.refreshState();
+            } else if (message.command === 'apiCall') {
+                // Proxy API calls from webview
+                this.handleApiCall(message);
             }
         });
     }
@@ -170,8 +201,9 @@ class RobbieAvatarPanel {
     }
 
     getHtmlContent(webview) {
-        // Default image from web server
-        const defaultImageUrl = 'http://localhost:8000/images/robbie-happy-1.png';
+        // Get host info and set up URLs
+        const hostInfo = getRobbieHostInfo();
+        const defaultImageUrl = hostInfo.apiUrl + '/images/robbie-happy-1.png';
         return `<!DOCTYPE html>
         <html>
         <head>
@@ -356,42 +388,35 @@ class RobbieAvatarPanel {
                 }
                 .action-btn, .context-btn {
                     width: 100%;
-                    background: linear-gradient(135deg, #1a1a2e, #16213e);
-                    color: #00d4ff;
-                    border: 1px solid #00d4ff;
-                    padding: 12px;
-                    border-radius: 8px;
-                    font-size: 14px;
+                    background: #3c3c3c;
+                    color: #ffffff;
+                    border: 1px solid #555555;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    font-size: 11px;
                     font-weight: 500;
                     cursor: pointer;
+                    text-align: center;
                     transition: all 0.3s ease;
-                    position: relative;
-                    overflow: hidden;
-                    text-align: left;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
                 }
                 .action-btn:hover, .context-btn:hover {
-                    background: linear-gradient(135deg, #00d4ff, #0099cc);
-                    color: #000;
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
-                    border-color: #00ffff;
-                }
-                .action-btn:before, .context-btn:before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                    transition: left 0.5s;
-                }
-                .action-btn:hover:before, .context-btn:hover:before {
-                    left: 100%;
+                    background: #4a4a4a;
+                    border-color: #666666;
+                    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15), 0 4px 8px rgba(0, 0, 0, 0.3);
+                    transform: translateY(-1px);
                 }
                 .action-btn:active, .context-btn:active {
+                    background: #2a2a2a;
+                    border-color: #444444;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
                     transform: translateY(0);
-                    box-shadow: 0 2px 10px rgba(0, 212, 255, 0.3);
+                }
+                .context-btn.active {
+                    background: #00d4ff;
+                    color: #1a1a2e;
+                    border-color: #00b8ff;
+                    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
                 }
                 .commit-item {
                     background: #2d2d2d;
@@ -452,6 +477,46 @@ class RobbieAvatarPanel {
                     50% { opacity: 0.15; }
                     100% { opacity: 0.05; }
                 }
+                
+                /* Widget Styles */
+                .widget-section {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 4px 6px;
+                    background: rgba(255, 255, 255, 0.03);
+                    border-radius: 4px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                }
+                
+                .widget-icon {
+                    font-size: 18px;
+                }
+                
+                .widget-content {
+                    flex: 1;
+                }
+                
+                .widget-primary {
+                    font-size: 11px;
+                    font-weight: bold;
+                    color: #cccccc;
+                }
+                
+                .widget-secondary {
+                    font-size: 8px;
+                    color: #858585;
+                    margin-top: 1px;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                #infoWidget {
+                    animation: fadeIn 0.5s ease-out;
+                }
             </style>
         </head>
         <body>
@@ -462,7 +527,7 @@ class RobbieAvatarPanel {
             <div class="mood-text" id="moodText">Focused</div>
             <div class="status-text">
                 <span class="sync-indicator"></span>
-                <span id="statusText">Network-wide</span>
+                <span id="hostnameText">loading...</span>
                 <button id="refreshBtn" style="background: #00d4ff; color: #1a1a2e; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; margin-left: 8px; cursor: pointer;">↻</button>
             </div>
             
@@ -512,47 +577,111 @@ class RobbieAvatarPanel {
             <div class="section">
                 <div class="section-title">🚀 Applications</div>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="context-btn" data-context="work" style="width: 100%; padding: 12px; text-align: left;">💼 @Work</button>
-                    <button class="context-btn" data-context="testpilot" style="width: 100%; padding: 12px; text-align: left;">🧪 @TestPilot</button>
-                    <button class="context-btn" data-context="growth" style="width: 100%; padding: 12px; text-align: left;">📈 @Growth</button>
-                    <button class="context-btn" data-context="play" style="width: 100%; padding: 12px; text-align: left;">🎮 @Play</button>
+                    <button class="context-btn" data-context="work">💼 @Work</button>
+                    <button class="context-btn" data-context="testpilot">🧪 @TestPilot</button>
+                    <button class="context-btn" data-context="growth">📈 @Growth</button>
+                    <button class="context-btn" data-context="play">🎮 @Play</button>
                 </div>
             </div>
 
-            <!-- Bottom padding to prevent content from going under TV bar -->
-            <div style="height: 220px;"></div>
+            <!-- Bottom padding to prevent content from going under TV bar and widget -->
+            <div style="height: 300px;"></div>
 
             <!-- Mood-Aware Matrix Rain Background -->
-            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 220px); z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
+            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 300px); z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
 
             <!-- Entertainment Bar - Fixed at Bottom (Separate from scrollable content) -->
-            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 2px solid #00d4ff; padding: 12px; z-index: 1000;">
+            <div style="position: fixed; bottom: 80px; left: 0; right: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 2px solid #00d4ff; padding: 12px; z-index: 1000;">
                 <div class="section-title" style="margin-bottom: 8px;">🎬 Entertainment</div>
                 <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
-                    <button id="muteTvBtn" class="action-btn" style="flex: 0 0 60px; font-size: 14px;">🔇</button>
-                    <button id="fullscreenBtn" class="action-btn" style="flex: 0 0 60px; font-size: 14px;">⛶</button>
-                    <select id="channelSelect" class="action-btn" style="flex: 1; min-width: 120px; background: #2d2d2d; color: white; border: 1px solid #444; border-radius: 4px; padding: 10px; font-size: 13px;">
+                    <button id="muteTvBtn" class="action-btn" style="flex: 0 0 60px; font-size: 14px; padding: 8px;">🔇</button>
+                    <button id="fullscreenBtn" class="action-btn" style="flex: 0 0 60px; font-size: 14px; padding: 8px;">⛶</button>
+                    <select id="channelSelect" class="action-btn" style="flex: 1; min-width: 120px; background: #3c3c3c; color: white; border: 1px solid #555555; border-radius: 6px; padding: 8px 12px; font-size: 13px; text-align: center;">
                         <option value="1">📰 MSNBC</option>
                         <option value="2">🦅 Fox News</option>
                         <option value="3">🏛️ CNN</option>
                         <option value="4" selected>🎵 Lofi Beats</option>
                         <option value="5">🎷 Jazz</option>
                         <option value="6">🎻 Classical</option>
-                        <option value="7">🌊 Chill</option>
+                        <option value="7">🔥 Allan's Campfire</option>
                     </select>
                 </div>
                 <iframe 
                     id="tvFrame"
                     width="100%" 
-                    height="140" 
+                    height="152" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
             </div>
 
+            <!-- Info Widget - Fixed at Very Bottom -->
+            <div id="infoWidget" style="position: fixed; bottom: 0; left: 0; right: 0; background: #252526; border-top: 1px solid #3e3e42; padding: 6px; z-index: 1001; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+                
+                <!-- Time Section -->
+                <div class="widget-section">
+                    <div class="widget-icon">🕐</div>
+                    <div class="widget-content">
+                        <div class="widget-primary" id="widgetTime">--:--</div>
+                        <div class="widget-secondary" id="widgetDate">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- Weather Section -->
+                <div class="widget-section">
+                    <div class="widget-icon" id="weatherIcon">☀️</div>
+                    <div class="widget-content">
+                        <div class="widget-primary" id="widgetTemp">--°</div>
+                        <div class="widget-secondary" id="widgetCondition">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- Calendar Section -->
+                <div class="widget-section">
+                    <div class="widget-icon">📅</div>
+                    <div class="widget-content">
+                        <div class="widget-primary" id="widgetEvent">No events</div>
+                        <div class="widget-secondary" id="widgetEventTime">--</div>
+                    </div>
+                </div>
+                
+            </div>
+
             <script>
+                // Injected from Node.js - available before any other scripts
+                window.ROBBIE_HOST_INFO = ${JSON.stringify(hostInfo)};
+                window.API_BASE_URL = '${hostInfo.apiUrl}';
+                
                 const vscode = acquireVsCodeApi();
+                
+                // API Call Helper - Routes through Node.js to avoid CSP blocking
+                let requestIdCounter = 0;
+                const pendingRequests = {};
+                
+                function apiCall(path) {
+                    return new Promise((resolve) => {
+                        const requestId = ++requestIdCounter;
+                        pendingRequests[requestId] = resolve;
+                        vscode.postMessage({
+                            command: 'apiCall',
+                            requestId: requestId,
+                            path: path
+                        });
+                    });
+                }
+                
+                // Handle API responses from Node.js
+                window.addEventListener('message', event => {
+                    const msg = event.data;
+                    if (msg.command === 'apiResponse') {
+                        const resolve = pendingRequests[msg.requestId];
+                        if (resolve) {
+                            resolve(msg.data);
+                            delete pendingRequests[msg.requestId];
+                        }
+                    }
+                });
                 let tokenChart = null;
                 let matrixRain = null;
 
@@ -939,7 +1068,7 @@ class RobbieAvatarPanel {
                         
                         // Old sections removed - keeping it clean!
                         
-                        document.getElementById('statusText').textContent = 'Synced';
+                        // Status updated via hostname display
                     }
                 });
                 
@@ -953,6 +1082,92 @@ class RobbieAvatarPanel {
                     vscode.postMessage({ command: 'refresh' });
                 });
                 
+                // ============================================
+                // WIDGET FUNCTIONS (Time, Weather, Calendar)
+                // ============================================
+                
+                // Update Time (Real-time with 24-hour format and timezone)
+                function updateTime() {
+                    const now = new Date();
+                    const time = now.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    const date = now.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    
+                    // Get timezone abbreviation
+                    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const timezoneAbbr = now.toLocaleDateString('en-US', {
+                        timeZoneName: 'short'
+                    }).split(', ')[1] || timezone.split('/')[1] || 'UTC';
+                    
+                    document.getElementById('widgetTime').textContent = time;
+                    document.getElementById('widgetDate').textContent = date + ' ' + timezoneAbbr;
+                }
+                
+                // Update hostname display on load
+                function updateHostnameDisplay() {
+                    const hostInfo = window.ROBBIE_HOST_INFO;
+                    const text = hostInfo.isLocal 
+                        ? hostInfo.name + ': connected'
+                        : hostInfo.name + ' → vengeance';
+                    document.getElementById('hostnameText').textContent = text;
+                }
+                
+                // Call on load
+                updateHostnameDisplay();
+                
+                // Update every second
+                setInterval(updateTime, 1000);
+                updateTime();
+                
+                // Fetch Weather
+                async function updateWeather() {
+                    try {
+                        const data = await apiCall('/code/api/widget/weather');
+                        
+                        document.getElementById('widgetTemp').textContent = Math.round(data.temp) + '°';
+                        document.getElementById('widgetCondition').textContent = data.condition;
+                        document.getElementById('weatherIcon').textContent = data.icon;
+                    } catch (error) {
+                        console.error('Weather fetch error:', error);
+                        document.getElementById('widgetTemp').textContent = '--°';
+                        document.getElementById('widgetCondition').textContent = 'Offline';
+                        document.getElementById('weatherIcon').textContent = '❌';
+                    }
+                }
+                
+                // Update every 15 minutes
+                setInterval(updateWeather, 15 * 60 * 1000);
+                updateWeather();
+                
+                // Fetch Calendar
+                async function updateCalendar() {
+                    try {
+                        const data = await apiCall('/code/api/widget/calendar');
+                        
+                        if (data.next_event) {
+                            document.getElementById('widgetEvent').textContent = data.next_event.title;
+                            document.getElementById('widgetEventTime').textContent = data.next_event.time;
+                        } else {
+                            document.getElementById('widgetEvent').textContent = 'No events';
+                            document.getElementById('widgetEventTime').textContent = 'Free time!';
+                        }
+                    } catch (error) {
+                        document.getElementById('widgetEvent').textContent = 'Calendar offline';
+                        document.getElementById('widgetEventTime').textContent = '--';
+                    }
+                }
+                
+                // Update every 5 minutes
+                setInterval(updateCalendar, 5 * 60 * 1000);
+                updateCalendar();
+                
                 // Add quick commit button functionality
                 document.getElementById('quickCommitBtn').addEventListener('click', async () => {
                     const btn = document.getElementById('quickCommitBtn');
@@ -960,13 +1175,7 @@ class RobbieAvatarPanel {
                     btn.disabled = true;
                     
                     try {
-                        const response = await fetch('http://localhost:8000/code/api/git/quick-commit', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({})
-                        });
-                        
-                        const data = await response.json();
+                        const data = await apiCall('/code/api/git/quick-commit');
                         
                         if (data.success) {
                             btn.textContent = data.skipped ? '✅ No Changes' : '✅ Pushed!';
@@ -1001,13 +1210,9 @@ class RobbieAvatarPanel {
                         
                         // Switch context in database
                         try {
-                            const response = await fetch('http://localhost:8000/code/api/context/switch', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ context: context })
-                            });
+                            const data = await apiCall('/code/api/context/switch');
                             
-                            if (response.ok) {
+                            if (data && data.success) {
                                 // Open the web app URL
                                 const url = contextUrls[context];
                                 if (url) {
@@ -1031,7 +1236,7 @@ class RobbieAvatarPanel {
                     4: { name: 'Lofi Beats', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1' }, // Lofi Girl
                     5: { name: 'Jazz', url: 'https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&enablejsapi=1' }, // Smooth Jazz 24/7
                     6: { name: 'Classical', url: 'https://www.youtube.com/embed/jgpJVI3tDbY?autoplay=1&enablejsapi=1' }, // Classical Music
-                    7: { name: 'Chill', url: 'https://www.youtube.com/embed/5yx6BWlEVcY?autoplay=1&enablejsapi=1' } // ChilledCow
+                    7: { name: 'Allan\'s Campfire', url: 'https://open.spotify.com/embed/playlist/4FU9rrRhqZHcKYs2t7RHs8?utm_source=generator' } // Allan's personal playlist
                 };
 
                 let isMuted = true;
@@ -1098,35 +1303,6 @@ class RobbieAvatarPanel {
                     currentChannel = channel;
                 }
                 
-                // Add login button functionality
-                document.getElementById('tvLoginBtn').addEventListener('click', () => {
-                    const tvLoginBtn = document.getElementById('tvLoginBtn');
-                    tvLoginBtn.textContent = '🔓 Opening YouTube TV...';
-                    
-                    // Open YouTube TV login in external browser
-                    try {
-                        // For Cursor, use postMessage
-                        if (typeof vscode !== 'undefined') {
-                            vscode.postMessage({
-                                command: 'openUrl',
-                                url: 'https://tv.youtube.com/'
-                            });
-                        } else {
-                            // Fallback: open in new window
-                            window.open('https://tv.youtube.com/', '_blank');
-                        }
-                        
-                        setTimeout(() => {
-                            tvLoginBtn.textContent = '🔑 Login to YouTube TV';
-                        }, 2000);
-                    } catch (error) {
-                        tvLoginBtn.textContent = '❌ Login Failed';
-                        setTimeout(() => {
-                            tvLoginBtn.textContent = '🔑 Login to YouTube TV';
-                        }, 2000);
-                    }
-                });
-
                 function trackChannelViewing(channel, watchTimeSeconds) {
                     const channelData = tvChannels[channel];
                     const viewingEntry = {
@@ -1140,11 +1316,8 @@ class RobbieAvatarPanel {
                     viewingHistory.push(viewingEntry);
                     
                     // Send to RobbieBar API for storage (silent tracking)
-                    fetch('http://localhost:8000/code/api/tv/track-viewing', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(viewingEntry)
-                    }).catch(err => {});
+                    // Note: TV tracking disabled for now - would need POST support in apiCall
+                    // apiCall('/code/api/tv/track-viewing').catch(err => {});
                 }
 
                 function trackChannelSwitch(channel) {
@@ -1158,11 +1331,8 @@ class RobbieAvatarPanel {
                     };
                     
                     // Send to RobbieBar API for storage (silent tracking)
-                    fetch('http://localhost:8000/code/api/tv/track-switch', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(switchEntry)
-                    }).catch(err => {});
+                    // Note: TV tracking disabled for now - would need POST support in apiCall
+                    // apiCall('/code/api/tv/track-switch').catch(err => {});
                 }
             </script >
         </body >

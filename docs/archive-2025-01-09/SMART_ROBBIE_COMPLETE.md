@@ -155,7 +155,7 @@ Add to your `settings.json`:
 
 ```bash
 # Required for embeddings (get from OpenAI)
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=sk-***REDACTED***
 
 # Database (already configured)
 DATABASE_URL=postgresql://robbie:robbie_dev_2025@localhost:5432/robbieverse
