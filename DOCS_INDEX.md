@@ -59,6 +59,10 @@ New to the project? Start with these:
 - **[packages/@robbie/personality/README.md](./packages/@robbie/personality/README.md)** - Mood engine + personality system
 - **[packages/@robbie/mcp-servers/README.md](./packages/@robbie/mcp-servers/README.md)** - Cursor MCP servers
 
+### Interface-Specific Guides
+- **[ROBBIEBAR_MACOS_INTEGRATION.md](./ROBBIEBAR_MACOS_INTEGRATION.md)** - macOS desktop app integration
+- **[ROBBIEBAR_INTEGRATION_CONTEXT.md](./ROBBIEBAR_INTEGRATION_CONTEXT.md)** - General RobbieBar context
+
 ### Demo & Testing
 - **[scripts/demo-personality-flow.sh](./scripts/demo-personality-flow.sh)** - Live personality demo
 

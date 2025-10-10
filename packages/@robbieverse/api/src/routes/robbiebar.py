@@ -24,13 +24,13 @@ router = APIRouter(prefix="/code/api", tags=["robbiebar"])
 # Database path (SQLite)
 DATABASE_PATH = os.getenv(
     "DATABASE_PATH",
-    "/home/allan/robbie_workspace/combined/aurora-ai-robbiverse/data/vengeance.db"
+    "/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db"
 )
 
 # Git repository path (adjust per server)
 GIT_REPO_PATH = os.getenv(
     "GIT_REPO_PATH",
-    "/home/allan/robbie_workspace/combined/aurora-ai-robbiverse"
+    "/Users/allanperetz/aurora-ai-robbiverse"
 )
 
 # ============================================

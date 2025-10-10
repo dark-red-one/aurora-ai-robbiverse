@@ -145,6 +145,36 @@ class RobbieAvatarPanel {
         req.end();
     }
 
+    httpPost(path, payload, callback) {
+        const postData = JSON.stringify(payload);
+        const options = {
+            hostname: 'localhost',
+            port: 8000,
+            path: path,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+
+        const req = http.request(options, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    callback(JSON.parse(data));
+                } catch (e) {
+                    callback(null);
+                }
+            });
+        });
+
+        req.on('error', () => callback(null));
+        req.write(postData);
+        req.end();
+    }
+
     handleApiCall(message) {
         this.httpGet(message.path, (data) => {
             if (avatarPanel) {
@@ -153,6 +183,44 @@ class RobbieAvatarPanel {
                     requestId: message.requestId,
                     data: data
                 });
+            }
+        });
+    }
+
+    handleChatMessage(message) {
+        const payload = {
+            source: 'robbiebar',
+            source_metadata: {
+                sender: 'allan',
+                timestamp: new Date().toISOString(),
+                platform: 'cursor-extension'
+            },
+            ai_service: 'chat',
+            payload: {
+                input: message.text,
+                parameters: {
+                    temperature: 0.7,
+                    max_tokens: 1500
+                }
+            },
+            user_id: 'allan',
+            fetch_context: true
+        };
+
+        this.httpPost('/api/v2/universal/request', payload, (data) => {
+            if (data && data.status === 'approved') {
+                // Send response to webview
+                if (avatarPanel) {
+                    avatarPanel.webview.postMessage({
+                        command: 'chatResponse',
+                        message: data.robbie_response.message,
+                        mood: data.robbie_response.mood,
+                        personalityChanges: data.robbie_response.personality_changes
+                    });
+                }
+                
+                // Refresh state to get updated mood
+                this.refreshState();
             }
         });
     }
@@ -191,6 +259,9 @@ class RobbieAvatarPanel {
             } else if (message.command === 'apiCall') {
                 // Proxy API calls from webview
                 this.handleApiCall(message);
+            } else if (message.command === 'chat') {
+                // Handle chat messages through Universal Input API
+                this.handleChatMessage(message);
             }
         });
     }
@@ -581,6 +652,27 @@ class RobbieAvatarPanel {
                     <button class="context-btn" data-context="testpilot">🧪 @TestPilot</button>
                     <button class="context-btn" data-context="growth">📈 @Growth</button>
                     <button class="context-btn" data-context="play">🎮 @Play</button>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- Chat Section -->
+            <div class="section">
+                <div class="section-title">💬 Chat with Robbie</div>
+                <div id="chatMessages" style="max-height: 200px; overflow-y: auto; background: #2d2d2d; border-radius: 4px; padding: 8px; margin-bottom: 8px; font-size: 11px;"></div>
+                <div style="display: flex; gap: 4px;">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        placeholder="Ask me anything..." 
+                        style="flex: 1; background: #3c3c3c; color: white; border: 1px solid #555; border-radius: 4px; padding: 6px; font-size: 11px;"
+                    />
+                    <button 
+                        id="chatSendBtn" 
+                        class="action-btn" 
+                        style="flex: 0 0 60px; padding: 6px;"
+                    >Send</button>
                 </div>
             </div>
 
@@ -1226,6 +1318,52 @@ class RobbieAvatarPanel {
                             console.error('Context switch failed:', error);
                         }
                     });
+                });
+
+                // Chat functionality
+                document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendChatMessage();
+                });
+
+                function sendChatMessage() {
+                    const input = document.getElementById('chatInput');
+                    const message = input.value.trim();
+                    if (!message) return;
+                    
+                    // Add user message to chat
+                    addChatMessage('You', message, true);
+                    input.value = '';
+                    
+                    // Send to extension
+                    vscode.postMessage({
+                        command: 'chat',
+                        text: message
+                    });
+                }
+
+                function addChatMessage(sender, text, isUser) {
+                    const chatDiv = document.getElementById('chatMessages');
+                    const msgDiv = document.createElement('div');
+                    msgDiv.style.marginBottom = '8px';
+                    msgDiv.style.color = isUser ? '#00d4ff' : '#ffffff';
+                    msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+                    chatDiv.appendChild(msgDiv);
+                    chatDiv.scrollTop = chatDiv.scrollHeight;
+                }
+
+                // Listen for chat responses
+                window.addEventListener('message', event => {
+                    const msg = event.data;
+                    if (msg.command === 'chatResponse') {
+                        addChatMessage('Robbie', msg.message, false);
+                        
+                        // Show mood change notification if any
+                        if (msg.personalityChanges && msg.personalityChanges.mood) {
+                            const change = msg.personalityChanges.mood;
+                            addChatMessage('System', `🎭 Mood changed: ${change.from} → ${change.to}`, false);
+                        }
+                    }
                 });
 
                 // TV Configuration - 7 YouTube Live Channels (3 News + 4 Music)
