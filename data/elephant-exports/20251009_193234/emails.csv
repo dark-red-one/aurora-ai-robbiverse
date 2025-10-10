@@ -1,0 +1,6 @@
+id,gmail_id,subject,sender_email,sender_name,body,received_at,is_read,importance,category,deal_id
+1,mock_62772,Quick sync on TestPilot demo,sarah.johnson@wholefoods.com,Sarah Johnson,"Hey Allan, loved the demo! Can we schedule a follow-up call?",2025-09-28 12:48:19.436408+00,t,8,deal,
+2,mock_51802,Budget approval - Q1 pilot,mchen@traderjoes.com,Michael Chen,Great news! We got budget approved for the 10-store pilot program.,2025-10-01 12:48:19.501713+00,f,9,deal,
+3,mock_24417,Meeting follow-up,jmartinez@kroger.com,Jennifer Martinez,Thanks for the insights. Our team wants to move forward with TestPilot.,2025-10-01 12:48:19.544066+00,t,7,deal,
+4,mock_26993,Data request,david.kim@target.com,David Kim,Can you share the demographic breakdown from last quarter's test?,2025-10-03 12:48:19.582738+00,t,6,deal,
+5,mock_91613,Pricing discussion,landerson@walmart.com,Lisa Anderson,We need to discuss enterprise pricing for multi-banner access.,2025-09-30 12:48:19.625788+00,t,8,deal,

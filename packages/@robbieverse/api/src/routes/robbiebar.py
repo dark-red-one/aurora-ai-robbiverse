@@ -1,6 +1,6 @@
 """
-RobbieBar API Routes
-====================
+RobbieBar API Routes - SQLite Version
+=====================================
 Backend for robbiebar web interface at /code
 Provides personality, system stats, git commands, and more
 """
@@ -8,21 +8,21 @@ Provides personality, system stats, git commands, and more
 import os
 import subprocess
 import psutil
+import sqlite3
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import asyncpg
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/code/api", tags=["robbiebar"])
 
-# Database connection string from environment
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://robbie:fun2Gus!!!@localhost:5432/robbieverse"
+# Database path (SQLite)
+DATABASE_PATH = os.getenv(
+    "DATABASE_PATH",
+    "/home/allan/robbie_workspace/combined/aurora-ai-robbiverse/data/vengeance.db"
 )
 
 # Git repository path (adjust per server)
@@ -41,39 +41,61 @@ class MoodUpdate(BaseModel):
 class GitCommitRequest(BaseModel):
     message: Optional[str] = None
 
+class ContextSwitchRequest(BaseModel):
+    context: str
+
+class NoteCreateRequest(BaseModel):
+    author: str
+    category: str
+    content: str
+    priority: int = 5
+
 # ============================================
 # DATABASE HELPERS
 # ============================================
 
-async def get_db_connection():
+def get_db_connection():
     """Get database connection"""
-    return await asyncpg.connect(DATABASE_URL)
+    return sqlite3.connect(DATABASE_PATH)
+
+def get_db_cursor():
+    """Get database cursor with row factory"""
+    conn = get_db_connection()
+    conn.row_factory = sqlite3.Row
+    return conn
 
 # ============================================
 # PERSONALITY ENDPOINTS
 # ============================================
 
 @router.get("/personality")
-async def get_personality() -> Dict[str, Any]:
-    """Get current Robbie personality state from database"""
+def get_personality() -> Dict[str, Any]:
+    """Get current Robbie personality state from database with mood definition"""
     try:
-        conn = await get_db_connection()
+        import json
+        conn = get_db_cursor()
         try:
-            # Query personality state (handle missing columns gracefully)
-            try:
-                row = await conn.fetchrow("""
-                    SELECT 
-                        current_mood,
-                        attraction_level,
-                        gandhi_genghis_level,
-                        updated_at
-                    FROM robbie_personality_state
-                    WHERE user_id = 'allan' AND personality_name = 'robbie'
-                    LIMIT 1
-                """)
-            except Exception as e:
-                logger.warning(f"Error querying personality: {e}")
-                row = None
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    rps.current_mood,
+                    rps.attraction_level,
+                    rps.gandhi_genghis_level,
+                    rps.current_context,
+                    rps.updated_at,
+                    rmd.mood_name,
+                    rmd.mood_emoji,
+                    rmd.main_image,
+                    rmd.variant_images,
+                    rmd.morph_interval_ms,
+                    rmd.matrix_emojis
+                FROM robbie_personality_state rps
+                LEFT JOIN robbie_mood_definitions rmd ON rps.current_mood = rmd.mood_id
+                WHERE rps.user_id = 'allan' AND rps.personality_name = 'robbie'
+                LIMIT 1
+            """)
+            
+            row = cursor.fetchone()
             
             if not row:
                 # Return default if no data
@@ -81,266 +103,268 @@ async def get_personality() -> Dict[str, Any]:
                     "mood": "focused",
                     "attraction": 8,
                     "gandhi_genghis": 7,
+                    "context": "code",
                     "energy": 50,
                     "updated_at": datetime.now().isoformat()
                 }
             
+            # Build mood_data from joined table
+            mood_data = None
+            if row["mood_name"]:
+                mood_data = {
+                    "name": row["mood_name"],
+                    "emoji": row["mood_emoji"],
+                    "main_image": row["main_image"],
+                    "variants": json.loads(row["variant_images"]) if row["variant_images"] else [],
+                    "morph_interval": row["morph_interval_ms"],
+                    "matrix_emojis": json.loads(row["matrix_emojis"]) if row["matrix_emojis"] else []
+                }
+            
             return {
                 "mood": row["current_mood"],
+                "mood_data": mood_data,
                 "attraction": row["attraction_level"],
                 "gandhi_genghis": row["gandhi_genghis_level"],
-                "energy": 50,  # Default energy level (column may not exist yet)
-                "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None
+                "context": row["current_context"],
+                "energy": 50,  # Default energy level
+                "updated_at": row["updated_at"] if row["updated_at"] else None
             }
         finally:
-            await conn.close()
+            conn.close()
             
     except Exception as e:
         logger.error(f"Error fetching personality: {e}")
-        # Return defaults on error
-        return {
-            "mood": "focused",
-            "attraction": 8,
-            "gandhi_genghis": 7,
-            "energy": 50,
-            "error": str(e)
-        }
-
-@router.put("/personality/mood")
-async def update_mood(update: MoodUpdate) -> Dict[str, Any]:
-    """Update Robbie's current mood"""
-    valid_moods = ["friendly", "focused", "playful", "bossy", "surprised", "blushing"]
-    
-    if update.mood not in valid_moods:
-        raise HTTPException(status_code=400, detail=f"Invalid mood. Must be one of: {valid_moods}")
-    
-    try:
-        conn = await get_db_connection()
-        try:
-            await conn.execute("""
-                UPDATE robbie_personality_state
-                SET current_mood = $1, updated_at = NOW()
-                WHERE user_id = 'allan' AND personality_name = 'robbie'
-            """, update.mood)
-            
-            return {
-                "success": True,
-                "mood": update.mood,
-                "updated_at": datetime.now().isoformat()
-            }
-        finally:
-            await conn.close()
-            
-    except Exception as e:
-        logger.error(f"Error updating mood: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 # ============================================
-# SYSTEM STATS ENDPOINTS
+# SYSTEM STATS
 # ============================================
 
 @router.get("/system/stats")
-async def get_system_stats() -> Dict[str, Any]:
-    """Get real-time system resource usage"""
+def get_system_stats() -> Dict[str, Any]:
+    """Get system resource usage"""
     try:
         # CPU usage
-        cpu_percent = psutil.cpu_percent(interval=0.1)
+        cpu_percent = psutil.cpu_percent(interval=1)
         
         # Memory usage
         memory = psutil.virtual_memory()
         memory_percent = memory.percent
         
-        # GPU usage (if available)
+        # GPU usage (try to get GPU info)
         gpu_percent = 0
         try:
-            # Try nvidia-smi for NVIDIA GPUs
+            # Try nvidia-smi if available
             result = subprocess.run(
                 ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
-                capture_output=True,
-                text=True,
-                timeout=1
+                capture_output=True, text=True, timeout=5
             )
             if result.returncode == 0:
-                gpu_percent = float(result.stdout.strip().split("\n")[0])
+                gpu_percent = float(result.stdout.strip())
         except:
-            # No GPU or nvidia-smi not available
-            pass
+            gpu_percent = 0
         
         return {
-            "cpu": round(cpu_percent, 1),
-            "memory": round(memory_percent, 1),
-            "gpu": round(gpu_percent, 1),
+            "cpu": cpu_percent,
+            "memory": memory_percent,
+            "gpu": gpu_percent,
             "timestamp": datetime.now().isoformat()
         }
         
     except Exception as e:
         logger.error(f"Error getting system stats: {e}")
-        return {
-            "cpu": 0,
-            "memory": 0,
-            "gpu": 0,
-            "error": str(e)
-        }
+        raise HTTPException(status_code=500, detail=f"System stats error: {e}")
 
 # ============================================
-# GIT ENDPOINTS
+# GIT COMMANDS
 # ============================================
 
 @router.get("/git/status")
-async def get_git_status() -> Dict[str, Any]:
-    """Get current git status"""
+def get_git_status() -> Dict[str, Any]:
+    """Get git repository status"""
     try:
+        # Change to git repo directory
+        original_dir = os.getcwd()
         os.chdir(GIT_REPO_PATH)
         
-        # Get current branch
-        branch_result = subprocess.run(
-            ["git", "branch", "--show-current"],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "unknown"
-        
-        # Get modified files count
-        status_result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        modified_count = len(status_result.stdout.strip().split("\n")) if status_result.stdout.strip() else 0
-        
-        # Get ahead/behind status
-        ahead_behind = subprocess.run(
-            ["git", "rev-list", "--left-right", "--count", "HEAD...@{u}"],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        ahead, behind = 0, 0
-        if ahead_behind.returncode == 0 and ahead_behind.stdout.strip():
-            parts = ahead_behind.stdout.strip().split()
-            ahead = int(parts[0]) if len(parts) > 0 else 0
-            behind = int(parts[1]) if len(parts) > 1 else 0
-        
-        return {
-            "branch": branch,
-            "modified_files": modified_count,
-            "ahead": ahead,
-            "behind": behind,
-            "clean": modified_count == 0,
-            "timestamp": datetime.now().isoformat()
-        }
-        
+        try:
+            # Get current branch
+            branch_result = subprocess.run(
+                ["git", "branch", "--show-current"],
+                capture_output=True, text=True, timeout=5
+            )
+            branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "unknown"
+            
+            # Get modified files count
+            status_result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True, text=True, timeout=5
+            )
+            
+            # Parse and categorize files
+            modified = []
+            untracked = []
+            deleted = []
+            
+            if status_result.returncode == 0:
+                for line in status_result.stdout.split('\n'):
+                    if not line.strip():
+                        continue
+                    status_code = line[:2]
+                    filename = line[3:].strip()
+                    
+                    if 'M' in status_code:
+                        modified.append(filename)
+                    elif '?' in status_code:
+                        untracked.append(filename)
+                    elif 'D' in status_code:
+                        deleted.append(filename)
+            
+            # Check if working directory is clean
+            total_changes = len(modified) + len(untracked) + len(deleted)
+            is_clean = total_changes == 0
+            
+            # Create clean summary
+            summary_parts = []
+            if modified:
+                summary_parts.append(f"✏️ {len(modified)} modified")
+            if untracked:
+                summary_parts.append(f"➕ {len(untracked)} new")
+            if deleted:
+                summary_parts.append(f"❌ {len(deleted)} deleted")
+            
+            summary = "  ".join(summary_parts) if summary_parts else "✅ Clean"
+            
+            return {
+                "branch": branch,
+                "summary": summary,
+                "modified": modified[:10],  # Limit to 10 files
+                "untracked": untracked[:10],
+                "deleted": deleted[:10],
+                "modified_count": len(modified),
+                "untracked_count": len(untracked),
+                "deleted_count": len(deleted),
+                "total_changes": total_changes,
+                "is_clean": is_clean,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            os.chdir(original_dir)
+            
     except Exception as e:
         logger.error(f"Error getting git status: {e}")
         return {
             "branch": "unknown",
-            "modified_files": 0,
-            "ahead": 0,
-            "behind": 0,
-            "clean": True,
+            "modified_files": [],
+            "modified_count": 0,
+            "is_clean": True,
             "error": str(e)
         }
 
 @router.post("/git/quick-commit")
-async def quick_commit(request: GitCommitRequest) -> Dict[str, Any]:
-    """Quick commit all changes and push"""
+def quick_commit(request: GitCommitRequest) -> Dict[str, Any]:
+    """Stage all changes, commit, and push"""
     try:
+        # Change to git repo directory
+        original_dir = os.getcwd()
         os.chdir(GIT_REPO_PATH)
         
-        # Check if there are changes
-        status_result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        
-        if not status_result.stdout.strip():
+        try:
+            # Check if there are changes
+            status_result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True, text=True, timeout=5
+            )
+            
+            if status_result.returncode != 0 or not status_result.stdout.strip():
+                return {
+                    "success": True,
+                    "skipped": True,
+                    "message": "No changes to commit"
+                }
+            
+            # Stage all changes
+            subprocess.run(["git", "add", "."], timeout=10)
+            
+            # Commit with message
+            message = request.message or f"Quick commit from RobbieBar - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            commit_result = subprocess.run(
+                ["git", "commit", "-m", message],
+                capture_output=True, text=True, timeout=10
+            )
+            
+            if commit_result.returncode != 0:
+                return {
+                    "success": False,
+                    "error": commit_result.stderr
+                }
+            
+            # Push to remote
+            push_result = subprocess.run(
+                ["git", "push"],
+                capture_output=True, text=True, timeout=30
+            )
+            
+            if push_result.returncode != 0:
+                return {
+                    "success": False,
+                    "error": push_result.stderr
+                }
+            
             return {
                 "success": True,
-                "message": "No changes to commit",
-                "skipped": True
+                "message": message,
+                "timestamp": datetime.now().isoformat()
             }
-        
-        # Add all changes
-        subprocess.run(["git", "add", "-A"], check=True, timeout=10)
-        
-        # Commit with message
-        commit_message = request.message or f"Quick commit from robbiebar - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        subprocess.run(
-            ["git", "commit", "-m", commit_message],
-            check=True,
-            timeout=10,
-            capture_output=True
-        )
-        
-        # Push to origin
-        push_result = subprocess.run(
-            ["git", "push", "origin", "main"],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        if push_result.returncode != 0:
-            # Try 'master' if 'main' fails
-            push_result = subprocess.run(
-                ["git", "push", "origin", "master"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-        
-        return {
-            "success": push_result.returncode == 0,
-            "message": commit_message,
-            "output": push_result.stdout + push_result.stderr,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Git command failed: {e}")
+            
+        finally:
+            os.chdir(original_dir)
+            
+    except Exception as e:
+        logger.error(f"Error with quick commit: {e}")
         return {
             "success": False,
-            "error": f"Git command failed: {e}",
-            "output": e.stderr if hasattr(e, 'stderr') else str(e)
+            "error": str(e)
         }
-    except Exception as e:
-        logger.error(f"Error in quick commit: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/git/recent")
-async def get_recent_commits() -> Dict[str, Any]:
-    """Get recent commits"""
+def get_recent_commits() -> Dict[str, Any]:
+    """Get recent git commits"""
     try:
+        # Change to git repo directory
+        original_dir = os.getcwd()
         os.chdir(GIT_REPO_PATH)
         
-        # Get last 5 commits
-        result = subprocess.run(
-            ["git", "log", "--oneline", "-5", "--format=%h|%s|%ar"],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        
-        commits = []
-        if result.returncode == 0 and result.stdout.strip():
-            for line in result.stdout.strip().split("\n"):
-                if "|" in line:
-                    hash, message, time = line.split("|", 2)
-                    commits.append({
-                        "hash": hash.strip(),
-                        "message": message.strip(),
-                        "time": time.strip()
-                    })
-        
-        return {
-            "commits": commits,
-            "count": len(commits)
-        }
-        
+        try:
+            # Get last 5 commits with timestamps and author
+            result = subprocess.run(
+                ["git", "log", "--format=%h|%s|%ar|%an", "-5"],
+                capture_output=True, text=True, timeout=5
+            )
+            
+            commits = []
+            if result.returncode == 0:
+                for line in result.stdout.strip().split('\n'):
+                    if line.strip():
+                        parts = line.split('|')
+                        if len(parts) >= 3:
+                            commits.append({
+                                "hash": parts[0],
+                                "message": parts[1],
+                                "time": parts[2],  # e.g. "63 minutes ago"
+                                "author": parts[3] if len(parts) > 3 else "Unknown"
+                            })
+            
+            return {
+                "commits": commits,
+                "count": len(commits),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            os.chdir(original_dir)
+            
     except Exception as e:
         logger.error(f"Error getting recent commits: {e}")
         return {
@@ -350,65 +374,286 @@ async def get_recent_commits() -> Dict[str, Any]:
         }
 
 # ============================================
-# CONVERSATIONS ENDPOINT
+# CONTEXT SWITCHING
 # ============================================
 
-@router.get("/conversations/recent")
-async def get_recent_conversations() -> Dict[str, Any]:
-    """Get recent conversations from database"""
+@router.post("/context/switch")
+def switch_context(request: ContextSwitchRequest) -> Dict[str, Any]:
+    """Switch Robbie's current context (code, work, growth, testpilot, play)"""
     try:
-        conn = await get_db_connection()
+        conn = get_db_connection()
         try:
-            rows = await conn.fetch("""
-                SELECT 
-                    id,
-                    title,
-                    context_type,
-                    updated_at,
-                    message_count
-                FROM conversations
-                WHERE user_id = 'allan'
-                ORDER BY updated_at DESC
-                LIMIT 5
-            """)
+            cursor = conn.cursor()
             
-            conversations = []
-            for row in rows:
-                conversations.append({
-                    "id": str(row["id"]),
-                    "title": row["title"],
-                    "context_type": row["context_type"],
-                    "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None,
-                    "message_count": row["message_count"] or 0
-                })
+            # Update both tables for compatibility
+            cursor.execute("""
+                UPDATE robbie_personality_state 
+                SET current_context = ?, updated_at = datetime('now')
+                WHERE user_id = 'allan' AND personality_name = 'robbie'
+            """, (request.context,))
+            
+            cursor.execute("""
+                UPDATE ai_personality_state 
+                SET current_context = ?, updated_at = datetime('now')
+                WHERE personality_id = 'robbie'
+            """, (request.context,))
+            
+            conn.commit()
             
             return {
-                "conversations": conversations,
-                "count": len(conversations)
+                "success": True,
+                "context": request.context,
+                "timestamp": datetime.now().isoformat()
             }
         finally:
-            await conn.close()
+            conn.close()
             
     except Exception as e:
-        logger.error(f"Error fetching conversations: {e}")
+        logger.error(f"Error switching context: {e}")
+        raise HTTPException(status_code=500, detail=f"Context switch failed: {e}")
+
+@router.get("/context/current")
+def get_current_context() -> Dict[str, Any]:
+    """Get Robbie's current context"""
+    try:
+        conn = get_db_cursor()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT current_context, updated_at
+                FROM robbie_personality_state
+                WHERE user_id = 'allan' AND personality_name = 'robbie'
+                LIMIT 1
+            """)
+            
+            row = cursor.fetchone()
+            
+            if row:
+                return {
+                    "context": row["current_context"],
+                    "updated_at": row["updated_at"] if row["updated_at"] else None
+                }
+            else:
+                return {"context": "code", "updated_at": None}
+                
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error getting context: {e}")
+        return {"context": "code", "error": str(e)}
+
+# ============================================
+# NOTES SYSTEM
+# ============================================
+
+@router.get("/notes")
+def get_notes(author: Optional[str] = None, category: Optional[str] = None) -> Dict[str, Any]:
+    """Get notes - Allan's all, Robbie's top 25 most relevant"""
+    try:
+        conn = get_db_cursor()
+        try:
+            cursor = conn.cursor()
+            
+            if author == "allan":
+                # Get ALL of Allan's notes
+                cursor.execute("SELECT * FROM notes WHERE author = 'allan' ORDER BY created_at DESC")
+                rows = cursor.fetchall()
+            elif author == "robbie":
+                # Get top 25 most relevant Robbie notes (by priority and recency)
+                cursor.execute("""
+                    SELECT * FROM notes 
+                    WHERE author = 'robbie' 
+                    ORDER BY priority DESC, created_at DESC 
+                    LIMIT 25
+                """)
+                rows = cursor.fetchall()
+            else:
+                # Get all notes with optional category filter
+                if category:
+                    cursor.execute("SELECT * FROM notes WHERE category = ? ORDER BY created_at DESC", (category,))
+                    rows = cursor.fetchall()
+                else:
+                    cursor.execute("SELECT * FROM notes ORDER BY created_at DESC")
+                    rows = cursor.fetchall()
+            
+            notes = [dict(row) for row in rows]
+            
+            return {
+                "notes": notes,
+                "count": len(notes),
+                "author": author,
+                "category": category,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error fetching notes: {e}")
         return {
-            "conversations": [],
+            "notes": [],
+            "count": 0,
+            "error": str(e)
+        }
+
+@router.post("/notes")
+def create_note(request: NoteCreateRequest) -> Dict[str, Any]:
+    """Create a new note"""
+    try:
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            note_id = f"{request.author}_{request.category}_{int(datetime.now().timestamp())}"
+            
+            cursor.execute("""
+                INSERT INTO notes (id, author, category, content, priority, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+            """, (note_id, request.author, request.category, request.content, request.priority))
+            
+            conn.commit()
+            
+            return {
+                "success": True,
+                "note_id": note_id,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error creating note: {e}")
+        raise HTTPException(status_code=500, detail=f"Note creation failed: {e}")
+
+@router.get("/notes/search")
+def search_notes(q: str) -> Dict[str, Any]:
+    """Search notes by content"""
+    try:
+        conn = get_db_cursor()
+        try:
+            cursor = conn.cursor()
+            
+            # Search in content field
+            cursor.execute("""
+                SELECT * FROM notes 
+                WHERE content LIKE ? 
+                ORDER BY priority DESC, created_at DESC
+                LIMIT 50
+            """, (f"%{q}%",))
+            
+            rows = cursor.fetchall()
+            notes = [dict(row) for row in rows]
+            
+            return {
+                "notes": notes,
+                "count": len(notes),
+                "query": q,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error searching notes: {e}")
+        return {
+            "notes": [],
             "count": 0,
             "error": str(e)
         }
 
 # ============================================
-# ACTIVE USERS (Future: track who's online)
+# MOTD (Message of the Day)
 # ============================================
 
-@router.get("/users/active")
-async def get_active_users() -> Dict[str, Any]:
-    """Get currently active users"""
-    # For now, just return Allan
-    # Future: track active sessions in database or Redis
-    return {
-        "users": ["Allan"],
-        "count": 1,
-        "timestamp": datetime.now().isoformat()
-    }
+@router.get("/moods")
+def get_moods() -> Dict[str, Any]:
+    """Get all mood definitions from database"""
+    try:
+        conn = get_db_cursor()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT mood_id, mood_name, mood_emoji, main_image, 
+                       variant_images, morph_interval_ms, matrix_emojis, description
+                FROM robbie_mood_definitions
+            """)
+            
+            rows = cursor.fetchall()
+            moods = {}
+            
+            for row in rows:
+                import json
+                moods[row["mood_id"]] = {
+                    "name": row["mood_name"],
+                    "emoji": row["mood_emoji"],
+                    "main_image": row["main_image"],
+                    "variants": json.loads(row["variant_images"]) if row["variant_images"] else [],
+                    "morph_interval": row["morph_interval_ms"],
+                    "matrix_emojis": json.loads(row["matrix_emojis"]) if row["matrix_emojis"] else [],
+                    "description": row["description"]
+                }
+            
+            return {
+                "moods": moods,
+                "count": len(moods),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Error fetching moods: {e}")
+        return {
+            "moods": {},
+            "count": 0,
+            "error": str(e)
+        }
 
+@router.get("/motd")
+def get_motd() -> Dict[str, Any]:
+    """Get context-aware Message of the Day"""
+    try:
+        # Get current context
+        context_response = get_current_context()
+        context = context_response.get("context", "code")
+        
+        # Get current time for greeting
+        now = datetime.now()
+        hour = now.hour
+        
+        if hour < 12:
+            time_greeting = "Good morning"
+        elif hour < 17:
+            time_greeting = "Good afternoon"
+        else:
+            time_greeting = "Good evening"
+        
+        # Context-specific MOTDs
+        motds = {
+            "code": f"{time_greeting} Allan - Ready to code! Your RobbieBar is active with system stats and git integration.",
+            "work": f"{time_greeting} Allan - Today's a productivity day! You have notes organized and tasks ready to tackle.",
+            "growth": f"{time_greeting} Allan - Pipeline at $289K with 40 companies. Time to close some deals!",
+            "testpilot": f"{time_greeting} Allan - TestPilot dashboard active. 33 tests running, 76% completion rate.",
+            "play": f"{time_greeting} Allan - You've been working hard! Ready for some fun? Strip blackjack awaits! 😘"
+        }
+        
+        motd = motds.get(context, motds["code"])
+        
+        return {
+            "motd": motd,
+            "context": context,
+            "time_greeting": time_greeting,
+            "timestamp": now.isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating MOTD: {e}")
+        return {
+            "motd": "Good day Allan - Robbie is ready to help!",
+            "context": "code",
+            "error": str(e)
+        }

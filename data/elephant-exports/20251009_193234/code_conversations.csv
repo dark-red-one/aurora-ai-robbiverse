@@ -1,0 +1,2 @@
+id,user_id,session_id,title,context_type,created_at,updated_at,last_message_at,message_count,metadata
+aea13da0-a48f-4302-947b-7da63bb94fbb,allan,session_b1fd4360-4e0c-4175-b133-69af62629932,Test Conversation,code,2025-10-08 18:51:50.61202+00,2025-10-08 18:51:50.61202+00,2025-10-08 18:51:50.61202+00,2,{}

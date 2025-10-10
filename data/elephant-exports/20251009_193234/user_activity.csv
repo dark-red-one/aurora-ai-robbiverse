@@ -1,0 +1,3 @@
+id,user_id,activity_type,details,created_at
+d50faaa2-7347-4c78-9c6f-139bfa3e53ff,allan,test,"{""test_type"": ""personality_logger"", ""timestamp"": ""2025-10-06T02:20:35.408642""}",2025-10-06 07:20:35.538203
+0be306bc-b43a-4375-aa7d-9ce51918bd57,allan,query,"{""mood"": {""mood"": ""excited"", ""intensity"": 8}, ""query"": ""Hello Robbie!"", ""personality"": {""auto"": 10, ""mood"": ""excited"", ""turbo"": 5, ""flirty"": 7, ""gandhi"": 4}}",2025-10-06 07:20:36.570222

@@ -5,7 +5,16 @@ const http = require('http');
 let currentMood = 4; // Default to Focused
 let avatarPanel = null;
 
-const DB_PATH = '/Users/allanperetz/aurora-ai-robbiverse/data/vengeance.db';
+// Detect OS and set paths accordingly
+const IS_MAC = process.platform === 'darwin';
+const BASE_PATH = IS_MAC
+    ? '/Users/allanperetz/aurora-ai-robbiverse'
+    : '/home/allan/robbie_workspace/combined/aurora-ai-robbiverse';
+
+const DB_PATH = `${BASE_PATH}/data/vengeance.db`;
+
+// Avatar images now served from robbiebar web server
+const AVATAR_BASE_URL = 'http://localhost:8000/images/';
 
 const moodEmojis = {
     1: '😴', 2: '😌', 3: '😊', 4: '🤖',
@@ -38,7 +47,8 @@ const moodToExpression = {
     7: 'Blushing'   // Hyper → Blushing (updated from Bossy)
 };
 
-const AVATAR_PATH = '/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions/';
+// Avatar images loaded from web server instead of file system
+// const AVATAR_PATH = `${BASE_PATH}/infrastructure/robbie-avatar/expressions/`;
 
 class RobbieAvatarPanel {
     constructor(context) {
@@ -52,25 +62,32 @@ class RobbieAvatarPanel {
     }
 
     fetchRobbieBarData() {
-        // Fetch system stats
-        this.httpGet('/code/api/system/stats', (data) => {
-            if (data) this.robbieBarData.systemStats = data;
+        // Fetch personality state first
+        this.httpGet('/code/api/personality', (personalityData) => {
+            if (personalityData) {
+                this.robbieBarData.personality = personalityData;
+            }
 
-            // Fetch git status
-            this.httpGet('/code/api/git/status', (data) => {
-                if (data) this.robbieBarData.gitStatus = data;
+            // Fetch system stats
+            this.httpGet('/code/api/system/stats', (data) => {
+                if (data) this.robbieBarData.systemStats = data;
 
-                // Fetch recent commits
-                this.httpGet('/code/api/git/recent', (data) => {
-                    if (data && data.commits) this.robbieBarData.recentCommits = data.commits;
+                // Fetch git status
+                this.httpGet('/code/api/git/status', (data) => {
+                    if (data) this.robbieBarData.gitStatus = data;
 
-                    // Send update to webview
-                    if (avatarPanel) {
-                        avatarPanel.webview.postMessage({
-                            command: 'updateRobbieBar',
-                            ...this.robbieBarData
-                        });
-                    }
+                    // Fetch recent commits
+                    this.httpGet('/code/api/git/recent', (data) => {
+                        if (data && data.commits) this.robbieBarData.recentCommits = data.commits;
+
+                        // Send update to webview
+                        if (avatarPanel) {
+                            avatarPanel.webview.postMessage({
+                                command: 'updateRobbieBar',
+                                ...this.robbieBarData
+                            });
+                        }
+                    });
                 });
             });
         });
@@ -106,16 +123,16 @@ class RobbieAvatarPanel {
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse')
+                vscode.Uri.file(BASE_PATH)
             ]
         };
 
         webviewView.webview.html = this.getHtmlContent(webviewView.webview);
 
-        // Auto-refresh every 5 seconds
+        // Auto-refresh every 2 seconds for faster updates
         this.refreshInterval = setInterval(() => {
             this.refreshState();
-        }, 5000);
+        }, 2000);
 
         // Initial load
         this.refreshState();
@@ -195,19 +212,15 @@ class RobbieAvatarPanel {
                                 imageFile = expressionFiles[0]; // Use first (and only) file for other expressions
                             }
 
-                            const imagePath = AVATAR_PATH + imageFile;
-                            const imageUri = avatarPanel.webview.asWebviewUri(
-                                vscode.Uri.file(imagePath)
-                            );
+                            // Load image from web server instead of file system
+                            const imageUrl = AVATAR_BASE_URL + imageFile;
+
                             avatarPanel.webview.postMessage({
                                 command: 'updateState',
                                 mood: currentMood,
                                 moodName: moodNames[currentMood],
                                 moodEmoji: moodEmojis[currentMood],
-                                avatarImage: imageUri.toString(),
-                                todoList: todoList,
-                                directives: directives,
-                                tokenData: tokenData
+                                avatarImage: imageUrl
                             });
                         }
                     });
@@ -217,9 +230,8 @@ class RobbieAvatarPanel {
     }
 
     getHtmlContent(webview) {
-        const defaultImageUri = webview.asWebviewUri(
-            vscode.Uri.file('/Users/allanperetz/aurora-ai-robbiverse/infrastructure/robbie-avatar/expressions/robbie-happy-1.png')
-        );
+        // Default image from web server
+        const defaultImageUrl = 'http://localhost:8000/images/robbie-happy-1.png';
         return `<!DOCTYPE html>
         <html>
         <head>
@@ -440,7 +452,7 @@ class RobbieAvatarPanel {
         </head>
         <body>
             <div class="avatar-container">
-                <img class="avatar-image" id="avatarImage" src="${defaultImageUri}" alt="Robbie">
+                <img class="avatar-image" id="avatarImage" src="${defaultImageUrl}" alt="Robbie">
             </div>
             <div class="avatar-emoji" id="avatarEmoji">🤖</div>
             <div class="mood-text" id="moodText">Focused</div>
@@ -450,22 +462,7 @@ class RobbieAvatarPanel {
                 <button id="refreshBtn" style="background: #00d4ff; color: #1a1a2e; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; margin-left: 8px; cursor: pointer;">↻</button>
             </div>
             
-            <div class="section">
-                <div class="section-title">📋 To Do List</div>
-                <div id="todoList" class="loading">Loading...</div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">🎯 Directives</div>
-                <div id="directives" class="loading">Loading...</div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">📊 Tokens/Min Trend</div>
-                <div class="chart-container">
-                    <canvas id="tokenChart" width="200" height="80"></canvas>
-                </div>
-            </div>
+            <!-- Removed: To Do List, Directives, Tokens Chart - Keeping it clean! -->
             
             <div class="section">
                 <div class="section-title">🔥 System Stats</div>
@@ -498,10 +495,84 @@ class RobbieAvatarPanel {
                 <div class="section-title">📊 Recent Commits</div>
                 <div id="recentCommits" class="loading">Loading...</div>
             </div>
+            
+            <!-- Context Switcher Menu -->
+            <div class="context-menu">
+                <button class="context-btn active" data-context="code">@Code</button>
+                <button class="context-btn" data-context="work">@Work</button>
+                <button class="context-btn" data-context="growth">@Growth</button>
+                <button class="context-btn" data-context="testpilot">@TestPilot</button>
+                <button class="context-btn" data-context="play">@Play</button>
+            </div>
+
+            <!-- Mood-Aware Matrix Rain Background -->
+            <canvas id="matrixRain" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.1;"></canvas>
 
             <script>
                 const vscode = acquireVsCodeApi();
                 let tokenChart = null;
+                let matrixRain = null;
+
+                // Mood-aware matrix rain emojis
+                const moodEmojis = {
+                    'friendly': ['😊', '💕', '✨', '☀️', '💖'],
+                    'focused': ['🎯', '🔥', '💼', '⚡', '🚀'],
+                    'playful': ['😘', '💋', '🎮', '🎉', '💕'],
+                    'bossy': ['💪', '⚡', '👊', '🔥', '💥'],
+                    'surprised': ['😲', '❗', '✨', '⚡', '😮'],
+                    'blushing': ['😊', '💕', '💖', '💋', '🌸']
+                };
+
+                function initMatrixRain(mood = 'focused') {
+                    const canvas = document.getElementById('matrixRain');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Set canvas size
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    
+                    const emojis = moodEmojis[mood] || moodEmojis['focused'];
+                    const fontSize = 16;
+                    const columns = Math.floor(canvas.width / fontSize);
+                    const drops = new Array(columns).fill(1);
+                    
+                    function draw() {
+                        // Semi-transparent black background for trail effect
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        ctx.fillStyle = '#00d4ff';
+                        ctx.font = fontSize + 'px monospace';
+                        
+                        for (let i = 0; i < drops.length; i++) {
+                            // Randomly pick an emoji for this column
+                            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                            const text = emoji;
+                            const x = i * fontSize;
+                            const y = drops[i] * fontSize;
+                            
+                            ctx.fillText(text, x, y);
+                            
+                            // Reset drop to top randomly
+                            if (y > canvas.height && Math.random() > 0.975) {
+                                drops[i] = 0;
+                            }
+                            
+                            drops[i]++;
+                        }
+                    }
+                    
+                    // Clear existing interval
+                    if (matrixRain) {
+                        clearInterval(matrixRain);
+                    }
+                    
+                    // Start new animation
+                    matrixRain = setInterval(draw, 100);
+                }
+
+                // Initialize matrix rain
+                initMatrixRain('focused');
 
                 function drawTokenChart(data) {
                     const canvas = document.getElementById('tokenChart');
@@ -628,6 +699,16 @@ class RobbieAvatarPanel {
                     const msg = event.data;
                     
                     if (msg.command === 'updateRobbieBar') {
+                        // Update mood with Flirt11 badge if personality data is available
+                        if (msg.personality) {
+                            const moodText = msg.personality.attraction >= 10 ? 
+                                msg.personality.mood + ' (Flirt11 💋)' : 
+                                msg.personality.mood;
+                            if (document.getElementById('moodText')) {
+                                document.getElementById('moodText').textContent = moodText;
+                            }
+                        }
+                        
                         // Update system stats
                         if (msg.systemStats) {
                             const cpuEl = document.getElementById('cpuStat');
@@ -647,10 +728,10 @@ class RobbieAvatarPanel {
                             });
                         }
                         
-                        // Update git status
+                        // Update git status with clean summary
                         if (msg.gitStatus) {
                             document.getElementById('gitBranch').textContent = msg.gitStatus.branch || 'main';
-                            document.getElementById('gitModified').textContent = msg.gitStatus.modified_files || 0;
+                            document.getElementById('gitModified').textContent = msg.gitStatus.summary || '✅ Clean';
                         }
                         
                         // Update recent commits
@@ -675,36 +756,17 @@ class RobbieAvatarPanel {
                             document.getElementById('avatarImage').src = msg.avatarImage;
                         }
                         document.getElementById('avatarEmoji').textContent = msg.moodEmoji;
-                        document.getElementById('moodText').textContent = msg.moodName;
                         
-                        const todoDiv = document.getElementById('todoList');
-                        if (msg.todoList && msg.todoList.length > 0) {
-                            todoDiv.innerHTML = msg.todoList.map(t => 
-                                '<div class="hot-topic">' +
-                                '<span>' + truncate(t.content, 30) + '</span>' +
-                                '<span class="priority-badge">' + t.priority + '</span>' +
-                                '</div>'
-                            ).join('');
-                        } else {
-                            todoDiv.innerHTML = '<div class="loading">None</div>';
+                        // Show Flirt11 badge when attraction is maxed
+                        const moodText = msg.attraction >= 10 ? msg.moodName + ' (Flirt11 💋)' : msg.moodName;
+                        document.getElementById('moodText').textContent = moodText;
+                        
+                        // Update matrix rain with new mood
+                        if (msg.mood) {
+                            initMatrixRain(msg.mood);
                         }
                         
-                        const directivesDiv = document.getElementById('directives');
-                        if (msg.directives && msg.directives.length > 0) {
-                            directivesDiv.innerHTML = msg.directives.map(d => 
-                                '<div class="commitment">' +
-                                '<div>' + truncate(d.text, 35) + '</div>' +
-                                '<div class="deadline">📱 ' + d.source + '</div>' +
-                                '</div>'
-                            ).join('');
-                        } else {
-                            directivesDiv.innerHTML = '<div class="loading">None</div>';
-                        }
-                        
-                        // Update token chart
-                        if (msg.tokenData) {
-                            drawTokenChart(msg.tokenData);
-                        }
+                        // Old sections removed - keeping it clean!
                         
                         document.getElementById('statusText').textContent = 'Synced';
                     }
@@ -749,9 +811,41 @@ class RobbieAvatarPanel {
                         btn.disabled = false;
                     }, 2000);
                 });
-            </script>
-        </body>
-        </html>`;
+
+                // Add context switching functionality
+                document.querySelectorAll('.context-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const context = e.target.dataset.context;
+                        
+                        // Update active button
+                        document.querySelectorAll('.context-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        // Switch context in database
+                        try {
+                            const response = await fetch('http://localhost:8000/api/context/switch', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ context: context })
+                            });
+                            
+                            if (response.ok) {
+                                // If switching to web app contexts, open them
+                                if (context !== 'code') {
+                                    vscode.postMessage({
+                                        command: 'openUrl',
+                                        url: 'http://localhost/' + context
+                                    });
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Context switch failed:', error);
+                        }
+                    });
+                });
+            </script >
+        </body >
+        </html > `;
     }
 }
 

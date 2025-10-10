@@ -1,0 +1,6 @@
+id,user_id,priority_type,priority_content,weight,active,created_at,updated_at
+1,allan,sales_content,AI agents sales content,8,t,2025-10-06 08:00:25.072433,2025-10-06 08:00:25.072433
+2,allan,business_critical,TestPilot CPG revenue deals,10,t,2025-10-06 08:00:25.072433,2025-10-06 08:00:25.072433
+3,allan,infrastructure,server alerts security issues,7,t,2025-10-06 08:00:25.072433,2025-10-06 08:00:25.072433
+4,allan,development,GitHub commits code reviews,6,t,2025-10-06 08:00:25.072433,2025-10-06 08:00:25.072433
+5,allan,robbie_development,Robbie AI personality improvements,9,t,2025-10-06 08:00:25.072433,2025-10-06 08:00:25.072433

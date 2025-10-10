@@ -1,5 +1,5 @@
 ---
-description: Technical specification for GPU mesh architecture focusing on distributed AI processing, workload management, and failover systems
+description: Technical specification for distributed GPU processing system including workload distribution, monitoring, and failover
 ---
 
 # === USER INSTRUCTIONS ===
@@ -112,49 +112,57 @@ The mesh architecture specializes in handling enterprise AI workloads with empha
 
 # gpu-mesh-architecture
 
-GPU Mesh Core Components:
+## Core Components
 
-1. Distributed Processing Layer (/gpu_mesh/coordinator.py)
-Importance Score: 95/100
-- Manages workload distribution across 4 RTX 4090 GPUs
-- Implements priority queuing with business context awareness:
-  * Revenue-generating tasks get 70% GPU allocation
-  * Client interactions get 20% allocation
-  * Background tasks limited to 10%
-- Automatic failover with 3-second detection window
-- Node health monitoring with performance metrics
+### GPU Mesh Coordinator
+Path: `services/gpu-mesh/gpu_mesh_coordinator.py`
+Importance Score: 95
 
-2. Task Distribution System (/gpu_mesh/ray_cluster.py)
-Importance Score: 90/100
-- Business-specific task routing based on:
-  * Task urgency (client interactions vs batch processing)
-  * GPU memory requirements
-  * Historical performance metrics
-  * Node availability
-- Custom load balancing with priority inheritance
-- Automatic task rescheduling on node failure
+- Distributed workload management system for AI processing across multiple GPU nodes
+- Priority-based task routing with business impact scoring
+- Real-time node health monitoring and automatic failover
+- Dynamic resource allocation based on task urgency and complexity
+- Business context preservation during node transitions
 
-3. Node Health Monitor (/infrastructure/monitoring/system_monitor.py)
-Importance Score: 85/100
-- Real-time node health scoring:
-  * Temperature thresholds
-  * Memory utilization
-  * Processing queue depth
-  * Response latency
-- Predictive maintenance alerts
-- Performance degradation detection
+### Load Balancer 
+Path: `api-connectors/gpu-powered-sync.py`
+Importance Score: 85
 
-4. Workload Orchestrator (/infrastructure/gpu_mesh/coordinator.py)
-Importance Score: 80/100
-- Dynamic resource allocation based on:
-  * Business hours (8am-6pm priority)
-  * Client meeting schedules
-  * Revenue impact scores
-  * Task completion SLAs
-- Cross-node task migration
-- Automatic capacity scaling
+- Priority calculation using:
+  - Business value impact (40%)
+  - Time sensitivity (30%) 
+  - Resource efficiency (20%)
+  - Task complexity (10%)
+- Node suitability scoring based on:
+  - Current load
+  - Performance metrics
+  - Memory availability
+  - Historical success rate
 
-The GPU mesh architecture implements a sophisticated distributed processing system optimized for business-critical AI operations, with emphasis on revenue-generating tasks and client interactions. The system maintains high availability through predictive maintenance and automatic failover mechanisms.
+### Node Health Monitor
+Path: `infrastructure/docker/backend/app/services/smart_load_balancer.py`
+Importance Score: 80
+
+- Real-time monitoring of:
+  - GPU utilization
+  - Memory usage
+  - Temperature thresholds
+  - Task completion rates
+- Automatic node disqualification on health issues
+- Self-healing attempt triggers
+- Graceful task redistribution
+
+### Failover System
+Path: `infrastructure/docker/backend/app/api/load_balancer.py`
+Importance Score: 90
+
+- Zero-downtime failover between nodes
+- Task state preservation during transitions
+- Automatic task replay after node recovery
+- Business context retention across failovers
+- Priority-based task rescheduling
+
+The mesh architecture enables distributed AI processing while maintaining business context and task priorities. It ensures high availability through intelligent load balancing and automatic failover mechanisms.
 
 $END$
 

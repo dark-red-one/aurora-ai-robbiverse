@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Work - Robbie Productivity Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background: #1a1a2e;
+            border-bottom: 1px solid #333;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-tab.active {
+            color: #00d4ff;
+            border-bottom-color: #4caf50;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            color: #e0e0e0;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .robbie-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #00d4ff;
+            object-fit: cover;
+        }
+
+        .chat-info h3 {
+            color: #00d4ff;
+            margin-bottom: 4px;
+        }
+
+        .chat-info p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .chat-message {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+            position: relative;
+        }
+
+        .chat-message::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 20px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid #1a1a2e;
+        }
+
+        .motd-content {
+            color: #e0e0e0;
+            line-height: 1.8;
+        }
+
+        .motd-content strong {
+            color: #00d4ff;
+        }
+
+        .chat-input {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .chat-input button {
+            background: #4caf50;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-input button:hover {
+            background: #45a049;
+        }
+
+        /* Notes Section */
+        .notes-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .notes-sidebar {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #333;
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section h4 {
+            color: #00d4ff;
+            margin-bottom: 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            color: #888;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .category-item.active {
+            color: #00d4ff;
+        }
+
+        .category-item:hover {
+            color: #e0e0e0;
+        }
+
+        .category-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .category-dot.intel {
+            background: #ffeb3b;
+        }
+
+        .category-dot.reference {
+            background: #4caf50;
+        }
+
+        .category-dot.drafts {
+            background: #2196f3;
+        }
+
+        .category-dot.connections {
+            background: #f44336;
+        }
+
+        .category-dot.shower {
+            background: #9c27b0;
+        }
+
+        .search-box {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+
+        .author-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .author-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .author-filter input[type="checkbox"] {
+            accent-color: #00d4ff;
+        }
+
+        /* Notes Grid */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .note-card {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #333;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .note-card:hover {
+            transform: translateY(-2px);
+            border-color: #00d4ff;
+        }
+
+        .note-card.intel {
+            border-left: 4px solid #ffeb3b;
+        }
+
+        .note-card.reference {
+            border-left: 4px solid #4caf50;
+        }
+
+        .note-card.drafts {
+            border-left: 4px solid #2196f3;
+        }
+
+        .note-card.connections {
+            border-left: 4px solid #f44336;
+        }
+
+        .note-card.shower {
+            border-left: 4px solid #9c27b0;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .note-category {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .note-category.intel {
+            background: #ffeb3b;
+            color: #000;
+        }
+
+        .note-category.reference {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .note-category.drafts {
+            background: #2196f3;
+            color: #fff;
+        }
+
+        .note-category.connections {
+            background: #f44336;
+            color: #fff;
+        }
+
+        .note-category.shower {
+            background: #9c27b0;
+            color: #fff;
+        }
+
+        .note-time {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .note-title {
+            font-weight: bold;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .note-content {
+            color: #888;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .note-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+        }
+
+        .note-author {
+            color: #888;
+        }
+
+        .note-author.allan {
+            color: #ff5555;
+        }
+
+        .note-author.robbie {
+            color: #00d4ff;
+        }
+
+        .new-note-btn {
+            background: #2196f3;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .new-note-btn:hover {
+            background: #1976d2;
+        }
+
+        /* Loading States */
+        .loading {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .notes-container {
+                grid-template-columns: 1fr;
+            }
+
+            .notes-sidebar {
+                order: 2;
+            }
+
+            .notes-grid {
+                order: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="logo">@Work</div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="chat">Chat</button>
+            <button class="nav-tab" data-tab="notes">Notes</button>
+            <button class="nav-tab" data-tab="comms">Comms</button>
+            <button class="nav-tab" data-tab="tasks">Tasks</button>
+            <button class="nav-tab" data-tab="news">News</button>
+        </div>
+        <div class="status-bar">
+            <span>67°F</span>
+            <div style="width: 8px; height: 8px; background: #4caf50; border-radius: 50%;"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Chat Tab -->
+        <div id="chat-tab" class="tab-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <img src="/images/robbie-focused.png" alt="Robbie" class="robbie-avatar" id="robbieAvatar">
+                    <div class="chat-info">
+                        <h3>Robbie</h3>
+                        <p>Your productivity copilot</p>
+                    </div>
+                </div>
+
+                <div class="chat-message">
+                    <div class="motd-content" id="motdContent">
+                        Loading your personalized message...
+                    </div>
+                </div>
+
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="What should I do next, Robbie?">
+                    <button id="sendBtn">
+                        <span>📤</span>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notes-tab" class="tab-content" style="display: none;">
+            <div class="notes-container">
+                <div class="notes-sidebar">
+                    <div class="sidebar-section">
+                        <h4>CATEGORIES</h4>
+                        <ul class="category-list">
+                            <li class="category-item active" data-category="all">
+                                <span>All Notes</span>
+                                <span id="allCount">0</span>
+                            </li>
+                            <li class="category-item" data-category="intel">
+                                <span class="category-dot intel"></span>
+                                <span>Intel</span>
+                                <span id="intelCount">0</span>
+                            </li>
+                            <li class="category-item" data-category="reference">
+                                <span class="category-dot reference"></span>
+                                <span>Reference</span>
+                                <span id="referenceCount">0</span>
+                            </li>
+                            <li class="category-item" data-category="drafts">
+                                <span class="category-dot drafts"></span>
+                                <span>Drafts</span>
+                                <span id="draftsCount">0</span>
+                            </li>
+                            <li class="category-item" data-category="connections">
+                                <span class="category-dot connections"></span>
+                                <span>Connections</span>
+                                <span id="connectionsCount">0</span>
+                            </li>
+                            <li class="category-item" data-category="shower">
+                                <span class="category-dot shower"></span>
+                                <span>Shower Thoughts</span>
+                                <span id="showerCount">0</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h4>AUTHOR</h4>
+                        <div class="author-filters">
+                            <label class="author-filter">
+                                <input type="checkbox" id="allanFilter" checked>
+                                <span>Allan's Notes</span>
+                            </label>
+                            <label class="author-filter">
+                                <input type="checkbox" id="robbieFilter" checked>
+                                <span>Robbie's Notes</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h4>SEARCH</h4>
+                        <input type="text" class="search-box" id="searchInput" placeholder="Search notes...">
+                    </div>
+                </div>
+
+                <div class="notes-main">
+                    <button class="new-note-btn" id="newNoteBtn">+ New Note</button>
+                    <div class="notes-grid" id="notesGrid">
+                        <div class="loading">Loading notes...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other tabs placeholder -->
+        <div id="comms-tab" class="tab-content" style="display: none;">
+            <div class="loading">Comms Center - Coming Soon</div>
+        </div>
+        <div id="tasks-tab" class="tab-content" style="display: none;">
+            <div class="loading">Task Board - Coming Soon</div>
+        </div>
+        <div id="news-tab" class="tab-content" style="display: none;">
+            <div class="loading">News Feed - Coming Soon</div>
+        </div>
+    </main>
+
+    <script>
+        // Global state
+        let currentTab = 'chat';
+        let currentCategory = 'all';
+        let currentNotes = [];
+        let allanFilter = true;
+        let robbieFilter = true;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function () {
+            loadMOTD();
+            loadNotes();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+
+            // Category filtering
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', () => filterByCategory(item.dataset.category));
+            });
+
+            // Author filtering
+            document.getElementById('allanFilter').addEventListener('change', updateFilters);
+            document.getElementById('robbieFilter').addEventListener('change', updateFilters);
+
+            // Search
+            document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 300));
+
+            // Chat
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            // New note
+            document.getElementById('newNoteBtn').addEventListener('click', createNewNote);
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(`${tabName}-tab`).style.display = 'block';
+
+            currentTab = tabName;
+
+            // Load data for specific tabs
+            if (tabName === 'notes') {
+                loadNotes();
+            }
+        }
+
+        // Load MOTD
+        async function loadMOTD() {
+            try {
+                const response = await fetch('/code/api/motd');
+                const data = await response.json();
+
+                document.getElementById('motdContent').innerHTML = `
+                    ${data.motd}
+                `;
+            } catch (error) {
+                console.error('Error loading MOTD:', error);
+                document.getElementById('motdContent').textContent = 'Good day Allan - Robbie is ready to help!';
+            }
+        }
+
+        // Load notes
+        async function loadNotes() {
+            try {
+                const response = await fetch('/code/api/notes');
+                const data = await response.json();
+
+                currentNotes = data.notes;
+                updateNotesDisplay();
+                updateCategoryCounts();
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                document.getElementById('notesGrid').innerHTML = '<div class="loading">Error loading notes</div>';
+            }
+        }
+
+        // Update notes display
+        function updateNotesDisplay() {
+            const grid = document.getElementById('notesGrid');
+
+            if (currentNotes.length === 0) {
+                grid.innerHTML = '<div class="loading">No notes found</div>';
+                return;
+            }
+
+            const filteredNotes = currentNotes.filter(note => {
+                // Category filter
+                if (currentCategory !== 'all' && note.category.toLowerCase() !== currentCategory) {
+                    return false;
+                }
+
+                // Author filter
+                if (!allanFilter && note.author === 'allan') return false;
+                if (!robbieFilter && note.author === 'robbie') return false;
+
+                return true;
+            });
+
+            grid.innerHTML = filteredNotes.map(note => `
+                <div class="note-card ${note.category.toLowerCase()}" data-note-id="${note.id}">
+                    <div class="note-header">
+                        <span class="note-category ${note.category.toLowerCase()}">${note.category.toUpperCase()}</span>
+                        <span class="note-time">${formatTime(note.created_at)}</span>
+                    </div>
+                    <div class="note-title">${note.content.substring(0, 50)}${note.content.length > 50 ? '...' : ''}</div>
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-footer">
+                        <span class="note-author ${note.author}">${note.author}</span>
+                        <span class="note-priority">Priority: ${note.priority}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update category counts
+        function updateCategoryCounts() {
+            const counts = {
+                all: currentNotes.length,
+                intel: currentNotes.filter(n => n.category.toLowerCase() === 'intel').length,
+                reference: currentNotes.filter(n => n.category.toLowerCase() === 'reference').length,
+                drafts: currentNotes.filter(n => n.category.toLowerCase() === 'drafts').length,
+                connections: currentNotes.filter(n => n.category.toLowerCase() === 'connections').length,
+                shower: currentNotes.filter(n => n.category.toLowerCase() === 'shower thoughts').length
+            };
+
+            Object.keys(counts).forEach(category => {
+                const element = document.getElementById(`${category}Count`);
+                if (element) element.textContent = counts[category];
+            });
+        }
+
+        // Filter by category
+        function filterByCategory(category) {
+            currentCategory = category;
+
+            // Update active category
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+            updateNotesDisplay();
+        }
+
+        // Update filters
+        function updateFilters() {
+            allanFilter = document.getElementById('allanFilter').checked;
+            robbieFilter = document.getElementById('robbieFilter').checked;
+            updateNotesDisplay();
+        }
+
+        // Search notes
+        async function handleSearch(event) {
+            const query = event.target.value;
+            if (query.length < 2) {
+                loadNotes();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/code/api/notes/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                currentNotes = data.notes;
+                updateNotesDisplay();
+            } catch (error) {
+                console.error('Error searching notes:', error);
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message to chat (simplified for now)
+            input.value = '';
+
+            // TODO: Implement actual chat functionality
+            console.log('Sending message:', message);
+        }
+
+        // Create new note
+        function createNewNote() {
+            // TODO: Implement note creation modal
+            console.log('Create new note');
+        }
+
+        // Utility functions
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+            return date.toLocaleDateString();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+
+</html>

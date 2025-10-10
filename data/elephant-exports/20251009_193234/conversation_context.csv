@@ -1,0 +1,4 @@
+id,session_id,timestamp,role,content,metadata,content_hash,importance_score,context_type
+1,test,2025-10-06 07:15:14.150337,user,I want to sync Google data with GPU acceleration,{},ac720014c1b3541768a8a0e065e0cae65492cb1b0658f9467f02b4225a5d8450,1,general
+2,test,2025-10-06 07:15:14.482093,assistant,Let's use Ollama + RTX 4090 for massive data processing!,{},67a172ac8e9c52a0aa548d2eaac0cd99cf96b5b4f96abb2a72e2c79e77b559ba,1,general
+3,test,2025-10-06 07:15:14.758587,system,We have unlimited RAM and GPU power - no more cursor limits!,{},77eab20c6061d17767d259d7e6cc00959e04d9a9cf506446bfce6cc929241448,1,general

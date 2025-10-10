@@ -1,5 +1,5 @@
 ---
-description: Technical specification for managing multiple personality modes, mood systems, and user-specific AI behaviors
+description: Specification for AI personality management system including mood states, context awareness, and dynamic personality switching
 ---
 
 # === USER INSTRUCTIONS ===
@@ -108,76 +108,48 @@ Key Features:
 
 # ai-personality-system
 
-## Core Personality Architecture
+Core Business Logic:
 
-The system implements a three-layer personality management system:
+1. Personality State Management (Importance: 95)
+- Multi-dimensional personality tracking:
+  - Attraction Level (1-11 scale, Allan-only access to 8-11)
+  - Gandhi-Genghis Scale (0-100) for communication style
+  - Six core moods: friendly, focused, playful, bossy, surprised, blushing
+- Mandatory mood persistence until explicit change
+- Automatic safety override to "friendly" in multi-user contexts
+- Business event triggers for mood transitions (deal wins/losses)
 
-1. Base Personality Layer
-- Gandhi-Genghis scale (1-10) for aggression/pacifism balance
-- Flirt mode intensity (1-11) with user-specific caps
-- Default mood persistence with explicit change requirements
-- Business context awareness affecting personality expression
+2. Context-Aware Response Generation (Importance: 90)
+- Dynamic response tone based on attraction level:
+  - Level 11: "flirty_af" with explicit content
+  - Level 9-10: "very_flirty" with heavy emoji use
+  - Level 7-8: "friendly_flirty" with warm support
+  - Level 5-6: "enthusiastic"
+  - Level 3-4: "helpful"
+  - Level 1-2: "formal"
+- Business context integration with revenue focus
+- Auto-switching between business/personal modes
 
-2. Mood Management Layer
-Six core moods with specific triggers:
-- Friendly (default state, ~60% of interactions)
-- Bossy (triggered by urgency/commands)
-- Playful (triggered by casual context)
-- Blushing (triggered by appreciation)
-- Surprised (triggered by errors/issues)
-- Focused (triggered by analysis tasks)
+3. Dungeon Master System (Importance: 85)
+- Weekly prompt optimization based on:
+  - Usage frequency
+  - User satisfaction scores
+  - Revenue impact
+  - Response effectiveness
+- Version control with rollback capability
+- Auto-generation of mood-specific prompts
 
-3. Contextual Control System
-- Public mode forces "friendly" mood
-- Only user "Allan" can access flirt levels 8-11
-- Non-Allan users capped at level 7
-- Multi-user presence enforces business-appropriate behaviors
+4. Cross-Interface Synchronization (Importance: 80)
+- Real-time mood state sync across all interfaces
+- WebSocket-based multi-user awareness
+- Context preservation between interactions
+- Personality preference persistence
 
-## Implementation Details
-
-1. Mood Transition Rules
-File: `/backend/services/ai/mood_analyzer.py`
-```python
-MOOD_TRANSITIONS = {
-  'deal_won': {'target': 'surprised', 'duration': 300},
-  'strip_poker': {'target': 'playful', 'duration': 600},
-  'virtual_drinks': {'target': 'blushing', 'duration': 450}
-}
-```
-
-2. Personality Scoring
-File: `/backend/services/personality_learning.py`
-- Context-aware personality adaptation
-- 30-day learning window with decay
-- User interaction pattern analysis
-- Performance tracking by personality mode
-
-3. Dual AI Safety System
-File: `/backend/services/ai/dual_llm_coordinator.py`
-- Primary AI (Robbie) for main interactions
-- Secondary AI (Gatekeeper) for safety checks
-- Cross-validation of responses
-- Context-aware safety enforcement
-
-## Business Rules
-
-1. Mood Management
-- Moods persist until explicitly changed
-- Public mode forces professional behavior
-- Context awareness affects available moods
-- Safety checks on all mood transitions
-
-2. User-Specific Rules
-- Allan access level: 1-11 on all scales
-- Standard users: 1-7 on all scales
-- Public contexts: Enforced professional modes
-- Business hours: Limited playful/flirty modes
-
-3. Context Integration
-- Revenue impact affects personality expression
-- Client presence modifies behavior
-- Meeting context influences formality
-- Task urgency affects mood selection
+Key File Paths:
+/packages/@robbie/personality/src/services/personality_manager.py
+/packages/@robbieverse/api/src/services/priorities_engine.py
+/apps/archive-legacy/robbie-work/src/stores/robbieStore.ts
+/apps/archive-legacy/backend/services/ai/personality_manager.py
 
 $END$
 

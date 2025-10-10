@@ -1,0 +1,12 @@
+id,category_name,description,color_code,is_active,created_at
+1,inbox,Main inbox messages,#0075ca,t,2025-10-06 07:37:02.128689
+2,important,High priority messages,#d73a49,t,2025-10-06 07:37:02.128689
+3,unread,Unread messages,#28a745,t,2025-10-06 07:37:02.128689
+4,sent,Sent messages,#6c757d,t,2025-10-06 07:37:02.128689
+5,drafts,Draft messages,#ffc107,t,2025-10-06 07:37:02.128689
+6,trash,Deleted messages,#dc3545,t,2025-10-06 07:37:02.128689
+7,allan-notes,Allan personal notes,#6f42c1,t,2025-10-06 07:37:02.128689
+8,robbie-notes,Robbie system notes,#28a745,t,2025-10-06 07:37:02.128689
+9,business,Business communications,#0075ca,t,2025-10-06 07:37:02.128689
+10,github,GitHub notifications,#24292e,t,2025-10-06 07:37:02.128689
+11,amazon,Amazon orders,#ff9900,t,2025-10-06 07:37:02.128689

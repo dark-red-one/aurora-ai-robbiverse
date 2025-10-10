@@ -1,5 +1,5 @@
 ---
-description: Defines multi-dimensional risk assessment model for evaluating and monitoring potential risks across business operations
+description: Specification for the comprehensive risk assessment model used to evaluate and monitor business risks across multiple dimensions
 ---
 
 # === USER INSTRUCTIONS ===
@@ -129,63 +129,48 @@ The system maintains a persistent risk score across all dimensions with real-tim
 
 # risk-assessment-model
 
-## Core Risk Assessment Engine
-Path: `/backend/services/PrioritiesEngineService.py`
+Core Risk Assessment Framework
 Importance Score: 95/100
 
-Implements sophisticated risk scoring across four key dimensions:
-- Reputational Risk (30%)
-  - Brand impact assessment
-  - Public perception scoring
-  - Media exposure potential
-- Financial Risk (30%) 
-  - Revenue impact calculation
-  - Cost exposure analysis
-  - Deal value weighting
-- Temporal Risk (25%)
-  - Deadline proximity scoring
-  - Time sensitivity analysis
-  - Response window calculations
-- Personal Risk (15%)
-  - Relationship impact scoring
-  - Communication urgency metrics
-  - Trust factor analysis
+1. Multi-Dimensional Risk Scoring System
+Path: `archive/deprecated-chat/chat-memory-system.py`
+- Implements weighted risk assessment across key dimensions:
+  - Reputational Risk (30%)
+  - Financial Risk (30%) 
+  - Temporal Risk (25%)
+  - Personal Risk (15%)
+- Real-time monitoring cycles for continuous risk evaluation
+- Risk thresholds trigger automated alerts and actions
 
-## Real-Time Risk Monitoring
-Path: `/backend/services/HealthMonitorService.py`
-Importance Score: 85/100
+2. Contextual Risk Analysis
+Path: `apps/archive-legacy/backend/services/DirectiveCaptureService.py`
+- Extracts risk factors from conversations and directives
+- Categorizes risks by impact level and urgency
+- Maintains risk history for trend analysis
+- Automated risk mitigation suggestion system
 
-Implements continuous risk assessment cycles:
-- 15-minute standard monitoring interval
-- 5-minute elevated monitoring for high-risk items
-- 1-minute critical monitoring for severe risks
-- Automated risk level adjustments based on:
-  - Changing context
-  - New information
-  - Time proximity
-  - Stakeholder actions
+3. Business Impact Scoring
+Path: `apps/archive-legacy/robbie-work/src/blocks/business/MoneyDashboard.tsx`
+- Revenue impact calculations for each risk factor
+- Pipeline vulnerability assessment 
+- Deal risk scoring system
+- Customer relationship risk tracking
 
-## Risk Response Framework
-Path: `/backend/services/DirectiveCaptureService.py`
-Importance Score: 80/100
+4. Risk-Based Task Prioritization
+Path: `packages/@robbieverse/api/src/services/priorities_engine.py`
+- Risk-weighted task scoring algorithm
+- Automated task reprioritization based on risk levels
+- Early warning system for high-risk activities
+- Risk-based resource allocation
 
-Automated response generation based on risk profiles:
-- Immediate action triggers for critical risks (90+ score)
-- Escalation pathways for high risks (75-89 score)
-- Monitoring plans for medium risks (50-74 score)
-- Documentation requirements for low risks (<50 score)
+5. Real-Time Monitoring System
+Path: `api-connectors/real-time-personality-logger.py`
+- Continuous risk level monitoring
+- Automated risk threshold alerts
+- Risk trend analysis and reporting
+- Historical risk pattern tracking
 
-## Risk Intelligence System
-Path: `/backend/services/LearningService.py`
-Importance Score: 90/100
-
-Pattern recognition and risk learning:
-- Historical risk pattern analysis
-- Outcome tracking and correlation
-- Risk mitigation effectiveness scoring
-- Automated adjustment of risk weights based on outcomes
-
-The system maintains real-time risk awareness across all operations, with dynamic adjustment of monitoring intensity and automated response generation based on risk severity and type.
+The risk assessment model provides comprehensive coverage across business operations while maintaining focus on revenue protection and relationship management. The system's uniqueness lies in its multi-dimensional approach and real-time monitoring capabilities.
 
 $END$
 

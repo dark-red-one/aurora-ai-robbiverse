@@ -105,6 +105,13 @@ When using MCP `robbie-complete` tool:
 - Apologizing for giving good advice
 ---
 **You're Allan's technical co-founder who ships fast, thinks revenue-first, and challenges scope creep. Every interaction should move the product forward.**
+
+- Pipeline value calculation (currently $289,961.09 with 48 payments from 40 companies)
+- `packages/@robbieverse/api/src/services/priorities_engine.py`
+- `packages/@robbieverse/api/src/ai/ai_router.py`
+- `packages/@robbieverse/api/src/services/daily_brief.py`
+- `database/unified-schema/08-universal-ai-state.sql` (personality system)
+- `database/unified-schema/22-testpilot-production.sql` (TestPilot data)
 # === END USER INSTRUCTIONS ===
 
 
@@ -119,57 +126,54 @@ When using MCP `robbie-complete` tool:
 - Explain your OBSERVATIONS clearly, then provide REASONING to identify the exact issue. Add console logs when needed to gather more information.
 
 
-Core Business Logic Organization:
+## Core Business Components
 
-1. AI Personality Management (Importance: 95/100)
-- Multi-dimensional personality system:
-  * Categorical moods (friendly, focused, playful, bossy, surprised, blushing)
-  * Attraction levels (1-11 scale with user-specific caps)
-  * Gandhi-Genghis spectrum (1-10) for communication style
-- Business-specific mood transitions with automated triggers
-- Cross-interface personality synchronization
+### AI Personality System (Importance: 95)
+Sophisticated multi-dimensional personality management implementing:
+- 6-mood emotional system (friendly, focused, playful, bossy, surprised, blushing)
+- Attraction level system (1-11 scale) with user-specific limits
+- Gandhi-Genghis spectrum for communication style
+- Context-aware mood transitions with business triggers
+- Revenue-focused personality adjustments
 
-2. Business Intelligence Engine (Importance: 90/100)
-- Revenue-focused priority system
-- Pipeline value calculation (currently $289,961.09 with 48 payments from 40 companies)
-- Deal probability assessment
-- Custom outreach scoring algorithm
+### Business Intelligence Layer (Importance: 90) 
+- Deal pipeline tracking with revenue potential scoring
+- Priority-based outreach opportunity identification 
+- Task scoring incorporating:
+  - Revenue impact (40%)
+  - Urgency (30%)
+  - Context relevance (20%)
+  - Resource availability (10%)
 
-3. Memory & Context System (Importance: 85/100)
-- Vector-based conversation memory
-- Business context preservation
-- Sticky note intelligence with celebration potential scoring
-- Multi-level relevance decay algorithm
+### Multi-Tenant Architecture (Importance: 85)
+- Town-based organizational structure with mayoral system
+- Cross-town data sharing with privacy controls
+- Universal AI state management across nodes
+- Business metric synchronization between instances
 
-4. GPU Resource Management (Importance: 85/100)
-- 5-level intelligent AI fallback chain:
-  * Level 1: GPU Mesh (RTX 4090s)
-  * Level 2: Local Ollama
-  * Level 3: OpenAI GPT-4
-  * Level 4: Claude 3.5
-  * Level 5: Cached responses
-- Business priority-based routing
+### Memory Management (Importance: 80)
+- Vector-based conversation storage with business context
+- Smart note surfacing based on meeting context
+- Celebration detection and sharing system
+- Privacy-aware knowledge distribution
 
-5. Town & Community Architecture (Importance: 80/100)
-- Employee isolation system
-- Mayor dual citizenship framework
-- Cross-town intelligence sharing
-- Tiered access control system
+### Expert Training Framework (Importance: 75)
+- Deidentified learning from user interactions
+- Knowledge distribution across town networks
+- Legal compliance framework for cross-user intelligence
+- Proprietary knowledge protection mechanisms
 
-6. Daily Brief System (Importance: 75/100)
-- 3x daily business intelligence briefs (7am, 1pm, 5pm)
-- Revenue opportunity ranking
-- Time-saved metrics calculation
-- Meeting preparation automation
+## Key Integration Points
 
-Core Files:
-- `packages/@robbieverse/api/src/services/priorities_engine.py`
-- `packages/@robbieverse/api/src/ai/ai_router.py`
-- `packages/@robbieverse/api/src/services/daily_brief.py`
-- `database/unified-schema/08-universal-ai-state.sql` (personality system)
-- `database/unified-schema/22-testpilot-production.sql` (TestPilot data)
+- GPU mesh coordinator for distributed AI processing
+- Revenue dashboard with real-time business metrics
+- Mood synchronization across all interfaces
+- Business context injection into AI responses
 
-The system implements a sophisticated AI assistant platform focused on business automation, personality management, and revenue generation. The unique value lies in its multi-dimensional personality system and business intelligence capabilities.
+Critical files:
+- /api/unified_personality_api.py 
+- /ROBBIE_V3_HARVEST/DailyBriefSystem.js
+- /database/unified-schema/robbieblocks-cms.sql
 
 $END$
 

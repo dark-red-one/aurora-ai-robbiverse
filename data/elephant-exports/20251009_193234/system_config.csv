@@ -1,0 +1,5 @@
+id,key,value,category,description,created_at,updated_at
+1,system.version,"""1.0.0""",system,System version,2025-09-19 23:34:08.795464,2025-09-19 23:34:08.795464
+2,db.schema_version,"""1""",system,Database schema version,2025-09-19 23:34:08.795464,2025-09-19 23:34:08.795464
+3,features.vector_search,false,features,Vector search enabled,2025-09-19 23:34:08.795464,2025-09-19 23:34:08.795464
+4,aurora.integration,"{""towns"": [""aurora""], ""integration_status"": ""active""}",system,Aurora system integration status,2025-09-20 00:28:27.212115,2025-09-20 00:29:47.307955

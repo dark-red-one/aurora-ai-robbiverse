@@ -1,0 +1,5 @@
+personality_id,current_mood,current_mode,energy_level,focus_state,last_state_change,state_metadata,updated_at
+robbie,4,professional,normal,available,2025-10-05 13:52:11.996448,,2025-10-05 13:52:11.996448
+steve-jobs,5,mentoring,normal,available,2025-10-05 13:52:11.996448,,2025-10-05 13:52:11.996448
+bookkeeper,4,analytical,normal,available,2025-10-05 13:52:11.996448,,2025-10-05 13:52:11.996448
+gatekeeper,4,vigilant,normal,available,2025-10-05 13:52:11.996448,,2025-10-05 13:52:11.996448

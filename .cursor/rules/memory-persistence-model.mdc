@@ -1,5 +1,5 @@
 ---
-description: Defines the memory persistence and vector-based data storage architecture for maintaining AI personality state and conversation history across interfaces
+description: Documents the vector-based memory system, context retrieval, and persistence model for AI personality and conversation state
 ---
 
 # === USER INSTRUCTIONS ===
@@ -116,68 +116,53 @@ The memory system focuses heavily on maintaining consistent AI personality state
 
 # memory-persistence-model
 
-## Vector Memory Core
-Path: `backend/services/memory/VectorMemoryService.py`
-Importance Score: 95/100
+## Vector Memory System (Importance: 95)
+- Vector embeddings for semantic conversation search
+- Context preservation across multiple interfaces
+- Branch management for conversation alternatives  
+- Automatic context compression based on importance scoring
+- Intelligent message importance scoring with time decay
 
-Multi-tier memory persistence system:
-- Short-term memory buffer (last 2000 tokens)
-- Mid-term vector store (30 day window)
-- Long-term permanent storage with decay
+Path: `apps/archive-legacy/backend/app/services/memory_chat.py`
 
-Memory categorization:
-- Critical business facts (no decay)
-- Relationship context (90 day decay)
-- Conversational elements (30 day decay)
-- Technical details (7 day decay)
+## Personality State Persistence (Importance: 90)
+- Multi-dimensional state tracking:
+  - Attraction level (1-11 scale)
+  - Gandhi-Genghis spectrum (1-10)
+  - Mood states (6 core emotions)
+- Context-aware state transitions
+- Cross-device synchronization
+- User-specific state restrictions
+- Business event state triggers
 
-## Sticky Notes Integration
-Path: `infrastructure/sticky-notes/StickyNotesMemoryService.py` 
-Importance Score: 85/100
+Path: `apps/archive-legacy/backend/app/services/ai/personality_manager.py`
 
-Specialized memory types:
-- Celebrations (permanent storage)
-- Business achievements (180 day retention)
-- Personal preferences (90 day refresh)
-- Technical solutions (30 day refresh)
+## Context Management (Importance: 85) 
+- Real-time context prioritization
+- Semantic relevance scoring
+- Memory scout process for pattern identification
+- Proactive context pre-loading
+- Business context awareness for revenue opportunities
 
-Memory scoring algorithm:
-- Business impact (40%)
-- Emotional resonance (30%)
-- Reference frequency (20%)
-- Time sensitivity (10%)
+Path: `apps/archive-legacy/backend/app/services/conversation_context.py`
 
-## Cross-Device Synchronization
-Path: `backend/services/sync/MemorySyncService.py`
-Importance Score: 90/100
+## Dossier System (Importance: 80)
+- Entity extraction and classification
+- Relationship graph maintenance
+- Contact temperature tracking
+- Deal momentum analysis
+- Communication pattern analysis
 
-Unified dossier system:
-- Real-time state sync across interfaces
-- Differential memory updates
-- Priority-based sync queue
-- Conflict resolution with version vectors
+Path: `apps/archive-legacy/backend/app/services/dossier_manager.py`
 
-Memory propagation rules:
-1. Critical updates (instant sync)
-2. Personality state (5 second delay)
-3. Context updates (30 second batching)
-4. Historical data (background sync)
+## Cross-Device Sync (Importance: 75)
+- Bidirectional state synchronization
+- Conflict resolution with master override
+- Offline queue management
+- Change tracking with explanations
+- Node health monitoring
 
-## Context Retrieval Engine
-Path: `backend/services/memory/ContextRetrieval.py`
-Importance Score: 88/100
-
-Hybrid retrieval system:
-- Vector similarity search (primary)
-- Keyword matching (secondary)
-- Time-window filtering (tertiary)
-- Source credibility scoring
-
-Retrieval weights:
-- Recency: 35%
-- Relevance: 30%
-- Importance: 20%
-- Usage frequency: 15%
+Path: `apps/archive-legacy/backend/app/services/sync_manager.py`
 
 $END$
 
