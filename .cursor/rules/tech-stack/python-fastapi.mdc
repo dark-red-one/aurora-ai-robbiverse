@@ -1,0 +1,351 @@
+---
+description: "Python/FastAPI backend standards"
+globs: ["**/*.py", "packages/@robbieverse/api/**/*"]
+alwaysApply: false
+---
+
+# Python/FastAPI Standards
+
+## Core Principles
+
+- Use Python 3.12+
+- Async/await for ALL I/O operations
+- Type hints on all function signatures
+- Pydantic v2 for validation
+- SQLAlchemy 2.0 async patterns
+
+---
+
+## Code Style
+
+### Naming Conventions
+
+- **Functions/Variables**: Lowercase with underscores (`user_service.py`, `get_user_data`)
+- **Classes**: PascalCase (`UserService`, `DealPipeline`)
+- **Constants**: UPPER_CASE (`MAX_RETRIES`, `API_TIMEOUT`)
+- **Descriptive Names**: Use auxiliary verbs (`is_active`, `has_permission`, `can_access`)
+
+### File Organization
+
+- One concern per file
+- Keep files under 300 lines
+- Group related functions together
+- Imports at top: stdlib → third-party → local
+
+### Conditional Syntax
+
+- One-line for simple conditionals: `return True if condition else False`
+- Multi-line for complex logic
+
+---
+
+## Error Handling
+
+### Prioritize Early Returns
+
+```python
+async def get_user(user_id: int, db: AsyncSession) -> User:
+    # Error handling at function beginning
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    # Early return for error conditions
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return user
+```
+
+### HTTP Exceptions
+
+```python
+from fastapi import HTTPException
+
+# Use appropriate status codes
+raise HTTPException(status_code=404, detail="Resource not found")
+raise HTTPException(status_code=400, detail="Invalid input")
+raise HTTPException(status_code=403, detail="Access denied")
+raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+### Logging with Context
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    result = await process_payment(order_id)
+except Exception as e:
+    logger.error(f"Payment processing failed for order {order_id}: {str(e)}")
+    raise HTTPException(status_code=500, detail="Payment processing failed")
+```
+
+---
+
+## FastAPI Patterns
+
+### Dependency Injection
+
+```python
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+async def get_db() -> AsyncSession:
+    async with async_session_maker() as session:
+        yield session
+
+@app.get("/users/{user_id}")
+async def get_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+) -> UserResponse:
+    # Use injected dependencies
+    return await user_service.get_user(user_id, db)
+```
+
+### Request/Response Models
+
+```python
+from pydantic import BaseModel, Field
+
+class UserCreate(BaseModel):
+    email: str = Field(..., description="User email address")
+    name: str = Field(..., min_length=1, max_length=100)
+    is_active: bool = Field(default=True)
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    name: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True  # Pydantic v2
+```
+
+### Async Route Handlers
+
+```python
+@app.post("/deals", response_model=DealResponse)
+async def create_deal(
+    deal: DealCreate,
+    db: AsyncSession = Depends(get_db)
+) -> DealResponse:
+    # All I/O operations use async/await
+    new_deal = await deal_service.create(deal, db)
+    await db.commit()
+    await db.refresh(new_deal)
+    return new_deal
+```
+
+---
+
+## SQLAlchemy 2.0 Async
+
+### Session Management
+
+```python
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+
+engine = create_async_engine("postgresql+asyncpg://...")
+async_session_maker = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
+```
+
+### Query Patterns
+
+```python
+from sqlalchemy import select, update, delete
+from sqlalchemy.orm import selectinload
+
+# Select with joins
+async def get_deal_with_company(deal_id: int, db: AsyncSession):
+    stmt = (
+        select(Deal)
+        .options(selectinload(Deal.company))
+        .where(Deal.id == deal_id)
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+
+# Update
+async def update_deal_status(deal_id: int, status: str, db: AsyncSession):
+    stmt = (
+        update(Deal)
+        .where(Deal.id == deal_id)
+        .values(status=status)
+    )
+    await db.execute(stmt)
+    await db.commit()
+
+# Delete
+async def delete_deal(deal_id: int, db: AsyncSession):
+    stmt = delete(Deal).where(Deal.id == deal_id)
+    await db.execute(stmt)
+    await db.commit()
+```
+
+---
+
+## Type Hints
+
+### Function Signatures
+
+```python
+from typing import Optional, List, Dict, Any
+
+async def get_deals(
+    status: Optional[str] = None,
+    limit: int = 10,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+) -> List[Deal]:
+    # Implementation
+    pass
+
+def calculate_revenue(deals: List[Deal]) -> Dict[str, Any]:
+    return {
+        "total": sum(d.amount for d in deals),
+        "count": len(deals)
+    }
+```
+
+### Return Types
+
+```python
+# Explicit return types for clarity
+async def get_user_by_email(email: str, db: AsyncSession) -> Optional[User]:
+    result = await db.execute(select(User).where(User.email == email))
+    return result.scalar_one_or_none()
+```
+
+---
+
+## Testing Patterns
+
+### Async Test Functions
+
+```python
+import pytest
+from httpx import AsyncClient
+
+@pytest.mark.asyncio
+async def test_create_deal(client: AsyncClient):
+    response = await client.post("/deals", json={
+        "company_id": 1,
+        "amount": 10000,
+        "status": "open"
+    })
+    assert response.status_code == 201
+    assert response.json()["status"] == "open"
+```
+
+---
+
+## Performance Considerations
+
+### Batch Operations
+
+```python
+# Good: Batch insert
+async def create_multiple_deals(deals: List[DealCreate], db: AsyncSession):
+    deal_objects = [Deal(**deal.dict()) for deal in deals]
+    db.add_all(deal_objects)
+    await db.commit()
+
+# Avoid: Individual inserts in loop
+```
+
+### Connection Pooling
+
+```python
+# Configure pool size for production
+engine = create_async_engine(
+    database_url,
+    pool_size=20,
+    max_overflow=10,
+    pool_pre_ping=True
+)
+```
+
+---
+
+## Example: Complete FastAPI Endpoint
+
+```python
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
+from typing import List, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+class DealCreate(BaseModel):
+    company_id: int
+    amount: float
+    status: str = "open"
+
+class DealResponse(BaseModel):
+    id: int
+    company_id: int
+    amount: float
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+@app.post("/deals", response_model=DealResponse, status_code=201)
+async def create_deal(
+    deal: DealCreate,
+    db: AsyncSession = Depends(get_db)
+) -> DealResponse:
+    """
+    Create a new deal in the pipeline.
+    
+    - **company_id**: ID of the company
+    - **amount**: Deal value in dollars
+    - **status**: Deal status (open, closed, lost)
+    """
+    # Validate company exists
+    company_result = await db.execute(
+        select(Company).where(Company.id == deal.company_id)
+    )
+    if not company_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    # Create deal
+    try:
+        new_deal = Deal(**deal.dict())
+        db.add(new_deal)
+        await db.commit()
+        await db.refresh(new_deal)
+        
+        logger.info(f"Created deal {new_deal.id} for company {deal.company_id}")
+        return new_deal
+        
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to create deal: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create deal")
+```
+
+---
+
+## Best Practices Summary
+
+1. **Always async** for I/O operations
+2. **Type hints everywhere** for clarity
+3. **Error handling first** in functions
+4. **Early returns** for error conditions
+5. **Dependency injection** for testability
+6. **Pydantic models** for validation
+7. **Proper logging** with context
+8. **Connection pooling** for performance

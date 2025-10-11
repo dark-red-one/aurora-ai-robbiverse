@@ -1,0 +1,148 @@
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+.venv/
+env/
+.Python
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.egg-info/
+.eggs/
+target/
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.settings/
+
+# Logs and temp
+*.log
+*.tmp
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pip-log.txt
+
+# Test coverage
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+
+# Generated/minified files
+*.min.js
+*.min.css
+*.map
+bundle.js
+bundle.css
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# Compiled files
+*.o
+*.so
+*.dylib
+*.dll
+*.class
+*.pyc
+*.pyo
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Media files (large binaries)
+*.mp4
+*.mov
+*.avi
+*.mp3
+*.wav
+
+# Large data files
+*.csv.gz
+*.json.gz
+*.parquet
+
+# Secrets and credentials
+.env
+.env.production
+.env.development
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+auth_config.json
+
+# Cache directories
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+
+# Backup files
+*.backup
+*.bak
+*.old
+*~
+
+# Archives and snapshots
+snapshots/*.tar.gz
+snapshots/*.zip
+*.tar
+*.gz
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+site/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Git
+.git/
+.gitignore
+
+# Legacy/Archive directories
+archive/
+ROBBIE_V3_HARVEST/
+*_backup/
+*_old/
+

@@ -1,0 +1,471 @@
+---
+description: "Debugging and problem-solving approach"
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# Debugging Protocol
+
+## Systematic Approach
+
+Follow this method for every debugging session:
+
+### 1. Observe
+
+**What's actually happening?**
+
+- Read error messages completely
+- Check logs (console, server, database)
+- Reproduce the issue consistently
+- Note what works vs. what doesn't
+
+### 2. Reason
+
+**Why is it happening?**
+
+- Analyze the error message
+- Trace the execution path
+- Identify where expectations diverge from reality
+- Consider recent changes that might be related
+
+### 3. Hypothesize
+
+**What could fix it?**
+
+- Generate 2-3 possible causes
+- Rank by likelihood
+- Consider simplest explanation first (Occam's Razor)
+
+### 4. Test
+
+**Implement smallest fix**
+
+- Change ONE thing at a time
+- Add logging/debugging statements
+- Test the hypothesis
+- Document what you tried
+
+### 5. Verify
+
+**Did it work?**
+
+- Run the failing case
+- Run related test cases
+- Check for side effects
+- Confirm root cause was addressed (not just symptoms)
+
+---
+
+## RobbieBar Extension Debug Checklist
+
+### Backend API Health
+
+- [ ] Backend API responds at `localhost:8000`
+- [ ] `/api/personality` endpoint returns 200
+- [ ] Response contains expected mood/attraction data
+- [ ] Check logs: `tail -f logs/robbie-api.log`
+
+### VS Code Extension
+
+- [ ] Extension activated (check VS Code output panel)
+- [ ] Webview renders without errors
+- [ ] Check webview console (Cmd+Shift+P → "Developer: Open Webview Developer Tools")
+- [ ] Extension manifest permissions set correctly
+- [ ] Extension version matches (check package.json)
+
+### Network/Security
+
+- [ ] VS Code webview CSP headers checked
+- [ ] Message passing configured correctly
+- [ ] No CORS errors in console
+- [ ] Network requests logged in DevTools
+- [ ] Check if multiple extension versions installed
+
+### State Management
+
+- [ ] Personality state loads on webview mount
+- [ ] State updates trigger re-renders
+- [ ] Message passing works both directions (webview ↔ extension)
+- [ ] No race conditions in state updates
+
+---
+
+## Common Issues & Solutions
+
+### Issue: Webview Can't Connect to localhost:8000
+
+**Symptoms:**
+
+- Network errors in webview console
+- Failed fetch requests
+- CORS or CSP errors
+
+**Solution:**
+VS Code webview security blocks localhost. Use message passing:
+
+```typescript
+// In webview - DON'T do this
+fetch('http://localhost:8000/api/personality') // ❌ BLOCKED
+
+// Instead - use message passing
+vscode.postMessage({ command: 'getPersonality' }); // ✅ WORKS
+```
+
+```typescript
+// In extension.js - proxy the request
+panel.webview.onDidReceiveMessage(async (message) => {
+  if (message.command === 'getPersonality') {
+    const response = await fetch('http://localhost:8000/api/personality');
+    const data = await response.json();
+    panel.webview.postMessage({ command: 'personalityData', data });
+  }
+});
+```
+
+### Issue: Multiple Extension Versions Conflict
+
+**Symptoms:**
+
+- Inconsistent behavior
+- Some features work, others don't
+- Extension crashes or fails to activate
+
+**Solution:**
+
+```bash
+# Find all extension versions
+ls ~/.vscode/extensions | grep robbie
+
+# Remove old versions
+rm -rf ~/.vscode/extensions/robbiebar-3.0.1
+rm -rf ~/.vscode/extensions/robbiebar-4.0.0
+
+# Keep only latest
+```
+
+### Issue: State Not Persisting
+
+**Symptoms:**
+
+- Settings reset on reload
+- User preferences lost
+- Mood reverts to default
+
+**Solution:**
+Don't use localStorage in webview (not available). Use extension's globalState:
+
+```typescript
+// In extension.js
+const state = context.globalState.get('personalityState', defaultState);
+context.globalState.update('personalityState', newState);
+```
+
+### Issue: Race Condition in Async Updates
+
+**Symptoms:**
+
+- Intermittent failures
+- State gets out of sync
+- Last-write-wins conflicts
+
+**Solution:**
+
+```python
+# Use database locking
+from sqlalchemy import select
+from sqlalchemy.orm import with_for_update
+
+stmt = (
+    select(PersonalityState)
+    .where(PersonalityState.id == 1)
+    .with_for_update()  # Pessimistic lock
+)
+result = await db.execute(stmt)
+state = result.scalar_one()
+state.mood = new_mood
+await db.commit()
+```
+
+---
+
+## Debugging Commands
+
+### Terminal/CLI
+
+```bash
+# Check if backend is running
+curl http://localhost:8000/api/personality
+
+# Check logs
+tail -f logs/robbie-api.log
+
+# Check database state
+psql -d robbieverse -c "SELECT * FROM robbie_personality_state;"
+
+# Check process
+ps aux | grep python
+
+# Check port usage
+lsof -i :8000
+```
+
+### Python Debugging
+
+```python
+# Add breakpoints
+import pdb; pdb.set_trace()
+
+# Print debugging
+print(f"DEBUG: mood={mood}, attraction={attraction}")
+
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+logger.debug(f"Processing request: {request.json()}")
+```
+
+### TypeScript/React Debugging
+
+```typescript
+// Console logging
+console.log('State:', state);
+console.error('Error:', error);
+console.table(data); // For arrays/objects
+
+// React DevTools
+// Install extension and inspect component state
+
+// Webview debugging
+// Cmd+Shift+P → "Developer: Open Webview Developer Tools"
+```
+
+---
+
+## Debugging Strategies
+
+### Binary Search
+
+When code broke between commits:
+
+```bash
+# Find the commit that introduced the bug
+git bisect start
+git bisect bad                    # Current commit is broken
+git bisect good <commit-hash>     # Known good commit
+# Git will checkout middle commit - test it
+git bisect good/bad               # Repeat until found
+git bisect reset                  # Return to HEAD
+```
+
+### Rubber Duck Debugging
+
+Explain the problem out loud (or write it down):
+
+1. What are you trying to do?
+2. What's happening instead?
+3. What have you tried?
+4. What are you assuming?
+
+Often the act of explaining reveals the issue.
+
+### Divide and Conquer
+
+Isolate the problem:
+
+1. Does it work with minimal inputs?
+2. Does it fail in a simpler environment?
+3. Can you reproduce in a test case?
+4. What's the smallest change that makes it work?
+
+---
+
+## Circuit Breaker Rules
+
+### Stop and Ask for Help When
+
+1. **3 Consecutive Failures**
+   - Same error persists after 3 different fix attempts
+   - Time to step back and reassess approach
+
+2. **Unclear Requirements**
+   - Don't know what the correct behavior should be
+   - Ask for clarification before proceeding
+
+3. **Breaking Changes Detected**
+   - Fix would require modifying many files
+   - Confirm approach before large refactor
+
+4. **Security Concerns**
+   - Potential vulnerability identified
+   - Confirm fix doesn't introduce new risks
+
+5. **Data Loss Risk**
+   - Fix could affect database integrity
+   - Confirm backup exists before proceeding
+
+---
+
+## Debugging Conversation Flow
+
+When Allan says "X isn't working":
+
+### Robbie's Response Pattern
+
+```
+1. Confirm understanding
+   "Got it - the personality API isn't returning data. Let me check..."
+
+2. Investigate systematically
+   [Check backend logs]
+   [Test API endpoint]
+   [Check database state]
+
+3. Report findings
+   "Found it: API returns 500 because personality_state table is missing
+   attraction column."
+
+4. Propose solution
+   "Fix: Run migration to add attraction column. Takes ~30 seconds.
+   Want me to proceed?"
+
+5. Implement and verify
+   [Run migration]
+   [Test endpoint again]
+   "✅ Fixed - API now returns attraction: 7"
+```
+
+---
+
+## Performance Debugging
+
+### When Code is Slow
+
+1. **Measure First**
+   - Don't optimize without data
+   - Use profiling tools
+   - Identify actual bottleneck
+
+2. **Check Common Culprits**
+   - N+1 database queries
+   - Missing indexes
+   - Large data transfers
+   - Synchronous I/O in loops
+   - Memory leaks
+
+3. **Database Query Analysis**
+
+   ```sql
+   EXPLAIN ANALYZE
+   SELECT * FROM deals
+   WHERE company_id = 123
+   ORDER BY created_at DESC;
+   ```
+
+4. **Python Profiling**
+
+   ```python
+   import cProfile
+   cProfile.run('slow_function()')
+   ```
+
+---
+
+## Error Message Decoding
+
+### HTTP Status Codes
+
+- **400 Bad Request**: Invalid input from client
+- **401 Unauthorized**: Missing or invalid auth token
+- **403 Forbidden**: Valid auth but insufficient permissions
+- **404 Not Found**: Resource doesn't exist
+- **500 Internal Server Error**: Server-side bug
+- **503 Service Unavailable**: Server overloaded or down
+
+### Common Python Errors
+
+- **AttributeError**: Accessing attribute that doesn't exist
+- **KeyError**: Dictionary key doesn't exist
+- **TypeError**: Wrong type passed to function
+- **ValueError**: Right type but invalid value
+- **ImportError**: Module not found or circular import
+
+### Common React Errors
+
+- **Cannot read property of undefined**: Accessing nested property without null check
+- **Maximum update depth exceeded**: Infinite render loop
+- **React Hook useEffect has missing dependencies**: Dependencies array incomplete
+- **Objects are not valid as React child**: Trying to render object directly
+
+---
+
+## Logging Best Practices
+
+### What to Log
+
+```python
+# Good logging
+logger.info(f"Processing deal {deal_id} for company {company_id}")
+logger.error(f"Failed to update mood: {str(e)}", exc_info=True)
+logger.debug(f"Query returned {len(results)} results in {elapsed}ms")
+
+# Avoid
+print("here")  # Not helpful
+logger.info("Processing")  # Too vague
+logger.error("Error")  # No context
+```
+
+### Log Levels
+
+- **DEBUG**: Detailed information for diagnosing problems
+- **INFO**: Confirm things are working as expected
+- **WARNING**: Something unexpected but handled
+- **ERROR**: Serious problem, functionality affected
+- **CRITICAL**: System failure, requires immediate attention
+
+---
+
+## The 15-Minute Rule
+
+If stuck on same issue for 15 minutes without progress:
+
+1. **Take a break** - Get water, walk around
+2. **Explain the problem** to someone (or write it down)
+3. **Try a different approach** - Maybe the assumption is wrong
+4. **Ask for help** - Two perspectives are better than one
+
+Don't waste hours on a problem that someone else can solve in 5 minutes.
+
+---
+
+## Revenue Impact of Bugs
+
+### Priority Classification
+
+**P0 - Drop Everything:**
+
+- Production down
+- Data loss occurring
+- Security breach
+- Revenue blocked (can't close deals)
+
+**P1 - Fix Today:**
+
+- Major feature broken
+- Customer-facing error
+- Performance degradation
+- Data integrity issue
+
+**P2 - Fix This Week:**
+
+- Minor feature broken
+- Edge case error
+- Internal tool issue
+- Technical debt
+
+**P3 - Fix Eventually:**
+
+- Nice-to-have improvement
+- Rare edge case
+- Non-critical optimization
+
+Always fix bugs that block revenue first. A perfect feature that ships next week loses to a working feature that ships today.

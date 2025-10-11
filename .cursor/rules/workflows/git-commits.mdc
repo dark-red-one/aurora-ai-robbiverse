@@ -1,0 +1,381 @@
+---
+description: "Git workflow and commit standards"
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# Git Workflow Standards
+
+## Conventional Commits
+
+Use structured commit messages for clear history and automated changelog generation.
+
+### Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Types
+
+- **feat**: New feature for the user
+- **fix**: Bug fix
+- **docs**: Documentation changes
+- **refactor**: Code restructure without behavior change
+- **test**: Adding or updating tests
+- **chore**: Maintenance tasks (dependencies, configs)
+- **perf**: Performance improvements
+- **style**: Code formatting (not CSS)
+- **ci**: CI/CD pipeline changes
+
+### Scope (Optional)
+
+Indicates what part of the codebase changed:
+
+- `robbiebar`: RobbieBar VS Code extension
+- `api`: Backend API
+- `db`: Database schema
+- `personality`: AI personality system
+- `webview`: Frontend UI
+- `extensions`: VS Code extensions
+
+---
+
+## Commit Message Examples
+
+### Simple Feature
+
+```
+feat(robbiebar): add personality state API endpoint
+
+Adds GET /api/personality endpoint to fetch current mood,
+attraction level, and Gandhi-Genghis spectrum value.
+```
+
+### Bug Fix
+
+```
+fix(webview): resolve localhost connection security issue
+
+VS Code webview CSP was blocking localhost:8000 requests.
+Implemented message passing through extension.js to proxy
+all API calls from webview to backend.
+
+Closes #42
+```
+
+### Refactoring
+
+```
+refactor(api): consolidate extension versions to 6.0.0
+
+Removed conflicting versions 3.0.1, 4.0.0, 5.0.0.
+All extension code now uses single source of truth at 6.0.0.
+Updated package.json files across all extensions.
+```
+
+### Documentation
+
+```
+docs(architecture): document RobbieBar communication flow
+
+Added sequence diagram showing webview → extension → backend
+message passing pattern. Clarifies security model and
+data flow between components.
+```
+
+### Multiple Changes
+
+```
+feat(personality): implement mood transitions and logging
+
+- Add state machine for mood transitions
+- Log all mood changes to database
+- Expose /api/mood/history endpoint
+- Update webview to show mood timeline
+
+Related to business intelligence tracking initiative.
+```
+
+---
+
+## Branch Naming
+
+### Pattern
+
+```
+<type>/<short-description>
+```
+
+### Examples
+
+```
+feature/personality-api
+fix/webview-security
+refactor/extension-consolidation
+docs/architecture-diagrams
+chore/dependency-updates
+```
+
+### Special Branches
+
+- `main` - Production-ready code
+- `develop` - Integration branch (if using GitFlow)
+- `hotfix/*` - Emergency fixes for production
+
+---
+
+## Commit Best Practices
+
+### Size and Scope
+
+- **One logical change per commit** - Don't mix refactoring with new features
+- **Small commits** - Easier to review, easier to revert
+- **Complete commits** - Don't leave the code in a broken state
+
+### Subject Line
+
+- **50 characters or less** for the subject
+- **Start with lowercase** (after the type)
+- **No period at the end**
+- **Imperative mood**: "add feature" not "added feature"
+
+### Body (Optional but Recommended)
+
+- **72 characters per line** for readability
+- **Explain what and why**, not how (code shows how)
+- **Separate subject from body** with a blank line
+- **Use bullet points** for multiple changes
+
+### Footer (When Applicable)
+
+- **Breaking changes**: `BREAKING CHANGE: <description>`
+- **Issue references**: `Closes #123`, `Fixes #456`, `Relates to #789`
+
+---
+
+## Pre-Commit Workflow
+
+### Before Committing
+
+1. **Review changes**: `git diff`
+2. **Test the code**: Ensure it works
+3. **Check for secrets**: No API keys or passwords
+4. **Lint the code**: Fix any linting errors
+5. **Stage selectively**: `git add -p` for partial commits
+
+### When Allan Says "commit this"
+
+1. **Generate descriptive message** following Conventional Commits
+2. **Use multi-line format** if changes are complex
+3. **Include issue reference** if applicable
+4. **Confirm message** before committing
+
+---
+
+## Example Workflow
+
+### Working on a Feature
+
+```bash
+# Create feature branch
+git checkout -b feature/personality-dashboard
+
+# Make changes, commit incrementally
+git add src/components/PersonalityDashboard.tsx
+git commit -m "feat(personality): add dashboard component skeleton"
+
+git add src/api/personalityService.ts
+git commit -m "feat(api): add personality data fetching service"
+
+git add src/components/PersonalityDashboard.tsx
+git commit -m "feat(personality): implement mood visualization"
+
+# Push to remote
+git push origin feature/personality-dashboard
+```
+
+### Fixing a Bug
+
+```bash
+# Create fix branch
+git checkout -b fix/mood-update-race-condition
+
+# Make fix
+git add src/services/moodService.py
+git commit -m "fix(api): prevent race condition in mood updates
+
+Added pessimistic locking on robbie_personality_state table
+to prevent concurrent updates from overwriting each other.
+
+Closes #87"
+
+git push origin fix/mood-update-race-condition
+```
+
+---
+
+## Multi-Line Commit Template
+
+For complex changes:
+
+```
+<type>(<scope>): <short summary>
+
+## What Changed
+- Specific change 1
+- Specific change 2
+- Specific change 3
+
+## Why
+Brief explanation of the motivation for these changes.
+
+## Impact
+- Performance: 30% faster query time
+- Security: Removed SQL injection vulnerability
+- UX: Reduced page load time by 2 seconds
+
+Closes #123
+Related to #456
+```
+
+---
+
+## Git Commands Reference
+
+### Prefer MCP Tools When Available
+
+Use GitKraken MCP tools for better integration:
+
+- `mcp_GitKraken_git_status` instead of `git status`
+- `mcp_GitKraken_git_log_or_diff` instead of `git log` or `git diff`
+- `mcp_GitKraken_git_add_or_commit` instead of `git add` or `git commit`
+- `mcp_GitKraken_git_branch` for branch operations
+- `mcp_GitKraken_git_push` for pushing changes
+
+These provide better error handling and integration with the development environment.
+
+### Staging
+
+```bash
+git add <file>                 # Stage specific file
+git add -p                     # Stage interactively (chunks)
+git add .                      # Stage all changes (use carefully)
+```
+
+### Committing
+
+```bash
+git commit -m "message"        # Simple commit
+git commit                     # Opens editor for detailed message
+git commit --amend             # Modify last commit
+```
+
+### Viewing History
+
+```bash
+git log --oneline              # Compact history
+git log --graph                # Visual branch structure
+git log -p                     # Show diffs
+git show <commit>              # Show specific commit
+```
+
+### Undoing Changes
+
+```bash
+git reset HEAD <file>          # Unstage file
+git checkout -- <file>         # Discard working changes
+git revert <commit>            # Create new commit that undoes
+git reset --soft HEAD^         # Undo last commit, keep changes
+```
+
+---
+
+## Revenue-Focused Commit Guidelines
+
+When committing, consider:
+
+### Priority Indicators
+
+Add to commit body when relevant:
+
+- **💰 Revenue Impact**: Feature that directly affects deal closing
+- **🚀 Velocity**: Speeds up development or deployment
+- **🔴 Critical**: Bug affecting production or customers
+- **📊 Metrics**: Adds tracking or analytics
+
+### Example
+
+```
+feat(deals): add automatic follow-up reminder system
+
+💰 Revenue Impact: Ensures no deals fall through cracks
+🚀 Velocity: Automates manual reminder process
+
+Automatically creates follow-up tasks 3 days after last
+contact with prospect. Reduces average deal cycle by 15%.
+
+Closes #234
+```
+
+---
+
+## When to Commit
+
+### Commit Frequently
+
+- After completing a logical unit of work
+- Before switching contexts or branches
+- At the end of each work session
+- When tests pass
+
+### Don't Commit
+
+- Code that doesn't compile/run
+- Code with known bugs (unless marking as WIP)
+- Large commented-out blocks
+- Secrets, credentials, or sensitive data
+- Generated files (unless necessary)
+
+---
+
+## Commit Message Anti-Patterns
+
+### Avoid
+
+```
+❌ "fixed stuff"
+❌ "WIP"
+❌ "asdf"
+❌ "Final version"
+❌ "Fixed bug"
+❌ "Updates"
+```
+
+### Instead
+
+```
+✅ "fix(api): resolve null pointer in user authentication"
+✅ "feat(personality): add mood transition animations"
+✅ "refactor(db): optimize deal pipeline query"
+✅ "docs(readme): add installation instructions"
+```
+
+---
+
+## Integration with Cursor
+
+When Robbie suggests commit messages:
+
+1. **Follow Conventional Commits** format
+2. **Be specific** about what changed
+3. **Include context** about why (if not obvious)
+4. **Reference issues** when applicable
+5. **Indicate revenue impact** for business features
+6. **Keep subject concise** but informative
+
+The goal: Someone reading `git log --oneline` should understand the project evolution at a glance.

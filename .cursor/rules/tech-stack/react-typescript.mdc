@@ -1,0 +1,545 @@
+---
+description: "React/TypeScript frontend standards"
+globs: ["**/*.tsx", "**/*.ts", ".cursor/extensions/**/*"]
+alwaysApply: false
+---
+
+# React/TypeScript Standards
+
+## Core Principles
+
+- TypeScript strict mode always
+- Functional components with hooks
+- Interfaces over types
+- Explicit return types on functions
+- No implicit any
+
+---
+
+## Component Structure
+
+### Standard Pattern
+
+```typescript
+interface ComponentProps {
+  title: string;
+  onAction: () => void;
+  isActive?: boolean;
+  data?: DataType;
+}
+
+export function Component({ 
+  title, 
+  onAction, 
+  isActive = false,
+  data 
+}: ComponentProps): JSX.Element {
+  // 1. Hooks at top (in order: state, effects, callbacks)
+  const [state, setState] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Side effects here
+  }, [dependencies]);
+  
+  // 2. Event handlers
+  const handleClick = useCallback(() => {
+    onAction();
+  }, [onAction]);
+  
+  // 3. Computed values
+  const displayText = useMemo(() => {
+    return `${title} - ${state}`;
+  }, [title, state]);
+  
+  // 4. Early returns for loading/error states
+  if (loading) return <div>Loading...</div>;
+  if (!data) return null;
+  
+  // 5. Return JSX
+  return (
+    <div onClick={handleClick}>
+      {displayText}
+    </div>
+  );
+}
+```
+
+### Component Organization
+
+```typescript
+// 1. Imports (React, third-party, local, styles)
+import React, { useState, useEffect } from 'react';
+import { SomeLibrary } from 'external-lib';
+import { localUtil } from './utils';
+import './styles.css';
+
+// 2. Type definitions
+interface Props { ... }
+interface State { ... }
+
+// 3. Component
+export function MyComponent(props: Props): JSX.Element { ... }
+
+// 4. Sub-components (if small and only used here)
+function SubComponent() { ... }
+```
+
+---
+
+## TypeScript Patterns
+
+### Interfaces vs Types
+
+```typescript
+// Prefer interfaces for objects
+interface User {
+  id: number;
+  email: string;
+  name: string;
+}
+
+// Use types for unions, intersections
+type Status = 'open' | 'closed' | 'pending';
+type ApiResponse = SuccessResponse | ErrorResponse;
+
+// Extend interfaces
+interface AdminUser extends User {
+  permissions: string[];
+}
+```
+
+### Type Safety
+
+```typescript
+// Explicit return types
+function getUser(id: number): Promise<User | null> {
+  return fetch(`/api/users/${id}`).then(r => r.json());
+}
+
+// Generic components
+interface ListProps<T> {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+}
+
+function List<T>({ items, renderItem }: ListProps<T>): JSX.Element {
+  return <ul>{items.map(renderItem)}</ul>;
+}
+```
+
+### Avoid Any
+
+```typescript
+// Bad
+const data: any = fetchData();
+
+// Good
+interface ApiData {
+  id: number;
+  value: string;
+}
+const data: ApiData = await fetchData();
+
+// If truly unknown structure
+const data: unknown = fetchData();
+if (isApiData(data)) {
+  // Type guard narrows to ApiData
+}
+```
+
+---
+
+## VS Code Extension Specifics
+
+### CRITICAL: Storage Limitations
+
+```typescript
+// ❌ NEVER use localStorage or sessionStorage
+// These are NOT available in VS Code webviews or Claude.ai context
+
+// ✅ Use React state for persistence
+const [personalityState, setPersonalityState] = useState<PersonalityState>({
+  mood: 'friendly',
+  attraction: 7
+});
+
+// ✅ Use message passing to extension for data
+vscode.postMessage({
+  command: 'saveState',
+  data: personalityState
+});
+```
+
+### Message Passing Pattern
+
+```typescript
+// In webview (React component)
+interface VsCodeApi {
+  postMessage(message: any): void;
+}
+
+declare const vscode: VsCodeApi;
+
+// Send message to extension
+const updateMood = (mood: string) => {
+  vscode.postMessage({
+    command: 'updateMood',
+    mood: mood
+  });
+};
+
+// Receive messages from extension
+useEffect(() => {
+  const handleMessage = (event: MessageEvent) => {
+    const message = event.data;
+    switch (message.command) {
+      case 'moodUpdated':
+        setCurrentMood(message.mood);
+        break;
+      case 'error':
+        console.error(message.error);
+        break;
+    }
+  };
+  
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, []);
+```
+
+### Webview Security
+
+```typescript
+// ❌ localhost URLs blocked by VS Code webview CSP
+// fetch('http://localhost:8000/api/mood') // FAILS
+
+// ✅ Use message passing through extension
+vscode.postMessage({ command: 'fetchMood' });
+
+// Extension can make HTTP requests and forward response
+```
+
+---
+
+## React Hooks Patterns
+
+### useState with TypeScript
+
+```typescript
+// Explicit type
+const [user, setUser] = useState<User | null>(null);
+
+// Inferred type (when initial value provides it)
+const [count, setCount] = useState(0); // number
+const [name, setName] = useState(''); // string
+
+// Complex state
+interface FormState {
+  email: string;
+  password: string;
+  errors: Record<string, string>;
+}
+
+const [form, setForm] = useState<FormState>({
+  email: '',
+  password: '',
+  errors: {}
+});
+```
+
+### useEffect Dependencies
+
+```typescript
+// Dependencies must be exhaustive
+useEffect(() => {
+  fetchData(userId, companyId);
+}, [userId, companyId]); // All used variables
+
+// Cleanup functions
+useEffect(() => {
+  const timer = setInterval(() => {
+    checkStatus();
+  }, 5000);
+  
+  return () => clearInterval(timer);
+}, []);
+```
+
+### Custom Hooks
+
+```typescript
+interface UseFetchResult<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+  refetch: () => void;
+}
+
+function useFetch<T>(url: string): UseFetchResult<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+  
+  return { data, loading, error, refetch: fetchData };
+}
+```
+
+---
+
+## Performance Optimization
+
+### React.memo
+
+```typescript
+// Only after profiling shows need
+interface ExpensiveComponentProps {
+  data: DataType[];
+  onUpdate: (id: number) => void;
+}
+
+export const ExpensiveComponent = React.memo<ExpensiveComponentProps>(
+  ({ data, onUpdate }) => {
+    // Expensive rendering logic
+    return <div>...</div>;
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison
+    return prevProps.data === nextProps.data;
+  }
+);
+```
+
+### useCallback for Stable References
+
+```typescript
+// Prevent child re-renders
+const handleSubmit = useCallback((formData: FormData) => {
+  submitToApi(formData);
+}, []); // Only created once
+
+// With dependencies
+const handleUpdate = useCallback((id: number) => {
+  updateItem(id, currentFilter);
+}, [currentFilter]); // Recreated when filter changes
+```
+
+### useMemo for Expensive Computations
+
+```typescript
+const sortedData = useMemo(() => {
+  return data.sort((a, b) => b.revenue - a.revenue);
+}, [data]);
+```
+
+---
+
+## Error Handling
+
+### Error Boundaries
+
+```typescript
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught:', error, errorInfo);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return <div>Something went wrong: {this.state.error?.message}</div>;
+    }
+    return this.props.children;
+  }
+}
+```
+
+### Async Error Handling
+
+```typescript
+const [error, setError] = useState<string | null>(null);
+
+const fetchData = async () => {
+  setError(null);
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) throw new Error('Failed to fetch');
+    const data = await response.json();
+    setData(data);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Unknown error');
+  }
+};
+```
+
+---
+
+## Best Practices
+
+### Component Size
+
+- Keep components under 200 lines
+- Extract custom hooks for complex logic
+- Split large components into smaller ones
+- One component per file (except tiny sub-components)
+
+### Props
+
+- Use destructuring in function signature
+- Provide default values for optional props
+- Keep prop lists reasonable (< 10 props)
+- Consider composition over prop drilling
+
+### State Management
+
+- Local state first (useState)
+- Lift state when needed
+- Context for global state (avoid prop drilling)
+- External state management (Redux, Zustand) only if needed
+
+### File Organization
+
+```
+src/
+  components/
+    common/          # Reusable UI components
+    features/        # Feature-specific components
+  hooks/             # Custom hooks
+  types/             # Shared TypeScript types
+  utils/             # Helper functions
+  contexts/          # React contexts
+```
+
+---
+
+## Example: Complete Component
+
+```typescript
+import React, { useState, useEffect, useCallback } from 'react';
+
+interface PersonalityState {
+  mood: 'friendly' | 'focused' | 'playful' | 'bossy' | 'surprised' | 'blushing';
+  attraction: number;
+  gandhi_genghis: number;
+}
+
+interface RobbieAvatarProps {
+  initialMood?: PersonalityState['mood'];
+  onMoodChange?: (mood: PersonalityState['mood']) => void;
+}
+
+export function RobbieAvatar({ 
+  initialMood = 'friendly',
+  onMoodChange 
+}: RobbieAvatarProps): JSX.Element {
+  const [personality, setPersonality] = useState<PersonalityState>({
+    mood: initialMood,
+    attraction: 7,
+    gandhi_genghis: 5
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Fetch personality state on mount
+  useEffect(() => {
+    const fetchPersonality = async () => {
+      try {
+        vscode.postMessage({ command: 'getPersonality' });
+      } catch (err) {
+        setError('Failed to load personality');
+      }
+    };
+    fetchPersonality();
+  }, []);
+  
+  // Listen for messages from extension
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const { command, data } = event.data;
+      if (command === 'personalityUpdate') {
+        setPersonality(data);
+        onMoodChange?.(data.mood);
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onMoodChange]);
+  
+  // Update mood
+  const updateMood = useCallback((newMood: PersonalityState['mood']) => {
+    setLoading(true);
+    vscode.postMessage({
+      command: 'updateMood',
+      mood: newMood
+    });
+  }, []);
+  
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+  
+  return (
+    <div className="robbie-avatar">
+      <img 
+        src={`/images/robbie-${personality.mood}.png`}
+        alt={`Robbie - ${personality.mood}`}
+      />
+      <div className="controls">
+        <button onClick={() => updateMood('friendly')}>Friendly</button>
+        <button onClick={() => updateMood('focused')}>Focused</button>
+        <button onClick={() => updateMood('playful')}>Playful</button>
+      </div>
+      {loading && <div className="loading">Updating...</div>}
+    </div>
+  );
+}
+```
+
+---
+
+## VS Code Extension Specific Checklist
+
+When building VS Code extensions:
+
+- [ ] NO localStorage or sessionStorage
+- [ ] Use vscode.postMessage for all data operations
+- [ ] Handle message passing both ways (webview ↔ extension)
+- [ ] Test webview security (CSP headers)
+- [ ] Keep extension logic separate from UI components
+- [ ] Use TypeScript strict mode
+- [ ] Handle extension activation/deactivation
+- [ ] Test in actual VS Code environment (not browser)
