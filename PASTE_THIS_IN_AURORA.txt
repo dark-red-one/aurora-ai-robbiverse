@@ -1,0 +1,27 @@
+═══════════════════════════════════════════════════════════════
+ PASTE THIS INTO AURORA WEB TERMINAL (ONE LINE)
+═══════════════════════════════════════════════════════════════
+
+mkdir -p /root/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKtYaAt1pjSiHpFJbktjN8JfzJ8SLhiMnpf1QsZnJIQ robbiebook@aurora-empire" >> /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && echo "✅ SSH key added!"
+
+═══════════════════════════════════════════════════════════════
+ WHERE TO PASTE IT
+═══════════════════════════════════════════════════════════════
+
+1. Open: https://aurora-u44170.vm.elestio.app:10004/
+2. Login:
+   User: root
+   Password: quB7SC-7bM5-KW3O9U
+3. Paste the command above
+4. Hit Enter
+5. You should see: ✅ SSH key added!
+
+═══════════════════════════════════════════════════════════════
+ THEN TEST IT
+═══════════════════════════════════════════════════════════════
+
+Run this on RobbieBook1:
+./deployment/aurora-gpu-status.sh
+
+It should show "✅✅✅ SYSTEM OPERATIONAL ✅✅✅"
+

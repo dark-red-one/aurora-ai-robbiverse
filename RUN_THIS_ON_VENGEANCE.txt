@@ -1,0 +1,78 @@
+═══════════════════════════════════════════════════════════════
+  🔥 GRAB VENGEANCE'S RTX 4090 - SIMPLE INSTRUCTIONS 🔥
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Copy script to Vengeance
+─────────────────────────────────────────────────────────────
+
+Option A - USB Drive:
+  1. Copy this file to USB: deployment/setup-vengeance-gpu-NOW.sh
+  2. Walk to Vengeance (300 feet)
+  3. Insert USB and copy script
+
+Option B - Network (if you can reach it):
+  scp deployment/setup-vengeance-gpu-NOW.sh vengeance:~/
+
+Option C - Just recreate it there:
+  Copy the script content and create it manually
+
+
+STEP 2: Run on Vengeance
+─────────────────────────────────────────────────────────────
+
+ON VENGEANCE, open terminal and run:
+
+    sudo bash setup-vengeance-gpu-NOW.sh
+
+Password: fun2Gus!!!
+
+The script will:
+  ✅ Install WireGuard VPN
+  ✅ Connect to network (10.0.0.2)
+  ✅ Install NVIDIA drivers (if needed)
+  ✅ Install Ollama
+  ✅ Pull qwen2.5:7b model
+  ✅ Open firewall
+  ✅ Test everything
+
+Takes: 10-15 minutes
+Requires: Internet connection
+
+
+STEP 3: Test from RobbieBook1
+─────────────────────────────────────────────────────────────
+
+Back on RobbieBook1, run:
+
+    ping 10.0.0.2
+    curl http://10.0.0.2:11434/api/tags
+    python3 services/gpu-mesh/robbiebook-client.py --test
+
+If those work → YOU'RE IN! 🔥🔥🔥
+
+
+TROUBLESHOOTING
+─────────────────────────────────────────────────────────────
+
+Can't reach 10.0.0.2 from RobbieBook1?
+  → Script will show Vengeance's public key
+  → Add that key to Aurora's WireGuard config
+  → Or just grab Vengeance's local IP and skip VPN
+
+GPU not showing?
+  → Reboot Vengeance after script runs
+  → NVIDIA drivers need a reboot to load
+
+═══════════════════════════════════════════════════════════════
+
+ALTERNATIVE: Skip VPN, use local IP
+────────────────────────────────────────────────────────────
+
+If VPN is being difficult, just:
+  1. On Vengeance run: ip addr | grep "inet "
+  2. Find the 192.168.x.x or 10.x.x.x address
+  3. Tell me that IP
+  4. I'll connect RobbieBook1 directly (no VPN needed!)
+
+═══════════════════════════════════════════════════════════════
+

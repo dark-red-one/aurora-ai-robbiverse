@@ -1,0 +1,29 @@
+# Add RobbieBook1 SSH Key to Aurora
+
+## Quick Fix - Copy/Paste into Elestio Console
+
+1. Go to: https://cloud.elestio.app
+2. Find: aurora-u44170 
+3. Click: "Console" or "Terminal"
+4. Paste these commands:
+
+```bash
+# Add RobbieBook1's SSH key to both root and allan users
+mkdir -p /root/.ssh
+mkdir -p /home/allan/.ssh
+
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKtYaAt1pjSiHpFJbktjN8JfzJ8SLhiMnpf1QsZnJIQ robbiebook@aurora-empire" >> /root/.ssh/authorized_keys
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKtYaAt1pjSiHpFJbktjN8JfzJ8SLhiMnpf1QsZnJIQ robbiebook@aurora-empire" >> /home/allan/.ssh/authorized_keys
+
+chmod 700 /root/.ssh /home/allan/.ssh
+chmod 600 /root/.ssh/authorized_keys /home/allan/.ssh/authorized_keys
+chown -R allan:allan /home/allan/.ssh
+
+echo "SSH key added successfully!"
+```
+
+Then test from RobbieBook1:
+```bash
+ssh aurora "hostname"
+```
+
