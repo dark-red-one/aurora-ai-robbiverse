@@ -63,13 +63,13 @@ INSERT INTO robbieblocks_components (
     'Robbie Avatar & Personality Header',
     'widget',
     'const RobbieAvatarHeader = ({ mood, attraction, gandhiGenghis, energy }) => {
-  const moodEmojis = {
-    friendly: "😊",
-    focused: "🎯",
-    playful: "😘",
-    bossy: "💪",
-    surprised: "😲",
-    blushing: "😳💕"
+  const moodAvatars = {
+    friendly: "/avatars/robbie-friendly.png",
+    focused: "/avatars/robbie-focused.png",
+    playful: "/avatars/robbie-playful.png",
+    bossy: "/avatars/robbie-bossy.png",
+    surprised: "/avatars/robbie-surprised.png",
+    blushing: "/avatars/robbie-blushing.png"
   };
   
   return (
@@ -80,9 +80,18 @@ INSERT INTO robbieblocks_components (
       marginBottom: "16px"
     }}>
       <div className="avatar-container" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <div className="avatar-emoji" style={{ fontSize: "48px" }}>
-          {moodEmojis[mood] || "🎯"}
-        </div>
+        <img 
+          src={moodAvatars[mood] || moodAvatars.focused} 
+          alt={mood || "focused"} 
+          className="avatar-image"
+          style={{ 
+            width: "48px", 
+            height: "48px", 
+            borderRadius: "50%", 
+            objectFit: "cover",
+            cursor: "pointer"
+          }} 
+        />
         <div className="personality-info" style={{ flex: 1 }}>
           <div className="mood-text" style={{ fontSize: "18px", fontWeight: "bold", color: "#fff" }}>
             {mood || "focused"}
@@ -108,8 +117,8 @@ INSERT INTO robbieblocks_components (
     }'::jsonb,
     '.robbie-header { transition: all 0.3s ease; }
      .robbie-header:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3); }
-     .avatar-emoji { cursor: pointer; transition: transform 0.2s; }
-     .avatar-emoji:hover { transform: scale(1.1); }',
+     .avatar-image { cursor: pointer; transition: transform 0.2s; }
+     .avatar-image:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }',
     ARRAY['react'],
     '1.0.0',
     true,

@@ -1,8 +1,8 @@
 {
   "name": "robbiebar-webview",
   "displayName": "RobbieBar - Your AI Coding Companion",
-  "description": "Beautiful webview panel showing Robbie's mood, system stats, git commands, and matrix rain",
-  "version": "2.0.0",
+  "description": "Beautiful webview panel showing Robbie's mood with PNG avatars, system stats, git commands, and matrix rain",
+  "version": "6.0.0",
   "publisher": "robbie",
   "icon": "icon.png",
   "engines": {
@@ -70,7 +70,7 @@
   },
   "scripts": {
     "package": "vsce package",
-    "install-local": "code --install-extension robbiebar-webview-2.0.0.vsix"
+    "install-local": "code --install-extension robbiebar-webview-6.0.0.vsix"
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",

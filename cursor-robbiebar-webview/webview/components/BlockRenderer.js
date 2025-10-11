@@ -104,13 +104,15 @@ class BlockRenderer {
      * 💋 Robbie Avatar Header
      */
     renderRobbieAvatarHeader(props) {
-        const moodEmojis = {
-            friendly: "😊",
-            focused: "🎯",
-            playful: "😘",
-            bossy: "💪",
-            surprised: "😲",
-            blushing: "😳💕"
+        // Use webview URIs if available (Cursor context), otherwise fall back to relative paths (browser testing)
+        const config = typeof window !== 'undefined' && window.ROBBIE_CONFIG;
+        const moodAvatars = config && config.avatarUris ? config.avatarUris : {
+            friendly: "../avatars/robbie-friendly.png",
+            focused: "../avatars/robbie-focused.png",
+            playful: "../avatars/robbie-playful.png",
+            bossy: "../avatars/robbie-bossy.png",
+            surprised: "../avatars/robbie-surprised.png",
+            blushing: "../avatars/robbie-blushing.png"
         };
         
         const mood = props.mood || 'focused';
@@ -121,9 +123,7 @@ class BlockRenderer {
         return `
             <div class="robbie-header" style="padding: 16px; background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%); border-radius: 12px; margin-bottom: 16px;">
                 <div class="avatar-container" style="display: flex; align-items: center; gap: 12px;">
-                    <div class="avatar-emoji" style="font-size: 48px; cursor: pointer;" onclick="cycleMood()">
-                        ${moodEmojis[mood]}
-                    </div>
+                    <img src="${moodAvatars[mood] || moodAvatars.focused}" alt="${mood}" class="avatar-image" style="width: 48px; height: 48px; border-radius: 50%; cursor: pointer; object-fit: cover; border: 2px solid rgba(255,255,255,0.2);" onclick="cycleMood()" onerror="this.style.display='none'" />
                     <div class="personality-info" style="flex: 1;">
                         <div class="mood-text" style="font-size: 18px; font-weight: bold; color: #fff;">${mood}</div>
                         <div class="personality-indicators" style="display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.8);">

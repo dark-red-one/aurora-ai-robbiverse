@@ -32,7 +32,8 @@ function activate(context) {
                 webviewView.webview.options = {
                     enableScripts: true,
                     localResourceRoots: [
-                        vscode.Uri.file(path.join(context.extensionPath, 'webview'))
+                        vscode.Uri.file(path.join(context.extensionPath, 'webview')),
+                        vscode.Uri.file(path.join(context.extensionPath, 'avatars'))
                     ]
                 };
 
@@ -78,7 +79,8 @@ function createOrShowPanel(context) {
             enableScripts: true,
             retainContextWhenHidden: true,
             localResourceRoots: [
-                vscode.Uri.file(path.join(context.extensionPath, 'webview'))
+                vscode.Uri.file(path.join(context.extensionPath, 'webview')),
+                vscode.Uri.file(path.join(context.extensionPath, 'avatars'))
             ]
         }
     );
@@ -115,6 +117,17 @@ function getWebviewContent(context, webview) {
     const config = vscode.workspace.getConfiguration('robbiebar');
     const apiUrl = config.get('apiUrl', 'http://localhost:8000');
 
+    // Generate webview URIs for avatars
+    const avatarsDir = path.join(context.extensionPath, 'avatars');
+    const avatarUris = {
+        friendly: webview.asWebviewUri(vscode.Uri.file(path.join(avatarsDir, 'robbie-friendly.png'))).toString(),
+        focused: webview.asWebviewUri(vscode.Uri.file(path.join(avatarsDir, 'robbie-focused.png'))).toString(),
+        playful: webview.asWebviewUri(vscode.Uri.file(path.join(avatarsDir, 'robbie-playful.png'))).toString(),
+        bossy: webview.asWebviewUri(vscode.Uri.file(path.join(avatarsDir, 'robbie-bossy.png'))).toString(),
+        surprised: webview.asWebviewUri(vscode.Uri.file(path.join(avatarsDir, 'robbie-surprised.png'))).toString(),
+        blushing: webview.asWebviewUri(vscode.Uri.file(path.join(avatarsDir, 'robbie-blushing.png'))).toString()
+    };
+
     // Inject configuration and inline CSS/JS
     html = html.replace('</head>', `
         <style>${css}</style>
@@ -122,7 +135,8 @@ function getWebviewContent(context, webview) {
             // Configuration from extension settings
             window.ROBBIE_CONFIG = {
                 apiUrl: '${apiUrl}',
-                vscodeApi: acquireVsCodeApi()
+                vscodeApi: acquireVsCodeApi(),
+                avatarUris: ${JSON.stringify(avatarUris)}
             };
         </script>
         </head>
