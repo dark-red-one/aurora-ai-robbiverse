@@ -7,8 +7,8 @@ from datetime import datetime
 import json
 import uuid
 
-from app.db.database import database
-from app.services.conversation_context import ConversationContextManager
+from ..db.database import database
+from ..services.conversation_context import ConversationContextManager
 
 class PersonalityManager:
     """Manages AI personalities and dynamic switching"""

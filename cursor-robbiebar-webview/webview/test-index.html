@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobbieBar - Test Mode 💋</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            overflow: hidden;
+        }
+        
+        #robbiebar-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        }
+        
+        .loading-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .loading-subtext {
+            font-size: 16px;
+            opacity: 0.7;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .test-info {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid #8B5CF6;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px;
+            font-size: 14px;
+        }
+        
+        .test-button {
+            background: #8B5CF6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px;
+        }
+        
+        .test-button:hover {
+            background: #7C3AED;
+        }
+    </style>
+</head>
+<body>
+    <div id="robbiebar-container">
+        <div class="loading-screen">
+            <div class="loading-icon">💋</div>
+            <div class="loading-text">RobbieBar Test Mode</div>
+            <div class="loading-subtext">Testing SQL-driven sidebar components</div>
+            
+            <div class="test-info">
+                <strong>Test Configuration:</strong><br>
+                API: <span id="api-status">Checking...</span><br>
+                Page Definition: <span id="page-status">Loading...</span><br>
+                Blocks: <span id="blocks-count">0</span>
+            </div>
+            
+            <button class="test-button" onclick="loadPageDefinition()">Load Page Definition</button>
+            <button class="test-button" onclick="loadBlockRenderer()">Load BlockRenderer</button>
+            <button class="test-button" onclick="renderSidebar()">Render Sidebar</button>
+        </div>
+    </div>
+
+    <script>
+        // Test configuration
+        const API_BASE = 'http://localhost:8000';
+        const NODE_ID = 'vengeance-local';
+        let pageDefinition = null;
+        let BlockRenderer = null;
+
+        // Check API status
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                document.getElementById('api-status').textContent = data.status;
+                document.getElementById('api-status').style.color = '#10B981';
+                return true;
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'Error: ' + error.message;
+                document.getElementById('api-status').style.color = '#EF4444';
+                return false;
+            }
+        }
+
+        // Load page definition from CMS
+        async function loadPageDefinition() {
+            try {
+                console.log('💋 Loading page definition from CMS...');
+                const response = await fetch(`${API_BASE}/api/robbieblocks/page/cursor-sidebar-main?node=${NODE_ID}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    pageDefinition = data;
+                    document.getElementById('page-status').textContent = 'Loaded ✅';
+                    document.getElementById('page-status').style.color = '#10B981';
+                    document.getElementById('blocks-count').textContent = data.blocks.length;
+                    console.log('✅ Page definition loaded:', data);
+                    console.log('Blocks:', data.blocks.map(b => b.component.key));
+                } else {
+                    throw new Error('Failed to load page definition');
+                }
+            } catch (error) {
+                document.getElementById('page-status').textContent = 'Error: ' + error.message;
+                document.getElementById('page-status').style.color = '#EF4444';
+                console.error('❌ Error loading page definition:', error);
+            }
+        }
+
+        // Load BlockRenderer
+        async function loadBlockRenderer() {
+            try {
+                console.log('💋 Loading BlockRenderer...');
+                
+                // Fetch the script content
+                const response = await fetch('components/BlockRenderer.js');
+                const scriptContent = await response.text();
+                
+                // Create and execute the script
+                const script = document.createElement('script');
+                script.textContent = scriptContent;
+                document.head.appendChild(script);
+                
+                // Wait a bit for the script to execute
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                if (typeof BlockRenderer !== 'undefined' && typeof BlockRenderer === 'function') {
+                    console.log('✅ BlockRenderer loaded as constructor!');
+                } else {
+                    console.log('BlockRenderer type:', typeof BlockRenderer);
+                    throw new Error('BlockRenderer not available as constructor');
+                }
+            } catch (error) {
+                console.error('❌ Error loading BlockRenderer:', error);
+            }
+        }
+
+        // Render the sidebar
+        function renderSidebar() {
+            if (!pageDefinition) {
+                alert('Please load page definition first!');
+                return;
+            }
+            
+            if (typeof BlockRenderer === 'undefined') {
+                alert('Please load BlockRenderer first!');
+                return;
+            }
+            
+            try {
+                console.log('💋 Rendering sidebar with BlockRenderer...');
+                
+                // Create renderer instance (simulate VS Code API)
+                const mockVscode = {
+                    postMessage: (message) => console.log('VSCode message:', message),
+                    getState: () => null,
+                    setState: (state) => console.log('VSCode state:', state)
+                };
+                
+                const renderer = new BlockRenderer(pageDefinition, mockVscode);
+                renderer.renderPage('robbiebar-container');
+                
+                console.log('✅ Sidebar rendered successfully!');
+            } catch (error) {
+                console.error('❌ Error rendering sidebar:', error);
+                alert('Error rendering sidebar: ' + error.message);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('💋 RobbieBar Test Mode initialized');
+            checkApiStatus();
+        });
+    </script>
+</body>
+</html>

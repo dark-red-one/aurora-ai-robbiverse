@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .avatar-container {
+            width: 90px; /* 40% smaller */
+            height: 90px;
+            border-radius: 50%;
+            background: #2d2d2d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+        }
+        .avatar-emoji {
+            font-size: 48px; /* 40% smaller */
+            image-rendering: pixelated;
+            filter: contrast(1.2);
+        }
+        .mood-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00d4ff;
+            text-align: center;
+            margin-bottom: 3px;
+        }
+        .network-status {
+            font-size: 11px;
+            color: #4caf50;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .sync-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 13px;
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .hot-topic {
+            background: #2d2d2d;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 11px;
+            border-left: 3px solid #ff6b6b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .priority-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+        .commitment {
+            background: #2d2d2d;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 11px;
+            border-left: 3px solid #ffa500;
+        }
+        .deadline {
+            color: #ffa500;
+            font-size: 9px;
+            margin-top: 3px;
+        }
+        .loading {
+            color: #666;
+            font-size: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="avatar-container">
+        <div class="avatar-emoji" id="avatarEmoji">🔥</div>
+    </div>
+    <div class="mood-text" id="moodText">Hyper</div>
+    <div class="network-status">
+        <span class="sync-dot"></span> Network-wide state
+    </div>
+    
+    <div class="section">
+        <div class="section-title">🔥 Hot Topics</div>
+        <div id="hotTopics">
+            <div class="hot-topic">
+                <span>Revenue urgency - deals closing NOW</span>
+                <span class="priority-badge">10</span>
+            </div>
+            <div class="hot-topic">
+                <span>Universal AI State LIVE</span>
+                <span class="priority-badge">9</span>
+            </div>
+            <div class="hot-topic">
+                <span>AllanBot training acceleration</span>
+                <span class="priority-badge">8</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">📌 Commitments</div>
+        <div id="commitments">
+            <div class="commitment">
+                <div>Ship Universal AI State system</div>
+                <div class="deadline">📅 47h away</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        
+        // Request data from extension
+        vscode.postMessage({ command: 'loadState' });
+        
+        // Listen for updates
+        window.addEventListener('message', event => {
+            const message = event.data;
+            
+            if (message.command === 'updateState') {
+                // Update mood
+                document.getElementById('avatarEmoji').textContent = message.mood.emoji;
+                document.getElementById('moodText').textContent = message.mood.name;
+                
+                // Update hot topics
+                if (message.hotTopics && message.hotTopics.length > 0) {
+                    document.getElementById('hotTopics').innerHTML = message.hotTopics
+                        .map(topic => `
+                            <div class="hot-topic">
+                                <span>${topic.content.substring(0, 35)}${topic.content.length > 35 ? '...' : ''}</span>
+                                <span class="priority-badge">${topic.priority}</span>
+                            </div>
+                        `).join('');
+                }
+                
+                // Update commitments
+                if (message.commitments && message.commitments.length > 0) {
+                    document.getElementById('commitments').innerHTML = message.commitments
+                        .map(c => `
+                            <div class="commitment">
+                                <div>${c.text}</div>
+                                <div class="deadline">📅 ${c.deadline}</div>
+                            </div>
+                        `).join('');
+                }
+            }
+        });
+        
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            vscode.postMessage({ command: 'loadState' });
+        }, 10000);
+    </script>
+</body>
+</html>
+

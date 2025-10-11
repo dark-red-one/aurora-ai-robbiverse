@@ -1,0 +1,50 @@
+{
+    "name": "robbiebar-panel",
+    "displayName": "RobbieBar",
+    "description": "Code command center with system stats, git commands, and personality state",
+    "version": "1.0.0",
+    "publisher": "testpilot",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "robbiebar.show",
+                "title": "Show RobbieBar",
+                "category": "RobbieBar"
+            },
+            {
+                "command": "robbiebar.refresh",
+                "title": "Refresh RobbieBar",
+                "category": "RobbieBar"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "robbiebar-container",
+                    "title": "RobbieBar",
+                    "icon": "$(dashboard)"
+                }
+            ]
+        },
+        "views": {
+            "robbiebar-container": [
+                {
+                    "type": "webview",
+                    "id": "robbiebar.panel",
+                    "name": "Command Center"
+                }
+            ]
+        }
+    }
+}
+

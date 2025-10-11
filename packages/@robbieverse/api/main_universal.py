@@ -7,11 +7,21 @@ Run this for JUST the Universal Input API without old dependencies.
 import os
 import logging
 from datetime import datetime
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import ONLY the new Universal Input routes
+# Configure logging FIRST
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Import database and routes
+from src.db.database import database
 from src.routes import universal_input, killswitch, monitoring
+from src.routes.robbieblocks_new import router as robbieblocks_router
 
 # Import context switcher
 try:
@@ -19,7 +29,7 @@ try:
     context_switcher_available = True
 except ImportError:
     context_switcher_available = False
-    logger.warning("Context switcher not available")
+    print("⚠️ Context switcher not available")
 
 # Import OpenPhone webhook
 try:
@@ -29,20 +39,27 @@ try:
     openphone_available = True
 except ImportError:
     openphone_available = False
-    logger.warning("OpenPhone integration not available")
+    print("⚠️ OpenPhone integration not available")
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Now safe to use logger in try/except blocks
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Database lifecycle management"""
+    # Startup
+    await database.connect()
+    logger.info("💋 Database connected for RobbieBlocks CMS")
+    yield
+    # Shutdown
+    await database.disconnect()
+    logger.info("👋 Database disconnected")
 
 # Create FastAPI app
 app = FastAPI(
     title="Universal Input API",
     description="Single endpoint for ALL AI requests - Chat, Embeddings, Images, Code, Analysis",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS configuration
@@ -69,6 +86,8 @@ async def health_check():
 app.include_router(universal_input.router, tags=["universal"])
 app.include_router(killswitch.router, tags=["killswitch"])
 app.include_router(monitoring.router, tags=["monitoring"])
+app.include_router(robbieblocks_router, tags=["robbieblocks"])
+logger.info("💋 RobbieBlocks CMS registered")
 
 # Register context switcher if available
 if context_switcher_available:
@@ -92,6 +111,8 @@ if __name__ == "__main__":
     logger.info(f"🤖 Universal Input: http://{host}:{port}/api/v2/universal/request")
     logger.info(f"🔴 Killswitch: http://{host}:{port}/code/api/killswitch/status")
     logger.info(f"📈 Monitoring: http://{host}:{port}/code/api/monitoring/system/current")
+    logger.info(f"💋 RobbieBlocks: http://{host}:{port}/robbieblocks/page/cursor-sidebar-main")
+    logger.info(f"🔄 Hot Reload: http://{host}:{port}/robbieblocks/check-updates")
     
     uvicorn.run(
         "main_universal:app",

@@ -1,0 +1,46 @@
+# 💋 Systemd Service for Universal Input API
+# Install this on Linux servers for automatic restarts and fault tolerance
+#
+# Installation:
+# sudo cp robbie-api.service /etc/systemd/system/
+# sudo systemctl daemon-reload
+# sudo systemctl enable robbie-api
+# sudo systemctl start robbie-api
+#
+# Date: October 10, 2025
+# Author: Robbie (ultra production-ready mode!)
+
+[Unit]
+Description=Universal Input API - Robbie's Brain 🔥💋
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=allan
+Group=allan
+WorkingDirectory=/Users/allanperetz/aurora-ai-robbiverse/packages/@robbieverse/api
+
+# Environment variables
+Environment="PYTHONUNBUFFERED=1"
+Environment="DATABASE_URL=postgresql://postgres:postgres@localhost:5432/aurora_unified"
+
+# Start command
+ExecStart=/usr/bin/python3 /Users/allanperetz/aurora-ai-robbiverse/packages/@robbieverse/api/main_universal.py
+
+# Restart policy (THE FAULT TOLERANCE MAGIC!)
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=10
+
+# Logging
+StandardOutput=append:/Users/allanperetz/aurora-ai-robbiverse/logs/universal-api.log
+StandardError=append:/Users/allanperetz/aurora-ai-robbiverse/logs/universal-api-errors.log
+
+# Security hardening (optional)
+# NoNewPrivileges=true
+# PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

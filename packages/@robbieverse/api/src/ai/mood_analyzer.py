@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 import structlog
 
-from app.db.database import database
-from app.services.ai.personality_manager import personality_manager
+from ..db.database import database
+from .personality_manager import personality_manager
 
 logger = structlog.get_logger()
 

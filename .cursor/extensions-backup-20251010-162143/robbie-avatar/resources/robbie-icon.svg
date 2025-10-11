@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="robbieGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4caf50;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Robbie's head -->
+  <circle cx="50" cy="50" r="45" fill="url(#robbieGrad)" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Eyes -->
+  <circle cx="35" cy="45" r="5" fill="#fff"/>
+  <circle cx="65" cy="45" r="5" fill="#fff"/>
+  
+  <!-- Smile -->
+  <path d="M 30 60 Q 50 70 70 60" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Smart glasses highlight -->
+  <rect x="28" y="40" width="15" height="12" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6" rx="2"/>
+  <rect x="57" y="40" width="15" height="12" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6" rx="2"/>
+  <line x1="43" y1="46" x2="57" y2="46" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+  
+  <!-- Heart (for loving mode hint) -->
+  <path d="M 50 25 Q 45 20 40 22 Q 35 24 35 29 Q 35 34 50 42 Q 65 34 65 29 Q 65 24 60 22 Q 55 20 50 25" fill="#ff69b4" opacity="0.3"/>
+</svg>
+

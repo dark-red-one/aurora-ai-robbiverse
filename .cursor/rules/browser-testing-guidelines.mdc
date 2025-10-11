@@ -1,0 +1,182 @@
+# Browser Testing Guidelines for Cursor Development
+
+## Automated Testing Tools
+
+### Playwright Browser Tools (Available in Cursor)
+When developing or debugging frontend code, ALWAYS use these tools:
+
+1. **Navigate to pages**: `mcp_cursor-playwright_browser_navigate`
+2. **Take screenshots**: `mcp_cursor-playwright_browser_take_screenshot`
+3. **Get page snapshot**: `mcp_cursor-playwright_browser_snapshot`
+4. **Click elements**: `mcp_cursor-playwright_browser_click`
+5. **Check console**: `mcp_cursor-playwright_browser_console_messages`
+6. **Network requests**: `mcp_cursor-playwright_browser_network_requests`
+7. **Evaluate JS**: `mcp_cursor-playwright_browser_evaluate`
+
+## When to Use Browser Testing
+
+- Before committing frontend changes
+- After modifying webview components
+- When debugging rendering issues
+- To verify API integration
+- To test user interactions
+
+## Test Suite Location
+
+- Automated tests: `tests/browser/cursor-extension-test.js`
+- Run tests: `./tests/browser/run-cursor-tests.sh`
+- Results: `tests/browser/test-results/`
+
+## Testing Checklist for RobbieBar Extension
+
+- [ ] Extension activates in Cursor sidebar
+- [ ] All 8 components render correctly
+- [ ] API connection to localhost:8000 works
+- [ ] Personality system responds (attraction 11)
+- [ ] System stats update every 2 seconds
+- [ ] Chat interface connects to Universal Input API
+- [ ] File navigator shows current workspace
+- [ ] App links open correctly
+- [ ] No console errors
+- [ ] Screenshots captured for documentation
+
+## Quick Test Command
+
+```bash
+# Run full test suite
+./tests/browser/run-cursor-tests.sh
+
+# Manual browser test
+cd cursor-robbiebar-webview && python3 serve-test.py
+# Then use Playwright tools in Cursor
+```
+
+## Browser Testing Workflow
+
+### 1. Automated Testing
+```bash
+# Run complete test suite
+./tests/browser/run-cursor-tests.sh
+```
+
+### 2. Manual Testing with Browser Tools
+```bash
+# Start test server
+cd cursor-robbiebar-webview && python3 serve-test.py
+
+# Then in Cursor, use these tools:
+# - Navigate to http://localhost:8001/test-index.html
+# - Take screenshots of each test step
+# - Check console logs for errors
+# - Test interactive elements
+```
+
+### 3. Extension Testing in Cursor
+1. Install extension: `cursor --install-extension robbiebar-webview-3.0.0.vsix`
+2. Restart Cursor
+3. Look for RobbieBar icon in activity bar
+4. Click icon to open sidebar
+5. Verify all components render correctly
+
+## Test Components Checklist
+
+### Component 1: robbie-avatar-header
+- Avatar displays with current mood
+- Personality sliders visible (attraction, gandhi-genghis)
+- Mood indicator updates
+
+### Component 2: app-links-nav
+- Links to @Work, @Code, @Play apps
+- Buttons clickable and styled correctly
+- Icons display properly
+
+### Component 3: system-stats-monitor
+- CPU usage displays
+- Memory usage displays
+- Updates every 2 seconds (default interval)
+- Shows local MacBook stats
+
+### Component 4: ai-chat-interface
+- Chat input field functional
+- Connects to Universal Input API (localhost:8000)
+- Messages send and receive
+- Personality-aware responses (attraction 11)
+
+### Component 5: file-navigator-git
+- Current workspace files display
+- Git status shows (branch, changes)
+- File tree navigable
+- Click to open files in editor
+
+### Component 6: tv-livestream-embed
+- CNN livestream embedded (or configured stream)
+- Video player controls functional
+- Iframe loads correctly
+
+### Component 7: lofi-beats-player
+- Lofi music player displays
+- Play/pause controls work
+- Volume control functional
+- Audio streams correctly
+
+### Component 8: sticky-notes-widget
+- Sticky notes display
+- Can create new notes
+- Notes persist to database
+- Surface/submerge functionality
+
+## API Integration Testing
+
+### Universal Input API
+- Health check: `GET http://localhost:8000/health`
+- Personality request: `POST http://localhost:8000/api/v2/universal/request`
+- Verify attraction=11 for Allan
+- Test mood changes and responses
+
+### RobbieBlocks CMS
+- Page definition: `GET http://localhost:8000/api/robbieblocks/page/cursor-sidebar-main?node=vengeance-local`
+- Should return 8 blocks
+- Verify component definitions
+- Check branding (Vengeance Gaming Rig)
+
+## Troubleshooting
+
+### Common Issues
+1. **API not responding**: Check if Universal Input API is running
+2. **Components not loading**: Verify BlockRenderer class loads correctly
+3. **Extension not visible**: Restart Cursor after installation
+4. **Console errors**: Check browser console for JavaScript errors
+
+### Debug Commands
+```bash
+# Check API status
+curl http://localhost:8000/health
+
+# Check CMS
+curl "http://localhost:8000/api/robbieblocks/page/cursor-sidebar-main?node=vengeance-local"
+
+# Check extension installation
+cursor --list-extensions | grep robbiebar
+```
+
+## Best Practices
+
+1. **Always test before committing**: Run browser tests before pushing changes
+2. **Take screenshots**: Document visual changes with screenshots
+3. **Check console logs**: Look for JavaScript errors or warnings
+4. **Test on different pages**: Verify components work in different contexts
+5. **Verify API integration**: Ensure all API calls succeed
+6. **Test personality system**: Verify attraction levels and mood changes work correctly
+
+## File Structure
+
+```
+tests/
+├── browser/
+│   ├── cursor-extension-test.js     # Main test suite
+│   ├── run-cursor-tests.sh         # Test runner script
+│   ├── test-results/               # Screenshots directory
+│   ├── test-report.txt             # Generated report
+│   └── final-test-report.txt       # Final comprehensive report
+└── README.md                       # Testing documentation
+```

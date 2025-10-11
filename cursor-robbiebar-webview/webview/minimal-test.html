@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobbieBar - Minimal Test 💋</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: #1E293B;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-button {
+            background: #8B5CF6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px;
+        }
+        
+        .test-button:hover {
+            background: #7C3AED;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10B981;
+            color: #10B981;
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #EF4444;
+            color: #EF4444;
+        }
+        
+        .status.info {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid #8B5CF6;
+            color: #8B5CF6;
+        }
+        
+        .code-block {
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>💋 RobbieBar - Minimal Test</h1>
+        
+        <div class="test-section">
+            <h2>Step 1: Load BlockRenderer Class</h2>
+            <div id="step1-status" class="status info">Not loaded</div>
+            <button class="test-button" onclick="loadBlockRendererClass()">Load BlockRenderer Class</button>
+            <div id="step1-details"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Step 2: Create Instance</h2>
+            <div id="step2-status" class="status info">Not created</div>
+            <button class="test-button" onclick="createInstance()">Create BlockRenderer Instance</button>
+            <div id="step2-details"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Step 3: Test Rendering</h2>
+            <div id="step3-status" class="status info">Not tested</div>
+            <button class="test-button" onclick="testRendering()">Test Rendering</button>
+            <div id="step3-details"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Console Output</h2>
+            <div id="console-output" class="code-block" style="height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+        let BlockRendererClass = null;
+        let rendererInstance = null;
+        
+        function log(message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+        
+        async function loadBlockRendererClass() {
+            log('🔧 Loading BlockRenderer class...');
+            
+            try {
+                // Fetch the script content
+                const response = await fetch('components/BlockRenderer.js');
+                let scriptContent = await response.text();
+                
+                log('📄 Script content fetched, length: ' + scriptContent.length);
+                
+                // Remove Node.js exports
+                scriptContent = scriptContent.replace(/if \(typeof module !== 'undefined'.*?module\.exports = BlockRenderer;.*?}/s, '');
+                
+                log('🧹 Cleaned Node.js exports');
+                
+                // Create a function that defines the class in a clean scope
+                const defineClass = new Function(scriptContent + '; return BlockRenderer;');
+                BlockRendererClass = defineClass();
+                
+                log('✅ BlockRenderer class loaded: ' + typeof BlockRendererClass);
+                
+                if (typeof BlockRendererClass === 'function') {
+                    updateStatus('step1-status', 'BlockRenderer class loaded successfully', 'success');
+                    
+                    const details = document.getElementById('step1-details');
+                    details.innerHTML = `
+                        <div class="code-block">
+                            <strong>Type:</strong> ${typeof BlockRendererClass}<br>
+                            <strong>Constructor:</strong> Yes<br>
+                            <strong>Prototype methods:</strong> ${Object.getOwnPropertyNames(BlockRendererClass.prototype).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    throw new Error('BlockRenderer is not a constructor function');
+                }
+                
+            } catch (error) {
+                updateStatus('step1-status', 'Error: ' + error.message, 'error');
+                log('❌ Error loading BlockRenderer: ' + error.message);
+            }
+        }
+        
+        async function createInstance() {
+            log('🏗️ Creating BlockRenderer instance...');
+            
+            if (!BlockRendererClass) {
+                updateStatus('step2-status', 'Error: Load BlockRenderer class first', 'error');
+                log('❌ BlockRenderer class not loaded');
+                return;
+            }
+            
+            try {
+                // Create mock page definition
+                const mockPageDefinition = {
+                    page: { page_name: 'Test Page' },
+                    blocks: [
+                        {
+                            component: { key: 'robbie-avatar-header' },
+                            props: { title: 'Test Avatar' }
+                        }
+                    ],
+                    branding: { node_name: 'Test Node' }
+                };
+                
+                // Create mock VS Code API
+                const mockVscode = {
+                    postMessage: (msg) => log('📤 VSCode: ' + JSON.stringify(msg)),
+                    getState: () => null,
+                    setState: (state) => log('💾 VSCode state: ' + JSON.stringify(state))
+                };
+                
+                // Create instance
+                rendererInstance = new BlockRendererClass(mockPageDefinition, mockVscode);
+                
+                log('✅ BlockRenderer instance created');
+                updateStatus('step2-status', 'Instance created successfully', 'success');
+                
+                const details = document.getElementById('step2-details');
+                details.innerHTML = `
+                    <div class="code-block">
+                        <strong>Instance type:</strong> ${typeof rendererInstance}<br>
+                        <strong>Constructor:</strong> ${rendererInstance.constructor.name}<br>
+                        <strong>Methods available:</strong> ${Object.getOwnPropertyNames(Object.getPrototypeOf(rendererInstance)).filter(m => m !== 'constructor').join(', ')}
+                    </div>
+                `;
+                
+            } catch (error) {
+                updateStatus('step2-status', 'Error: ' + error.message, 'error');
+                log('❌ Error creating instance: ' + error.message);
+            }
+        }
+        
+        async function testRendering() {
+            log('🎨 Testing rendering...');
+            
+            if (!rendererInstance) {
+                updateStatus('step3-status', 'Error: Create instance first', 'error');
+                log('❌ Renderer instance not created');
+                return;
+            }
+            
+            try {
+                // Create test container
+                const container = document.createElement('div');
+                container.id = 'test-render-output';
+                container.style.cssText = `
+                    width: 300px;
+                    height: 200px;
+                    border: 2px solid #8B5CF6;
+                    border-radius: 8px;
+                    padding: 10px;
+                    background: #1E293B;
+                    margin: 10px 0;
+                `;
+                
+                // Try to render
+                rendererInstance.renderPage('test-render-output');
+                
+                // Add to page
+                const details = document.getElementById('step3-details');
+                details.innerHTML = '<h4>Rendered Output:</h4>';
+                details.appendChild(container);
+                
+                log('✅ Rendering test completed');
+                updateStatus('step3-status', 'Rendering test completed', 'success');
+                
+            } catch (error) {
+                updateStatus('step3-status', 'Error: ' + error.message, 'error');
+                log('❌ Error during rendering: ' + error.message);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Minimal test initialized');
+        });
+    </script>
+</body>
+</html>

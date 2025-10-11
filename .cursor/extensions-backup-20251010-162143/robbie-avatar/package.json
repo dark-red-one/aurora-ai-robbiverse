@@ -1,0 +1,44 @@
+{
+  "name": "robbie-avatar",
+  "displayName": "Robbie Avatar - Your AI Partner",
+  "description": "Beautiful Robbie avatar with mood tracking and perfect memory",
+  "version": "1.0.0",
+  "publisher": "testpilot",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "robbie-sidebar",
+          "title": "Robbie",
+          "icon": "resources/robbie-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "robbie-sidebar": [
+        {
+          "id": "robbie-avatar-view",
+          "name": "Avatar & Status",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "robbie.activate",
+        "title": "Activate Robbie Avatar"
+      }
+    ]
+  }
+}
+
